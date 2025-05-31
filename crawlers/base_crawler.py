@@ -3,6 +3,7 @@ import logging
 import json
 import os
 import redis
+import copy
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,7 +12,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel, HttpUrl
 from django.conf import settings
 
-# Crawler constants
+# crawler constants
 DEFAULT_MAX_DEPTH = int(os.getenv("CRAWLER_MAX_DEPTH", 10))
 DEFAULT_CONCURRENCY = int(os.getenv("CRAWLER_CONCURRENCY", 3))
 DEFAULT_HOVER_DELAY_RANGE = (
@@ -23,7 +24,7 @@ DEFAULT_GRID_HOVER_DELAY_RANGE = (
     int(os.getenv("CRAWLER_GRID_HOVER_DELAY_MAX", 750))
 )
 
-# Active constants (can be modified at runtime)
+# active constants (can be modified at runtime)
 MAX_DEPTH = DEFAULT_MAX_DEPTH
 CONCURRENCY = DEFAULT_CONCURRENCY
 HOVER_DELAY_RANGE = DEFAULT_HOVER_DELAY_RANGE
@@ -63,20 +64,41 @@ class JsonFileBackend(OutputBackend):
         self.hierarchical = hierarchical
 
     def send(self, records) -> None:
+        logger = logging.getLogger("JsonFileBackend")
+        
+        logger.debug(f"JsonFileBackend.send() called with {len(records) if hasattr(records, '__len__') else 'unknown'} records")
+        logger.debug(f"Records type: {type(records)}")
+        
         if self.hierarchical:
             # single hierarchical structure (dict) - write as formatted JSON
             with self._path.open("w", encoding="utf-8") as f:
                 json.dump(records, f, indent=2, ensure_ascii=False, default=str)
+            logger.info(f"Wrote hierarchical data to {self._path}")
         else:
             # (original behavior) using ND-JSON (one line per record)
+            records_written = 0
             with self._path.open("a", encoding="utf-8") as f:
                 for r in records:
-                    # ProductRecord for JSON output
-                    if isinstance(r, ProductRecord):
-                        f.write(r.model_dump_json() + "\n")
-                    # URL string in URL-only mode
-                    elif isinstance(r, str):
-                        f.write(json.dumps({"url": r}) + "\n")
+                    try:
+                        # ProductRecord for JSON output (Pydantic models)
+                        if hasattr(r, 'model_dump_json'):
+                            f.write(r.model_dump_json() + "\n")
+                            records_written += 1
+                        # URL string in URL-only mode
+                        elif isinstance(r, str):
+                            f.write(json.dumps({"url": r}) + "\n")
+                            records_written += 1
+                        # Handle raw dicts from grid crawler (NEW FIX)
+                        elif isinstance(r, dict):
+                            f.write(json.dumps(r, default=str) + "\n")
+                            records_written += 1
+                            logger.debug(f"Wrote raw dict: {r.get('title', r.get('asin', r.get('tcin', 'Unknown')))}")
+                        else:
+                            logger.warning(f"Skipping unknown record type: {type(r)} - {r}")
+                    except Exception as e:
+                        logger.error(f"Error writing record: {e}, record: {r}")
+            
+            logger.info(f"Wrote {records_written} records to {self._path}")
 
 # Redis backend - send just URLs to Redis (memory efficient)
 class RedisBackend(OutputBackend):
@@ -114,8 +136,8 @@ class BaseCrawler(ABC):
         self.hierarchical = hierarchical
         self.department = department
         self.category = category
-        self.max_pages = 5  # default value
-        self.concurrency = CONCURRENCY  # default value
+        self.max_pages = 5  
+        self.concurrency = CONCURRENCY  
         
         # if hierarchical mode, force JSON backend
         if hierarchical:
@@ -149,40 +171,19 @@ class BaseCrawler(ABC):
             self.logger.error(f"Failed to load hierarchy file {hierarchy_file}: {e}")
             raise
 
-    # extract all leaf category URLs from a hierarchy
-    def _extract_leaf_urls(self, hierarchy: dict) -> List[str]:
-        leaf_urls = []
-        
-        def walk_hierarchy(node):
-            # Handle the root level with "departments"
-            if "departments" in node:
-                for dept in node["departments"]:
-                    walk_hierarchy(dept)
-                return
-            
-            # Handle regular nodes with "sub_items"
-            sub_items = node.get("sub_items")
-            if sub_items and len(sub_items) > 0:
-                for child in sub_items:
-                    walk_hierarchy(child)
-            else:
-                # this is a leaf node (no sub_items or empty sub_items) - collect the URL
-                if "link_url" in node:
-                    leaf_urls.append(node["link_url"])
-                    self.logger.debug(f"Found leaf URL: {node['link_url']} (category: {node.get('name', 'Unknown')})")
-                    
-        walk_hierarchy(hierarchy)
-        return leaf_urls
-
     # filter hierarchy based on category/department filters
     def _filter_hierarchy(self, hierarchy: dict, category_filter: str = None, department_filter: str = None) -> dict:
         if not (category_filter or department_filter):
             return hierarchy
-            
+
+        self.logger.info(f"Filtering hierarchy for category='{category_filter}', department='{department_filter}'")
+        
+        # recursively find a node that matches the target name
         def find_matching_node(node, target_name):
             # check if this node matches
             node_name = node.get("name") or node.get("department_name")
             if node_name == target_name:
+                self.logger.info(f"Found matching node: {node_name}")
                 return node
                 
             # recurse into sub_items
@@ -196,40 +197,197 @@ class BaseCrawler(ABC):
         
         # find the target node
         target_name = category_filter or department_filter
+        
+        # search in departments first
+        if "departments" in hierarchy:
+            for department in hierarchy["departments"]:
+                # check if this department matches
+                if department.get("department_name") == target_name or department.get("name") == target_name:
+                    self.logger.info(f"Found matching department: {target_name}")
+                    return department
+                
+                # search within this department
+                result = find_matching_node(department, target_name)
+                if result:
+                    self.logger.info(f"Found '{target_name}' within department: {department.get('department_name', 'Unknown')}")
+                    return result
+        
+        # if not found in departments structure, search the entire hierarchy
         filtered_node = find_matching_node(hierarchy, target_name)
         
         if not filtered_node:
             self.logger.warning(f"Filter '{target_name}' not found in hierarchy")
+            # print available categories for debugging
+            self._print_available_categories(hierarchy)
             return hierarchy
             
-        self.logger.info(f"Filtered hierarchy to: {target_name}")
+        self.logger.info(f"Successfully filtered hierarchy to: {target_name}")
         return filtered_node
 
-    # main method to crawl from hierarchy file
+    # print available categories for debugging
+    def _print_available_categories(self, hierarchy: dict, max_items: int = 50):
+        categories = []
+        
+        # collect categories from hierarchy
+        def collect_categories(node, depth=0):
+            if len(categories) >= max_items:
+                return
+                
+            name = node.get("name") or node.get("department_name")
+            if name:
+                categories.append("  " * depth + name)
+            
+            if node.get("sub_items"):
+                for child in node["sub_items"]:
+                    collect_categories(child, depth + 1)
+        
+        # collect categories from departments
+        if "departments" in hierarchy:
+            for dept in hierarchy["departments"]:
+                collect_categories(dept)
+        else:
+            collect_categories(hierarchy)
+        
+        self.logger.info(f"Available categories (showing first {min(len(categories), max_items)}):")
+        for cat in categories[:max_items]:
+            self.logger.info(cat)
+        
+        if len(categories) > max_items:
+            self.logger.info(f"... and {len(categories) - max_items} more categories")
+
+    # extract leaf URLs from hierarchy
+    def _extract_leaf_urls(self, hierarchy: dict) -> List[str]:
+        leaf_urls = []
+        
+        def walk_hierarchy(node):
+            # handle the root level w/ "departments"  
+            if "departments" in node:
+                for dept in node["departments"]:
+                    walk_hierarchy(dept)
+                return
+            
+            # handle regular nodes w/ "sub_items"
+            sub_items = node.get("sub_items")
+            if sub_items and len(sub_items) > 0:
+                for child in sub_items:
+                    walk_hierarchy(child)
+            else:
+                # leaf node (no sub_items or empty sub_items) - collect the URL
+                if "link_url" in node:
+                    leaf_urls.append(node["link_url"])
+                    category_name = node.get('name', 'Unknown')
+                    self.logger.debug(f"Found leaf URL: {node['link_url']} (category: {category_name})")
+                        
+        walk_hierarchy(hierarchy)
+        return leaf_urls
+
+    # crawl from hierarchy file w/ optional filtering
     def crawl_from_hierarchy_file(self, hierarchy_file: Path, max_pages_per_cat: int = 5, 
-                                 category_filter: str = None, department_filter: str = None,
-                                 concurrency: int = 5) -> None:
+                                category_filter: str = None, department_filter: str = None,
+                                concurrency: int = 5) -> None:        
         # load hierarchy
         hierarchy = self._load_hierarchy_file(hierarchy_file)
-        
+        self.logger.info(f"Loaded hierarchy with {len(hierarchy.get('departments', []))} departments")
+
         # apply filters if specified
+        original_hierarchy = hierarchy
         if category_filter or department_filter:
-            hierarchy = self._filter_hierarchy(hierarchy, category_filter, department_filter)
+            self.logger.info(f"Applying filters: category='{category_filter}', department='{department_filter}'")
+            filtered_hierarchy = self._filter_hierarchy(hierarchy, category_filter, department_filter)
+            
+            # verify filtering worked
+            if filtered_hierarchy == hierarchy:
+                self.logger.warning("Filtering did not reduce the hierarchy - using full hierarchy")
+            else:
+                hierarchy = filtered_hierarchy
+                self.logger.info("Successfully applied hierarchy filter")
         
-        # extract all leaf URLs
+        # extract leaf URLs
         leaf_urls = self._extract_leaf_urls(hierarchy)
-        self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
         
+        # log the number of leaf URLs found
+        if category_filter or department_filter:
+            self.logger.info(f"After filtering to '{category_filter or department_filter}': found {len(leaf_urls)} leaf categories to crawl")
+        else:
+            self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
+        
+        # if no leaf URLs found, log a warning and return
         if not leaf_urls:
             self.logger.warning("No leaf categories found to crawl")
             return
+        
+        # store original output backend (for later)
+        original_backend = self._out
+        
+        # temp collector for hierarchical mode
+        if self.hierarchical:
+            # collect results to attach to hierarchy later
+            collected_results = []
             
-        # crawl all grids concurrently
-        self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+            # temp backend that just collects results
+            class ResultCollector:
+                def __init__(self):
+                    self.results = []
+                
+                def send(self, records):
+                    if isinstance(records, list):
+                        self.results.extend(records)
+                    else:
+                        self.results.append(records)
+            
+            collector = ResultCollector()
+            self._out = collector
+            
+            # crawl w/ the collector backend
+            self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+            
+            # restore original backend
+            self._out = original_backend
+            
+            # create hierarchical structure w/ results
+            hierarchical_output = self._create_hierarchical_output(hierarchy, collector.results, category_filter, department_filter)
+            
+            # send hierarchical structure to the real backend
+            self.logger.info("Sending hierarchical structure to output backend")
+            self._out.send(hierarchical_output)
+        else:
+            # non-hierarchical mode - crawl normally
+            self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+
+    # create hierarchical output structure w/ results attached
+    def _create_hierarchical_output(self, filtered_hierarchy: dict, results: list, category_filter: str = None, department_filter: str = None) -> dict:
+        # copy hierarchy (avoid modifying the original)
+        output_hierarchy = copy.deepcopy(filtered_hierarchy)
+        
+        # find leaf nodes & attach results
+        def attach_results_to_leaves(node):
+            sub_items = node.get("sub_items")
+            if sub_items and len(sub_items) > 0:
+                # has children - recurse (find leaf nodes)
+                for child in sub_items:
+                    attach_results_to_leaves(child)
+            else:
+                # leaf node - attach results
+                if self.urls_only:
+                    # URLs only mode
+                    node["product_urls"] = [str(r) if isinstance(r, str) else str(r.url) if hasattr(r, 'url') else str(r) for r in results]
+                else:
+                    # full mode
+                    node["products"] = [r.model_dump() if hasattr(r, 'model_dump') else r for r in results]
+        
+        # handle different hierarchy structures (departments or not)
+        if "departments" in output_hierarchy:
+            for dept in output_hierarchy["departments"]:
+                attach_results_to_leaves(dept)
+        else:
+            attach_results_to_leaves(output_hierarchy)
+        
+        self.logger.info(f"Created hierarchical output with {len(results)} total items")
+        return output_hierarchy
 
     # main method - orchestrate a crawl
     def crawl(self, max_pages_per_cat: int = 5, category_filter: str = None, department_filter: str = None) -> None:
-        # hierarchical mode - build complete category tree with products
+        # hierarchical mode - build complete category tree w/ products
         if self.hierarchical:
             self.logger.info("Starting hierarchical crawl")
             hierarchy = self._scrape_hierarchy(max_pages_per_cat, category_filter, department_filter)
@@ -238,7 +396,7 @@ class BaseCrawler(ABC):
                 self._out.send(hierarchy)
             return
 
-        # original flat mode - use department or category filter
+        # flat mode - use department or category filter
         targets = self._resolve_targets(category_filter, department_filter)
         self.logger.info("Resolved %s target categories", len(targets))
 

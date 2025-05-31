@@ -212,6 +212,12 @@ class AmazonCrawler(BaseCrawler):
         # send results to output backend
         if results:
             self.logger.info(f"Collected {len(results)} total items from concurrent crawling")
+            self.logger.info(f"Sample result type: {type(results[0]) if results else 'None'}")
+            
+            # debug: check what we're actually sending
+            if results and hasattr(results[0], '__dict__'):
+                self.logger.info(f"Sample result: {results[0]}")
+            
             self._out.send(results)
         else:
             self.logger.warning("No results collected from concurrent crawling")
@@ -250,7 +256,7 @@ class AmazonCrawler(BaseCrawler):
         self.logger.info(f"Batch {batch_num}: Processing {len(urls)} URLs")
         
         # crawl the grid for this batch
-        results = await crawl_grid(
+        raw_results = await crawl_grid(
             start_urls=urls,
             max_depth=max_pages_per_cat,
             concurrency=CONCURRENCY,
@@ -258,8 +264,31 @@ class AmazonCrawler(BaseCrawler):
             logger=self.logger
         )
         
-        self.logger.info(f"Batch {batch_num}: Found {len(results)} items")
-        return results
+        self.logger.info(f"Batch {batch_num}: Found {len(raw_results)} raw items")
+        
+        # convert raw results to appropriate format
+        if self.urls_only:
+            # URLs only - raw_results should be strings
+            return raw_results
+        else:
+            # full mode - convert raw dicts to ProductRecord objects
+            converted_results = []
+            for item in raw_results:
+                try:
+                    # convert raw dict to ProductRecord
+                    product_record = ProductRecord(
+                        retailer_id=self.retailer_id,
+                        asin=item.get("asin"),
+                        title=item.get("title", "Unknown Title"),
+                        price=item.get("price", "Unknown Price"),
+                        url=item.get("url", "")
+                    )
+                    converted_results.append(product_record)
+                except Exception as e:
+                    self.logger.error(f"Error converting item to ProductRecord: {e}, item: {item}")
+            
+            self.logger.info(f"Batch {batch_num}: Converted {len(converted_results)} items to ProductRecord objects")
+            return converted_results
 
     # scrape hierarchical structure with products attached to leaf nodes
     def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
