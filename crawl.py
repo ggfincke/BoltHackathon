@@ -253,12 +253,21 @@ Examples:
             # validate hierarchy file
             hierarchy_file = validate_hierarchy_file(hierarchy_file)
             
+            # create output backend for hierarchy file mode
+            backend = create_output_backend(
+                mode=args.mode,
+                retailer_id=retailer_id,
+                hierarchical=args.hierarchical,
+                output_file=args.output
+            )
+            
             # create crawler with hierarchy file
             crawler = crawler_class(
                 retailer_id=retailer_id,
                 logger=logger,
                 urls_only=(args.mode == "urls-only"),
-                hierarchical=args.hierarchical
+                hierarchical=args.hierarchical,
+                output_backend=backend
             )
             crawler.max_pages = args.max_pages
             crawler.concurrency = args.concurrency
@@ -273,19 +282,26 @@ Examples:
                 hierarchical=args.hierarchical
             )
             crawler.max_pages = args.max_pages
-        
-        # create output backend
-        backend = create_output_backend(
-            mode=args.mode,
-            retailer_id=retailer_id,
-            hierarchical=args.hierarchical,
-            output_file=args.output
-        )
-        
+
         # run crawler
-        if args.mode == "urls-only":
-            crawler.crawl_urls(backend)
+        if hierarchy_file:
+            # hierarchy file mode - use the specialized method
+            logger.info(f"Starting hierarchy file crawl with {args.concurrency} concurrent workers")
+            crawler.crawl_from_hierarchy_file(
+                hierarchy_file=hierarchy_file,
+                max_pages_per_cat=args.max_pages,
+                concurrency=args.concurrency
+            )
         else:
+            # regular mode (category/department based)
+            # create output backend for regular mode
+            backend = create_output_backend(
+                mode=args.mode,
+                retailer_id=retailer_id,
+                hierarchical=args.hierarchical,
+                output_file=args.output
+            )
+            crawler._out = backend
             crawler.crawl(max_pages_per_cat=args.max_pages)
             
     except Exception as e:
@@ -293,4 +309,4 @@ Examples:
         sys.exit(1)
 
 if __name__ == "__main__":
-    main() 
+    main()

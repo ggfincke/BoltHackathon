@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel, HttpUrl
 from django.conf import settings
 
-# Crawler constants - can be overridden by environment variables or subclasses
+# Crawler constants
 DEFAULT_MAX_DEPTH = int(os.getenv("CRAWLER_MAX_DEPTH", 10))
 DEFAULT_CONCURRENCY = int(os.getenv("CRAWLER_CONCURRENCY", 3))
 DEFAULT_HOVER_DELAY_RANGE = (
@@ -64,11 +64,11 @@ class JsonFileBackend(OutputBackend):
 
     def send(self, records) -> None:
         if self.hierarchical:
-            # Expect a single hierarchical structure (dict) - write as formatted JSON
+            # single hierarchical structure (dict) - write as formatted JSON
             with self._path.open("w", encoding="utf-8") as f:
                 json.dump(records, f, indent=2, ensure_ascii=False, default=str)
         else:
-            # Original behavior - using ND-JSON (one line per record)
+            # (original behavior) using ND-JSON (one line per record)
             with self._path.open("a", encoding="utf-8") as f:
                 for r in records:
                     # ProductRecord for JSON output
@@ -154,14 +154,22 @@ class BaseCrawler(ABC):
         leaf_urls = []
         
         def walk_hierarchy(node):
-            # if node has sub_items, recurse into them
-            if node.get("sub_items"):
-                for child in node["sub_items"]:
+            # Handle the root level with "departments"
+            if "departments" in node:
+                for dept in node["departments"]:
+                    walk_hierarchy(dept)
+                return
+            
+            # Handle regular nodes with "sub_items"
+            sub_items = node.get("sub_items")
+            if sub_items and len(sub_items) > 0:
+                for child in sub_items:
                     walk_hierarchy(child)
             else:
-                # this is a leaf node - collect the URL
+                # this is a leaf node (no sub_items or empty sub_items) - collect the URL
                 if "link_url" in node:
                     leaf_urls.append(node["link_url"])
+                    self.logger.debug(f"Found leaf URL: {node['link_url']} (category: {node.get('name', 'Unknown')})")
                     
         walk_hierarchy(hierarchy)
         return leaf_urls
