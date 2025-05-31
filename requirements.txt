@@ -1,0 +1,12 @@
+redis
+pydantic
+django
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+python-dotenv
+playwright
+selenium
+undetected-chromedriver
+playwright-stealth
