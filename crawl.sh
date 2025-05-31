@@ -38,29 +38,39 @@ show_usage() {
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
-    echo "  quick-amazon      Quick Amazon full crawl (5 pages per category)"
-    echo "  quick-target      Quick Target full crawl (5 pages per category)"
-    echo "  urls-amazon       Amazon URL-only crawl to Redis"
-    echo "  urls-target       Target URL-only crawl to Redis"
-    echo "  hierarchy-amazon  Amazon hierarchical full crawl"
-    echo "  hierarchy-target  Target hierarchical full crawl"
-    echo "  hierarchy-urls-amazon  Amazon hierarchical URL crawl"
-    echo "  hierarchy-urls-target  Target hierarchical URL crawl"
-    echo "  list              List available retailers"
-    echo "  test-redis        Test Redis connection"
-    echo "  help              Show this help message"
+    echo "  quick-amazon              Quick Amazon full crawl (5 pages per category)"
+    echo "  quick-target              Quick Target full crawl (5 pages per category)"
+    echo "  urls-amazon               Amazon URL-only crawl to Redis"
+    echo "  urls-target               Target URL-only crawl to Redis"
+    echo "  hierarchy-amazon          Amazon hierarchical full crawl"
+    echo "  hierarchy-target          Target hierarchical full crawl"
+    echo "  hierarchy-urls-amazon     Amazon hierarchical URL crawl"
+    echo "  hierarchy-urls-target     Target hierarchical URL crawl"
+    echo ""
+    echo "Hierarchy File Commands (NEW):"
+    echo "  from-hierarchy-amazon     Amazon crawl from existing hierarchy file (full mode)"
+    echo "  from-hierarchy-target     Target crawl from existing hierarchy file (full mode)"
+    echo "  from-hierarchy-urls-amazon  Amazon crawl from hierarchy file (URLs only)"
+    echo "  from-hierarchy-urls-target  Target crawl from hierarchy file (URLs only)"
+    echo ""
+    echo "Utility Commands:"
+    echo "  list                      List available retailers"
+    echo "  test-redis                Test Redis connection"
+    echo "  help                      Show this help message"
     echo ""
     echo "Options (passed through to crawl.py):"
-    echo "  --category CATEGORY   Specific category to crawl"
-    echo "  --max-pages N         Maximum pages per category"
-    echo "  --output PREFIX       Output file prefix"
-    echo "  --log-level LEVEL     Logging level (DEBUG, INFO, WARNING, ERROR)"
+    echo "  --category CATEGORY       Specific category to crawl"
+    echo "  --max-pages N             Maximum pages per category"
+    echo "  --concurrency N           Number of concurrent grid crawlers (hierarchy file mode)"
+    echo "  --output PREFIX           Output file prefix"
+    echo "  --log-level LEVEL         Logging level (DEBUG, INFO, WARNING, ERROR)"
     echo ""
     echo "Examples:"
     echo "  $0 quick-amazon"
     echo "  $0 urls-target --category \"Beverages\""
     echo "  $0 hierarchy-amazon --max-pages 3 --output my_crawl"
-    echo "  $0 hierarchy-urls-target --category \"Electronics\""
+    echo "  $0 from-hierarchy-amazon --concurrency 10 --max-pages 2"
+    echo "  $0 from-hierarchy-urls-target custom_hierarchy.json --concurrency 8"
     echo ""
     echo "Direct crawl.py usage:"
     echo "  $0 -- --retailer amazon --mode full --hierarchical --category \"Electronics\""
@@ -128,6 +138,62 @@ case "$COMMAND" in
         print_info "Starting Target hierarchical URL crawl"
         python "$CRAWL_SCRIPT" --retailer target --mode urls-only --hierarchical "$@"
         print_success "Target hierarchical URL crawl completed"
+        ;;
+    
+    from-hierarchy-amazon)
+        print_info "Starting Amazon crawl from hierarchy file (full mode)"
+        if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
+            # First argument is likely a file path
+            HIERARCHY_FILE="$1"
+            shift
+            python "$CRAWL_SCRIPT" --retailer amazon --mode full --from-hierarchy-file "$HIERARCHY_FILE" "$@"
+        else
+            # Use default hierarchy file
+            python "$CRAWL_SCRIPT" --retailer amazon --mode full --from-hierarchy-file "" "$@"
+        fi
+        print_success "Amazon hierarchy file crawl completed"
+        ;;
+    
+    from-hierarchy-target)
+        print_info "Starting Target crawl from hierarchy file (full mode)"
+        if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
+            # First argument is likely a file path
+            HIERARCHY_FILE="$1"
+            shift
+            python "$CRAWL_SCRIPT" --retailer target --mode full --from-hierarchy-file "$HIERARCHY_FILE" "$@"
+        else
+            # Use default hierarchy file
+            python "$CRAWL_SCRIPT" --retailer target --mode full --from-hierarchy-file "" "$@"
+        fi
+        print_success "Target hierarchy file crawl completed"
+        ;;
+    
+    from-hierarchy-urls-amazon)
+        print_info "Starting Amazon crawl from hierarchy file (URLs only)"
+        if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
+            # First argument is likely a file path
+            HIERARCHY_FILE="$1"
+            shift
+            python "$CRAWL_SCRIPT" --retailer amazon --mode urls-only --from-hierarchy-file "$HIERARCHY_FILE" "$@"
+        else
+            # Use default hierarchy file
+            python "$CRAWL_SCRIPT" --retailer amazon --mode urls-only --from-hierarchy-file "" "$@"
+        fi
+        print_success "Amazon hierarchy file URL crawl completed"
+        ;;
+    
+    from-hierarchy-urls-target)
+        print_info "Starting Target crawl from hierarchy file (URLs only)"
+        if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
+            # First argument is likely a file path
+            HIERARCHY_FILE="$1"
+            shift
+            python "$CRAWL_SCRIPT" --retailer target --mode urls-only --from-hierarchy-file "$HIERARCHY_FILE" "$@"
+        else
+            # Use default hierarchy file
+            python "$CRAWL_SCRIPT" --retailer target --mode urls-only --from-hierarchy-file "" "$@"
+        fi
+        print_success "Target hierarchy file URL crawl completed"
         ;;
     
     list)

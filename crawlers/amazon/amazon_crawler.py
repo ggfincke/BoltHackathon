@@ -3,6 +3,7 @@ import json
 import os
 import asyncio
 from pathlib import Path
+from typing import List
 
 # relative import
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
@@ -199,6 +200,67 @@ class AmazonCrawler(BaseCrawler):
         self.logger.info(f"Found {len(urls)} URLs to send to Redis")
         return urls
 
+    # crawl multiple grid URLs concurrently (new method for hierarchy file mode)
+    def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
+        self.logger.info(f"Starting concurrent grid crawling for {len(grid_urls)} categories with concurrency={concurrency}")
+        
+        # run the async concurrent crawl
+        results = self.loop.run_until_complete(
+            self._async_crawl_grids_concurrent(grid_urls, max_pages_per_cat, concurrency)
+        )
+        
+        # send results to output backend
+        if results:
+            self.logger.info(f"Collected {len(results)} total items from concurrent crawling")
+            self._out.send(results)
+        else:
+            self.logger.warning("No results collected from concurrent crawling")
+
+    # async method to crawl multiple grids concurrently
+    async def _async_crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int):
+        # split URLs into batches for processing
+        batch_size = max(1, len(grid_urls) // concurrency)
+        batches = [grid_urls[i:i + batch_size] for i in range(0, len(grid_urls), batch_size)]
+        
+        self.logger.info(f"Processing {len(grid_urls)} URLs in {len(batches)} batches")
+        
+        # create tasks for each batch
+        tasks = []
+        for i, batch in enumerate(batches):
+            task = asyncio.create_task(
+                self._process_batch(batch, max_pages_per_cat, i + 1)
+            )
+            tasks.append(task)
+        
+        # wait for all batches to complete
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # collect all results
+        all_results = []
+        for i, result in enumerate(batch_results):
+            if isinstance(result, Exception):
+                self.logger.error(f"Batch {i + 1} failed: {result}")
+            else:
+                all_results.extend(result)
+        
+        return all_results
+
+    # process a batch of URLs
+    async def _process_batch(self, urls: List[str], max_pages_per_cat: int, batch_num: int):
+        self.logger.info(f"Batch {batch_num}: Processing {len(urls)} URLs")
+        
+        # crawl the grid for this batch
+        results = await crawl_grid(
+            start_urls=urls,
+            max_depth=max_pages_per_cat,
+            concurrency=CONCURRENCY,
+            extract_urls_only=self.urls_only,
+            logger=self.logger
+        )
+        
+        self.logger.info(f"Batch {batch_num}: Found {len(results)} items")
+        return results
+
     # scrape hierarchical structure with products attached to leaf nodes
     def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
         # resolve target nodes
@@ -206,73 +268,36 @@ class AmazonCrawler(BaseCrawler):
         if not target_nodes:
             self.logger.error("No target categories found to crawl")
             return {}
-
-        # determine what we're crawling
-        if department_filter:
-            title = f"Amazon Department: {department_filter}"
-        elif category_filter:
-            title = f"Amazon Category: {category_filter}"
-        else:
-            title = "Amazon Categories"
-
-        # if multiple targets, create a root node to contain them
-        if len(target_nodes) > 1:
-            root = {
-                "name": title, 
-                "link_url": self.base_url,
-                "sub_items": []
-            }
-        else:
-            root = None
-
-        # process each target node
-        for target in target_nodes:
-            self.logger.info(f"Building category hierarchy for: {target.name}")
             
-            # use category crawler to build hierarchy
-            cat_hierarchy = self.loop.run_until_complete(
+        # crawl each target node
+        all_results = {}
+        for node in target_nodes:
+            self.logger.info(f"Starting hierarchical crawl for: {node.name}")
+            cat_json = self.loop.run_until_complete(
                 crawl_category(
-                    start_url=target.url,
+                    start_url=node.url,
                     max_depth=MAX_DEPTH,
                     logger=self.logger
                 )
             )
             
-            # populate leaf nodes with product URLs
-            self._populate_leaf_nodes_with_products(cat_hierarchy, max_pages_per_cat)
+            # populate leaf nodes with products
+            self._populate_leaf_nodes_with_products(cat_json, max_pages_per_cat)
             
-            # add to root or return directly
-            if root:
-                root["sub_items"].append(cat_hierarchy)
-            else:
-                root = cat_hierarchy
+            # add to results
+            all_results[node.name] = cat_json
+            
+        return all_results
 
-        return root
-
-    # recursively find leaf nodes and populate them with product URLs
+    # populate leaf nodes with products
     def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int):
         # if node has sub_items, recurse into them
         if node.get("sub_items"):
             for child in node["sub_items"]:
                 self._populate_leaf_nodes_with_products(child, max_pages)
         else:
-            # this is a leaf node - populate with products
+            # this is a leaf node - crawl products
             if "link_url" in node:
-                self.logger.info(f"Scraping products for leaf category: {node['name']}")
-                try:
-                    # get product URLs for this category
-                    urls = self.loop.run_until_complete(
-                        crawl_grid(
-                            start_urls=[node["link_url"]],
-                            max_depth=max_pages,
-                            concurrency=CONCURRENCY,
-                            extract_urls_only=True,
-                            logger=self.logger
-                        )
-                    )
-                    # attach URLs to this node
-                    node["product_urls"] = urls
-                    self.logger.info(f"Found {len(urls)} products in {node['name']}")
-                except Exception as e:
-                    self.logger.error(f"Error scraping products for {node['name']}: {e}")
-                    node["product_urls"] = []
+                self.logger.info(f"Crawling products for leaf node: {node.get('name')}")
+                products = self._scrape_category(node["link_url"], max_pages)
+                node["products"] = [p.model_dump() for p in products]

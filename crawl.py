@@ -8,6 +8,9 @@ Usage:
     python crawl.py --retailer amazon --mode full
     python crawl.py --retailer target --mode urls-only --category "Beverages"
     python crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
+    python crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
+
+    python crawl.py --retailer amazon --from-hierarchy-file amazon_grocery_hierarchy.json --mode full --max-pages 10
 """
 
 import argparse
@@ -33,12 +36,14 @@ RETAILER_CONFIG = {
     "amazon": {
         "class": AmazonCrawler,
         "retailer_id": 1,
-        "description": "Amazon product crawler"
+        "description": "Amazon product crawler",
+        "default_hierarchy_file": "crawlers/amazon/amazon_grocery_hierarchy.json"
     },
     "target": {
         "class": TargetCrawler,
         "retailer_id": 2,
-        "description": "Target product crawler"
+        "description": "Target product crawler",
+        "default_hierarchy_file": "crawlers/target/target_grocery_hierarchy.json"
     }
 }
 
@@ -90,6 +95,15 @@ def validate_retailer(retailer: str):
         available = ", ".join(get_available_retailers())
         raise ValueError(f"Unsupported retailer '{retailer}'. Available retailers: {available}")
 
+# validate hierarchy file exists
+def validate_hierarchy_file(file_path: str) -> Path:
+    path = Path(file_path)
+    if not path.exists():
+        raise ValueError(f"Hierarchy file not found: {file_path}")
+    if not path.suffix.lower() == '.json':
+        raise ValueError(f"Hierarchy file must be a JSON file: {file_path}")
+    return path
+
 def main():
     parser = argparse.ArgumentParser(
         description="Unified crawler interface for multiple retailers",
@@ -102,6 +116,8 @@ Examples:
   %(prog)s --retailer target --mode urls-only --hierarchical --output hierarchy_urls
   %(prog)s --retailer amazon --department "Amazon Grocery" --mode full
   %(prog)s --retailer target --department "Target Grocery" --hierarchical
+  %(prog)s --retailer target --from-hierarchy-file hierarchy.json --mode urls-only --max-pages 3
+  %(prog)s --retailer amazon --from-hierarchy-file --mode full --concurrency 10
   %(prog)s --list-retailers
         """
     )
@@ -127,6 +143,13 @@ Examples:
     )
     
     parser.add_argument(
+        "--from-hierarchy-file",
+        metavar="FILE",
+        help="Load hierarchy from existing JSON file and crawl all leaf categories. "
+             "If no file specified, uses default hierarchy file for the retailer."
+    )
+    
+    parser.add_argument(
         "--department", "-d",
         help="Specific department to crawl (optional, will crawl all subcategories within)"
     )
@@ -141,6 +164,13 @@ Examples:
         type=int,
         default=5,
         help="Maximum pages to crawl per category (default: 5)"
+    )
+    
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=5,
+        help="Number of concurrent grid crawlers (default: 5, only applies to hierarchy file mode)"
     )
     
     parser.add_argument(
@@ -175,6 +205,7 @@ Examples:
         print("Available retailers:")
         for retailer, config in RETAILER_CONFIG.items():
             print(f"  {retailer}: {config['description']} (ID: {config['retailer_id']})")
+            print(f"    Default hierarchy file: {config['default_hierarchy_file']}")
         return
     
     if args.test_redis:
@@ -191,6 +222,11 @@ Examples:
     if not args.retailer:
         parser.error("--retailer is required (use --list-retailers to see options)")
     
+    # validate conflicting arguments
+    if args.from_hierarchy_file is not None:
+        if args.category or args.department or args.hierarchical:
+            parser.error("--from-hierarchy-file cannot be used with --category, --department, or --hierarchical")
+    
     # set up logging
     logger = setup_logging(args.log_level)
     
@@ -203,49 +239,57 @@ Examples:
         crawler_class = retailer_config["class"]
         retailer_id = retailer_config["retailer_id"]
         
+        # handle hierarchy file mode
+        hierarchy_file = None
+        if args.from_hierarchy_file is not None:
+            if args.from_hierarchy_file == "":
+                # use default hierarchy file
+                hierarchy_file = retailer_config["default_hierarchy_file"]
+                logger.info(f"Using default hierarchy file: {hierarchy_file}")
+            else:
+                # use specified file
+                hierarchy_file = args.from_hierarchy_file
+            
+            # validate hierarchy file
+            hierarchy_file = validate_hierarchy_file(hierarchy_file)
+            
+            # create crawler with hierarchy file
+            crawler = crawler_class(
+                retailer_id=retailer_id,
+                logger=logger,
+                urls_only=(args.mode == "urls-only"),
+                hierarchical=args.hierarchical
+            )
+            crawler.max_pages = args.max_pages
+            crawler.concurrency = args.concurrency
+        else:
+            # create crawler with category/department
+            crawler = crawler_class(
+                retailer_id=retailer_id,
+                logger=logger,
+                category=args.category,
+                department=args.department,
+                urls_only=(args.mode == "urls-only"),
+                hierarchical=args.hierarchical
+            )
+            crawler.max_pages = args.max_pages
+        
         # create output backend
-        output_backend = create_output_backend(args.mode, retailer_id, args.hierarchical, args.output)
-        
-        # determine crawler options
-        urls_only = args.mode == "urls-only"
-        hierarchical = args.hierarchical
-        
-        mode_desc = f"{args.mode} mode"
-        if hierarchical:
-            mode_desc += " with hierarchical structure"
-        
-        logger.info(f"Starting {args.retailer} crawler in {mode_desc}")
-        if args.department:
-            logger.info(f"Target department: {args.department}")
-        if args.category:
-            logger.info(f"Target category: {args.category}")
-        logger.info(f"Max pages per category: {args.max_pages}")
-        
-        # create & run crawler
-        crawler = crawler_class(
+        backend = create_output_backend(
+            mode=args.mode,
             retailer_id=retailer_id,
-            logger=logger,
-            department=args.department,
-            category=args.category,
-            output_backend=output_backend,
-            urls_only=urls_only,
-            hierarchical=hierarchical
+            hierarchical=args.hierarchical,
+            output_file=args.output
         )
         
-        # run crawl
-        crawler.crawl(
-            max_pages_per_cat=args.max_pages,
-            category_filter=args.category,
-            department_filter=args.department
-        )
-        
-        logger.info("Crawl completed successfully")
-        
-    except KeyboardInterrupt:
-        logger.info("Crawl interrupted by user")
-        sys.exit(1)
+        # run crawler
+        if args.mode == "urls-only":
+            crawler.crawl_urls(backend)
+        else:
+            crawler.crawl(max_pages_per_cat=args.max_pages)
+            
     except Exception as e:
-        logger.error(f"Crawl failed: {e}", exc_info=args.log_level == "DEBUG")
+        logger.error(f"Crawler failed: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
