@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/amazon/amazon_crawler.py
-
 # imports
 import json
 import os

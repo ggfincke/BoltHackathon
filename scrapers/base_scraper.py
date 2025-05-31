@@ -1,5 +1,3 @@
-# beacon/scraping/scrapers/base_scraper.py
-
 # imports
 import logging
 import time

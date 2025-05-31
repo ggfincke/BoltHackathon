@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/target/subcrawlers/grid_crawler.py
-
 # TODO: add proxy support, concurrency
 import logging
 import random

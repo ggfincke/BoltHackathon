@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/amazon/subcrawlers/grid_crawler.py
-
 # imports
 import json, random, logging, asyncio
 from pathlib import Path

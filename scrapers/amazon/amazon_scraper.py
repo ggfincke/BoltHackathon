@@ -1,5 +1,3 @@
-# beacon/scraping/scrapers/amazon/amazon_scraper.py
-
 # imports
 from selenium import webdriver
 from selenium.webdriver.common.by import By

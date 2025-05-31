@@ -1,5 +1,3 @@
-# beacon/scraping/scrapers/walmart/walmart_scraper.py
-
 from selenium import webdriver
 # undetected chromedriver works better for walmart
 import undetected_chromedriver as uc

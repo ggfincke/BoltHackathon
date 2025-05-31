@@ -1,5 +1,3 @@
-# beacon/scraping/scrapers/target/target_scraper.py
-
 # imports 
 from selenium import webdriver
 import undetected_chromedriver as uc

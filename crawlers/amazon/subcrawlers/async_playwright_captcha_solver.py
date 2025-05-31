@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/amazon/category_creator/playwright_captcha_solver.py
-
 # custom async version of https://github.com/ggfincke/Simple-Amazon-CAPTCHA-Solver
 
 # imports

@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/base_crawler.py
-
 # imports
 import logging
 import json

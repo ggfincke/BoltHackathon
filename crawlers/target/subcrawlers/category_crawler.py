@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/target/subcrawlers/category_crawler.py
-
 # imports   
 import re, json, random, logging, asyncio
 from pathlib import Path

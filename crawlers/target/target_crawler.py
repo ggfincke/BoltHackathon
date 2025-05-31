@@ -1,5 +1,3 @@
-# backend/scraping/crawlers/target/target_crawler.py
-
 # imports
 import json
 import os

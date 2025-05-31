@@ -1,5 +1,3 @@
-# beacon/scraping/scrapers/amazon/amazon_captcha_solver.py
-
 import cv2
 import numpy as np
 
