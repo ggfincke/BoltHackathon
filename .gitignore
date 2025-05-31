@@ -4,3 +4,4 @@
 # compiled Python files
 *.py[cod]
 *.pyo
+*.pyc
