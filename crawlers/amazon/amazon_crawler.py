@@ -13,14 +13,15 @@ from .subcrawlers.grid_crawler import crawl_grid
 
 # Amazon Crawler
 class AmazonCrawler(BaseCrawler):
-    def __init__(self, retailer_id, logger=None, category=None, output_backend=None, urls_only=False, hierarchical=False):
-        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical)
+    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
+        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
         self.base_url = "https://www.amazon.com"
         self.logger.info("AmazonCrawler initialized. Playwright will be launched as needed.")
         self.logger.info(f"Mode: {'Hierarchical' if hierarchical else 'URL-only' if urls_only else 'Full product data'}")
         self._load_category_config()
-        # target category
+        # target category and department
         self.target_category = category
+        self.target_department = department
         # reuse one loop
         self.loop = asyncio.get_event_loop()
 
@@ -70,23 +71,54 @@ class AmazonCrawler(BaseCrawler):
         # if not found in departments, do a broad search
         return search_categories(self.category_config.get("departments", []), category_name)
 
-    # return a list of dicts [{"name": "Beverages", "start_url": etc.} depending on self.target_category (one) or all departments (many)
-    def _resolve_targets(self, category_filter: str | None = None) -> list[Target]:
-        # prefer the explicit argument, fall back to self.target_category
+    # return a list of dicts [{"name": "Beverages", "start_url": etc.} depending on filters or all departments (many)
+    def _resolve_targets(self, category_filter: str | None = None, department_filter: str | None = None) -> list[Target]:
+        # prefer the explicit arguments, fall back to instance attributes
         cat = category_filter or self.target_category
+        dept = department_filter or self.target_department
 
-        if cat:                      # targeted crawl
+        if cat:                      # targeted category crawl
             node = self._find_category_in_config(cat)
             if not node:
                 self.logger.error("Category '%s' not found", cat)
                 return []
-            return [Target(node["name"], node["link_url"])]
+            return [Target(node.get("name") or node.get("department_name"), node["link_url"])]
 
-        # full crawl
+        if dept:                     # targeted department crawl - crawl all subcategories within department
+            dept_node = self._find_category_in_config(dept)
+            if not dept_node:
+                self.logger.error("Department '%s' not found", dept)
+                return []
+            
+            # collect all subcategories within this department as targets
+            targets = []
+            
+            # if department has direct sub_items, use those
+            if dept_node.get("sub_items"):
+                for item in dept_node["sub_items"]:
+                    targets.append(Target(item["name"], item["link_url"]))
+            
+            # if department has entry_point_categories, use those (legacy structure)
+            if dept_node.get("entry_point_categories"):
+                for entry in dept_node["entry_point_categories"]:
+                    targets.append(Target(entry["name"], entry["link_url"]))
+                    
+            self.logger.info(f"Found {len(targets)} subcategories in department '{dept}'")
+            return targets
+
+        # full crawl - all departments
         targets: list[Target] = []
-        for dept in self.category_config["departments"]:
-            for entry in dept["entry_point_categories"]:
-                targets.append(Target(entry["name"], entry["link_url"]))
+        for department in self.category_config["departments"]:
+            # if department has direct sub_items, use those
+            if department.get("sub_items"):
+                for item in department["sub_items"]:
+                    targets.append(Target(item["name"], item["link_url"]))
+            
+            # if department has entry_point_categories, use those (legacy structure)
+            if department.get("entry_point_categories"):
+                for entry in department["entry_point_categories"]:
+                    targets.append(Target(entry["name"], entry["link_url"]))
+                    
         return targets
 
     # extract all leaf category URLs from a category tree
@@ -168,17 +200,25 @@ class AmazonCrawler(BaseCrawler):
         return urls
 
     # scrape hierarchical structure with products attached to leaf nodes
-    def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None) -> dict:
+    def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
         # resolve target nodes
-        target_nodes = self._resolve_targets(category_filter)
+        target_nodes = self._resolve_targets(category_filter, department_filter)
         if not target_nodes:
             self.logger.error("No target categories found to crawl")
             return {}
 
+        # determine what we're crawling
+        if department_filter:
+            title = f"Amazon Department: {department_filter}"
+        elif category_filter:
+            title = f"Amazon Category: {category_filter}"
+        else:
+            title = "Amazon Categories"
+
         # if multiple targets, create a root node to contain them
         if len(target_nodes) > 1:
             root = {
-                "name": "Amazon Categories", 
+                "name": title, 
                 "link_url": self.base_url,
                 "sub_items": []
             }

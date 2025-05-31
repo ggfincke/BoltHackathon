@@ -1,9 +1,8 @@
 {
   "departments": [
     {
-      "department_name": "Groceries",
-      "search_alias": "search-alias=grocery",
-      "entry_point_categories": [],
+      "department_name": "Amazon Grocery",
+      "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310101&ref_=eemb_redirect_grocery",
       "sub_items": [
         {
           "name": "Candy & Chocolate",

@@ -115,7 +115,7 @@ async def _crawl_category_async(page: Page, node_json, depth, visited, q, logger
         link_name = re.sub(r"^See\s+", "", link_text)
         child = {
             "name":      link_name,
-            "link_url":  _shorten_url(link_url),  # Use shortened URL here
+            "link_url":  _shorten_url(link_url),
             "sub_items": [],
             "parent":    node_json,
         }
@@ -165,8 +165,8 @@ async def crawl_category(start_url: str, max_depth: int = MAX_DEPTH, logger=None
     
     # root JSON (top-level category)
     root_json = {
-        "name": "Root",
-        "link_url": _shorten_url(start_url), 
+        "name": "Amazon Grocery",
+        "link_url": _shorten_url(start_url),         
         "sub_items": []
     }
     

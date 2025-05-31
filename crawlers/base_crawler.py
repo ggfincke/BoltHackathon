@@ -106,11 +106,14 @@ def create_redis_backend(retailer_id: int, queue_key: str = "crawl_urls_queue"):
 
 # Base crawler - abstract base class for all crawlers
 class BaseCrawler(ABC):
-    def __init__(self, retailer_id: int, output_backend: OutputBackend = None, logger: logging.Logger = None, urls_only: bool = False, hierarchical: bool = False):
+    def __init__(self, retailer_id: int, output_backend: OutputBackend = None, logger: logging.Logger = None, 
+                 urls_only: bool = False, hierarchical: bool = False, department: str = None, category: str = None):
         self.retailer_id = retailer_id
         self.logger = logger or logging.getLogger(self.__class__.__name__)
         self.urls_only = urls_only
         self.hierarchical = hierarchical
+        self.department = department
+        self.category = category
         
         # if hierarchical mode, force JSON backend
         if hierarchical:
@@ -134,18 +137,18 @@ class BaseCrawler(ABC):
         self._out = output_backend
 
     # main method - orchestrate a crawl
-    def crawl(self, max_pages_per_cat: int = 5, category_filter: str = None) -> None:
+    def crawl(self, max_pages_per_cat: int = 5, category_filter: str = None, department_filter: str = None) -> None:
         # hierarchical mode - build complete category tree with products
         if self.hierarchical:
             self.logger.info("Starting hierarchical crawl")
-            hierarchy = self._scrape_hierarchy(max_pages_per_cat, category_filter)
+            hierarchy = self._scrape_hierarchy(max_pages_per_cat, category_filter, department_filter)
             if hierarchy:
                 self.logger.info("Sending hierarchical data to output backend")
                 self._out.send(hierarchy)
             return
 
-        # original flat mode
-        targets = self._resolve_targets(category_filter)
+        # original flat mode - use department or category filter
+        targets = self._resolve_targets(category_filter, department_filter)
         self.logger.info("Resolved %s target categories", len(targets))
 
         # scrape each target
@@ -172,7 +175,7 @@ class BaseCrawler(ABC):
     # abstract methods - supplied by crawler
     # resolve targets (from a category filter)
     @abstractmethod
-    def _resolve_targets(self, category_filter: str | None) -> list[Target]:
+    def _resolve_targets(self, category_filter: str | None, department_filter: str | None) -> list[Target]:
         ...
 
     # scrape a category
@@ -187,7 +190,7 @@ class BaseCrawler(ABC):
 
     # scrape hierarchical structure with products attached to leaf nodes
     @abstractmethod
-    def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None) -> dict:
+    def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
         ...
 
 

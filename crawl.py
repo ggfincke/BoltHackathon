@@ -100,6 +100,8 @@ Examples:
   %(prog)s --retailer target --mode urls-only --category "Beverages"
   %(prog)s --retailer amazon --mode full --hierarchical --max-pages 5
   %(prog)s --retailer target --mode urls-only --hierarchical --output hierarchy_urls
+  %(prog)s --retailer amazon --department "Amazon Grocery" --mode full
+  %(prog)s --retailer target --department "Target Grocery" --hierarchical
   %(prog)s --list-retailers
         """
     )
@@ -122,6 +124,11 @@ Examples:
         "--hierarchical",
         action="store_true",
         help="Build hierarchical category structure (works with both modes)"
+    )
+    
+    parser.add_argument(
+        "--department", "-d",
+        help="Specific department to crawl (optional, will crawl all subcategories within)"
     )
     
     parser.add_argument(
@@ -208,6 +215,8 @@ Examples:
             mode_desc += " with hierarchical structure"
         
         logger.info(f"Starting {args.retailer} crawler in {mode_desc}")
+        if args.department:
+            logger.info(f"Target department: {args.department}")
         if args.category:
             logger.info(f"Target category: {args.category}")
         logger.info(f"Max pages per category: {args.max_pages}")
@@ -216,6 +225,7 @@ Examples:
         crawler = crawler_class(
             retailer_id=retailer_id,
             logger=logger,
+            department=args.department,
             category=args.category,
             output_backend=output_backend,
             urls_only=urls_only,
@@ -225,7 +235,8 @@ Examples:
         # run crawl
         crawler.crawl(
             max_pages_per_cat=args.max_pages,
-            category_filter=args.category
+            category_filter=args.category,
+            department_filter=args.department
         )
         
         logger.info("Crawl completed successfully")
