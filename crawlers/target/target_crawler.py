@@ -235,28 +235,27 @@ class TargetCrawler(BaseCrawler):
 
     # process a batch of URLs synchronously (for use with ThreadPoolExecutor)
     def _process_batch_sync(self, urls: List[str], max_pages_per_cat: int, batch_num: int):
-        """Process a batch of URLs synchronously with proper data conversion"""
         self.logger.info(f"Target Batch {batch_num}: Processing {len(urls)} URLs")
         
         try:
-            # Use the existing crawl_grid function with the batch of URLs
+            # use existing crawl_grid function with the batch of URLs
             results = crawl_grid(
                 start_urls=urls,
                 max_depth=max_pages_per_cat,
                 extract_urls_only=self.urls_only,
-                use_safari=False,  # use Chrome for consistency
+                use_safari=True, 
                 proxy_manager=None,
                 logger=self.logger
             )
             
-            # Convert results to expected format if needed
+            # convert results to expected format if needed
             if not self.urls_only:
-                # Full mode - convert raw dicts to ProductRecord objects if needed
+                # full mode - convert raw dicts to ProductRecord objects if needed
                 converted_results = []
                 for item in results:
                     try:
                         if isinstance(item, dict):
-                            # Convert raw dict to ProductRecord
+                            # convert raw dict to ProductRecord
                             from ..base_crawler import ProductRecord
                             product_record = ProductRecord(
                                 retailer_id=self.retailer_id,
@@ -267,7 +266,7 @@ class TargetCrawler(BaseCrawler):
                             )
                             converted_results.append(product_record)
                         else:
-                            # Already a ProductRecord or similar
+                            # already a ProductRecord or similar
                             converted_results.append(item)
                     except Exception as e:
                         self.logger.error(f"Error converting Target item to ProductRecord: {e}, item: {item}")
