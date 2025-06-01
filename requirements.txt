@@ -10,3 +10,6 @@ playwright
 selenium
 undetected-chromedriver
 playwright-stealth
+opencv-python
+torch
+easyocr
