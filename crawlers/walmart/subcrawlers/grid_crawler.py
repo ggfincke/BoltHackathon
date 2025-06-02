@@ -5,7 +5,7 @@ import time
 import json
 import re
 from pathlib import Path
-from typing import List, Dict, Set, Optional, Callable, Any
+from typing import List, Dict, Set, Optional, Callable, Any, Tuple
 from urllib.parse import urljoin, urlparse
 
 import undetected_chromedriver as uc
@@ -79,11 +79,95 @@ def _random_delay(min_seconds=None, max_seconds=None):
     delay = random.uniform(min_seconds/1000, max_seconds/1000)
     time.sleep(delay)
 
-# extract Walmart item ID from a product card or URL
+# check if page is blocked
+def _is_blocked_page(driver) -> bool:
+    current_url = driver.current_url.lower()
+    return any(keyword in current_url for keyword in ['blocked', 'challenge', 'captcha'])
+
+# safely close driver
+def _safe_close_driver(driver, logger):
+    try:
+        if driver:
+            driver.quit()
+    except Exception as e:
+        logger.debug(f"Error closing driver: {e}")
+
+# navigate to URL with automatic browser relaunching when blocked
+def _safe_navigate_with_relaunch(driver, url, logger, use_safari=False, proxy_manager=None, max_retries=3) -> Tuple[bool, webdriver.Remote]:
+    current_driver = driver
+    
+    for attempt in range(max_retries):
+        try:
+            logger.debug(f"Navigating to: {url} (attempt {attempt + 1})")
+            current_driver.get(url)
+            
+            # wait for page to load
+            WebDriverWait(current_driver, 15).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            
+            # check if we're blocked
+            if _is_blocked_page(current_driver):
+                logger.warning(f"Detected blocked page: {current_driver.current_url}")
+                logger.info(f"Relaunching browser (attempt {attempt + 1}/{max_retries})")
+                
+                # close current driver
+                _safe_close_driver(current_driver, logger)
+                
+                # wait a bit before relaunching
+                relaunch_delay = random.uniform(3, 8)
+                logger.info(f"Waiting {relaunch_delay:.1f}s before relaunching...")
+                time.sleep(relaunch_delay)
+                
+                # create new driver
+                current_driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
+                
+                # try navigation again with new driver
+                logger.info("Retrying navigation with fresh browser...")
+                current_driver.get(url)
+                
+                # wait for page to load
+                WebDriverWait(current_driver, 15).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                
+                # check again if still blocked
+                if _is_blocked_page(current_driver):
+                    logger.warning("Still blocked after relaunch, will retry...")
+                    continue
+            
+            # wait for final page state
+            WebDriverWait(current_driver, 10).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            
+            # successful navigation
+            logger.info("Successfully navigated to page")
+            return True, current_driver
+            
+        except Exception as e:
+            logger.warning(f"Navigation attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                # close and relaunch for any error
+                logger.info("Relaunching browser due to error...")
+                _safe_close_driver(current_driver, logger)
+                
+                relaunch_delay = random.uniform(2, 5)
+                time.sleep(relaunch_delay)
+                
+                current_driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
+                continue
+            else:
+                logger.error(f"Failed to navigate to {url} after {max_retries} attempts")
+                return False, current_driver
+    
+    return False, current_driver
+
+# extract Walmart item ID from a product card
 def _get_product_id_from_card(card) -> Optional[str]:
     return card.get_attribute('data-item-id')
 
-# extract product URL from a product card
+# extract product URL from a product card element
 def _extract_product_url(driver, card) -> Optional[str]:
     try:
         link = card.find_element(By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR)
@@ -97,21 +181,21 @@ def _extract_product_url(driver, card) -> Optional[str]:
     parsed = urlparse(href)
     return f'{parsed.scheme}://{parsed.netloc}{parsed.path}'
 
-# extract product title from a card element
+# extract product title from a product card element
 def _extract_product_title(card) -> str:
     try:
         return card.find_element(By.CSS_SELECTOR, PRODUCT_TITLE_SELECTOR).text.strip()
     except NoSuchElementException:
         return "Unknown Title"
 
-# extract product price from a card element
+# extract product price from a product card element
 def _extract_product_price(card) -> str:
     try:
         return card.find_element(By.CSS_SELECTOR, PRODUCT_PRICE_SELECTOR).text.strip()
     except NoSuchElementException:
         return "Unknown Price"
 
-# scroll down the page to ensure all products are loaded
+# scroll down the page to load all products
 def _scroll_page(driver):
     try:
         # get initial page height
@@ -134,7 +218,7 @@ def _scroll_page(driver):
     except Exception as e:
         logging.error(f"Error scrolling page: {e}")
 
-# check for & click load more button
+# click load more button
 def _click_load_more(driver) -> bool:
     try:
         # look for load more button
@@ -149,7 +233,7 @@ def _click_load_more(driver) -> bool:
         pass
     return False
 
-# click the "Next Page" chevron
+# click the "Next Page" chevron on the pagination
 def _go_to_next_page(driver: webdriver.Remote) -> bool:
     try:
         # make sure pagination is in view
@@ -179,6 +263,12 @@ def _go_to_next_page(driver: webdriver.Remote) -> bool:
                         (By.CSS_SELECTOR, PRODUCT_CARD_SELECTOR)
                     )
                 )
+                
+                # check for blocking after page navigation
+                if _is_blocked_page(driver):
+                    logging.getLogger(__name__).warning("Detected blocked page after pagination")
+                    return False
+                
                 return True
 
         return False  
@@ -187,20 +277,18 @@ def _go_to_next_page(driver: webdriver.Remote) -> bool:
         logging.error(f"Pagination error: {exc}")
         return False
 
-# extract just product URLs from pages (for Redis output)
-def _extract_urls(driver: webdriver.Remote, url: str, max_pages: int, logger) -> List[str]:
+# extract just product URLs from pages 
+def _extract_urls(driver: webdriver.Remote, url: str, max_pages: int, logger, use_safari=False, proxy_manager=None) -> Tuple[List[str], webdriver.Remote]:
     logger.info(f"Extracting URLs from Walmart: {url}")
     all_urls = []
     
-    # navigate to the starting URL
+    # navigate to the starting URL using safe navigation with relaunch
+    success, driver = _safe_navigate_with_relaunch(driver, url, logger, use_safari, proxy_manager)
+    if not success:
+        logger.error(f"Failed to navigate to starting URL: {url}")
+        return all_urls, driver
+    
     try:
-        driver.get(url)
-        
-        # wait for page to load
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        
         # process pages
         for page_num in range(max_pages):
             logger.info(f"Processing Walmart page {page_num + 1}/{max_pages}")
@@ -223,7 +311,8 @@ def _extract_urls(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
             # try to click load more button
             load_more_clicked = _click_load_more(driver)
             if load_more_clicked:
-                _scroll_page(driver)  # Scroll again after load more
+                # scroll again after load more
+                _scroll_page(driver)  
             
             # get all product cards
             product_cards = driver.find_elements(By.CSS_SELECTOR, PRODUCT_CARD_SELECTOR)
@@ -256,22 +345,20 @@ def _extract_urls(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
     except Exception as e:
         logger.error(f"Error extracting Walmart URLs: {e}")
     
-    return all_urls
+    return all_urls, driver
 
 # extract full product data from pages (for JSON output)
-def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger) -> List[Dict[str, Any]]:
+def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger, use_safari=False, proxy_manager=None) -> Tuple[List[Dict[str, Any]], webdriver.Remote]:
     logger.info(f"Extracting full Walmart product data from {url}")
     all_products = []
     
-    # navigate to starting URL
+    # navigate to starting URL using safe navigation with relaunch
+    success, driver = _safe_navigate_with_relaunch(driver, url, logger, use_safari, proxy_manager)
+    if not success:
+        logger.error(f"Failed to navigate to starting URL: {url}")
+        return all_products, driver
+    
     try:
-        driver.get(url)
-        
-        # wait for page to load
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
-        
         # process pages
         for page_num in range(max_pages):
             logger.info(f"Processing Walmart page {page_num + 1}/{max_pages}")
@@ -335,9 +422,9 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
     except Exception as e:
         logger.error(f"Error extracting Walmart product data: {e}")
                 
-    return all_products
+    return all_products, driver
 
-# * main - crawl product grids from a list of starting URLs and return the products found
+# * main - crawl product grids from a list of starting URLs & return products found
 def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: bool = False,
                use_safari: bool = False, proxy_manager = None, logger = None) -> List:
     # logger
@@ -352,17 +439,17 @@ def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: boo
     
     # process each URL
     for url in start_urls:
+        driver = None
         try:
             logger.info(f"Processing Walmart URL: {url}")
             driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
-            url_results = extract_fn(driver, url, max_depth, logger)
+            url_results, driver = extract_fn(driver, url, max_depth, logger, use_safari, proxy_manager)
             results.extend(url_results)
             logger.info(f"Completed Walmart URL: {url}, extracted {len(url_results)} items")
         except Exception as e:
             logger.error(f"Error processing Walmart URL {url}: {e}")
         finally:
-            if driver:
-                driver.quit()
+            _safe_close_driver(driver, logger)
     
     return results
 
