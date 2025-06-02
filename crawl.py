@@ -7,8 +7,10 @@ with various configurations and output modes.
 Usage:
     python crawl.py --retailer amazon --mode full
     python crawl.py --retailer target --mode urls-only --category "Beverages"
+    python crawl.py --retailer walmart --mode full --category "Snacks"
     python crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
     python crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
+    python crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
     python crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
 """
 
@@ -25,6 +27,7 @@ sys.path.append(str(Path(__file__).parent / "crawlers"))
 # import crawler classes
 from crawlers.amazon.amazon_crawler import AmazonCrawler
 from crawlers.target.target_crawler import TargetCrawler
+from crawlers.walmart.walmart_crawler import WalmartCrawler
 from crawlers.base_crawler import (
     JsonFileBackend, 
     create_redis_backend,
@@ -44,6 +47,12 @@ RETAILER_CONFIG = {
         "retailer_id": 2,
         "description": "Target product crawler",
         "default_hierarchy_file": "crawlers/target/target_grocery_hierarchy.json"
+    },
+    "walmart": {
+        "class": WalmartCrawler,
+        "retailer_id": 3,
+        "description": "Walmart product crawler",
+        "default_hierarchy_file": "crawlers/walmart/walmart_grocery_hierarchy.json"
     }
 }
 
@@ -148,12 +157,15 @@ def main():
 Examples:
   %(prog)s --retailer amazon --mode full
   %(prog)s --retailer target --mode urls-only --category "Beverages"
+  %(prog)s --retailer walmart --mode full --category "Snacks"
   %(prog)s --retailer amazon --mode full --hierarchical --max-pages 5
   %(prog)s --retailer target --mode urls-only --hierarchical --output hierarchy_urls
+  %(prog)s --retailer walmart --department "Walmart Grocery" --hierarchical
   %(prog)s --retailer amazon --department "Amazon Grocery" --mode full
   %(prog)s --retailer target --department "Target Grocery" --hierarchical
   %(prog)s --retailer target --from-hierarchy-file hierarchy.json --mode urls-only --max-pages 3
   %(prog)s --retailer amazon --from-hierarchy-file --mode full --concurrency 10
+  %(prog)s --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
   %(prog)s --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
   %(prog)s --list-retailers
         """

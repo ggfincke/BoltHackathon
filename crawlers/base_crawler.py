@@ -41,6 +41,7 @@ class ProductRecord(BaseModel):
     retailer_id: int
     asin: str | None = None
     tcin: str | None = None
+    wm_item_id: str | None = None
     title: str
     price: str
     url: HttpUrl
@@ -92,7 +93,7 @@ class JsonFileBackend(OutputBackend):
                         elif isinstance(r, dict):
                             f.write(json.dumps(r, default=str) + "\n")
                             records_written += 1
-                            logger.debug(f"Wrote raw dict: {r.get('title', r.get('asin', r.get('tcin', 'Unknown')))}")
+                            logger.debug(f"Wrote raw dict: {r.get('title', r.get('asin', r.get('tcin', r.get('wm_item_id', 'Unknown'))))}")
                         else:
                             logger.warning(f"Skipping unknown record type: {type(r)} - {r}")
                     except Exception as e:
