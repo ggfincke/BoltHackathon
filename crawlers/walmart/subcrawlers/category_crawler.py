@@ -1,9 +1,8 @@
 # imports   
 import re, json, random, logging, time
 from pathlib import Path
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set, Optional, Tuple
 from urllib.parse import urljoin
-
 
 # have to use undetected_chromedriver bc selenium/playwright get identified by walmart
 import undetected_chromedriver as uc
@@ -15,13 +14,10 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from selenium.webdriver.safari.service import Service as SafariService
 from selenium.webdriver.safari.options import Options as SafariOptions
 
-# import constants from base crawler
-from ...base_crawler import MAX_DEPTH, CONCURRENCY, HOVER_DELAY_RANGE
-
-# MAX_DEPTH = 3
-# CONCURRENCY = 1
-# HOVER_DELAY_RANGE = (350, 500)
-# GRID_HOVER_DELAY_RANGE = (500, 750)
+MAX_DEPTH = 10
+CONCURRENCY = 1
+HOVER_DELAY_RANGE = (700, 1000)
+GRID_HOVER_DELAY_RANGE = (1000, 1500)
 
 # Walmart-specific selectors
 CATEGORY_GRID_CONTAINER = "div[role='list'][id*='Grid']" 
@@ -38,7 +34,7 @@ MAX_SCROLL_ATTEMPTS  = 3
 SCROLL_CHUNK = 800          
 SCROLL_WAIT  = 0.25         
 MAX_HYDRATE_SCROLLS = 5     
-VALID_HREF_RE = re.compile(r"/cp/[^/]+/\d{6,}")
+VALID_HREF_RE = re.compile(r"/(?:cp|browse)/[^?#]+")
 
 # urls
 START_URL = "https://www.walmart.com/cp/food/976759?povid=GlobalNav_rWeb_Grocery_GroceryShopAll" 
@@ -64,7 +60,13 @@ def _setup_driver(use_safari: bool = True, proxy_manager = None) -> webdriver.Re
         options.add_argument('--window-size=1920,1080')
         options.add_argument("--log-level=3")
         
+        # additional anti-detection measures
+        options.add_argument('--disable-blink-features=AutomationControlled')
+
         driver = uc.Chrome(options=options)
+        
+        # Execute script to remove webdriver property
+        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     
     return driver
 
@@ -76,6 +78,93 @@ def _random_delay(min_seconds=None, max_seconds=None):
     # convert ms to seconds
     delay = random.uniform(min_seconds/1000, max_seconds/1000)
     time.sleep(delay)
+
+def _is_blocked_page(driver) -> bool:
+    """Check if current page is a blocked/challenge page."""
+    current_url = driver.current_url.lower()
+    return any(keyword in current_url for keyword in ['blocked', 'challenge', 'captcha'])
+
+def _safe_close_driver(driver, logger):
+    """Safely close a driver instance."""
+    try:
+        if driver:
+            driver.quit()
+    except Exception as e:
+        logger.debug(f"Error closing driver: {e}")
+
+def _safe_navigate_with_relaunch(driver, url, logger, use_safari=True, proxy_manager=None, max_retries=3) -> Tuple[bool, webdriver.Remote]:
+    """
+    Navigate to URL with automatic browser relaunching when blocked.
+    Returns: (success, driver) where driver might be a new instance if relaunched.
+    """
+    current_driver = driver
+    
+    for attempt in range(max_retries):
+        try:
+            logger.debug(f"Navigating to: {url} (attempt {attempt + 1})")
+            current_driver.get(url)
+            
+            # wait for page to load
+            WebDriverWait(current_driver, 15).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            
+            # check if we're blocked
+            if _is_blocked_page(current_driver):
+                logger.warning(f"Detected blocked page: {current_driver.current_url}")
+                logger.info(f"Relaunching browser (attempt {attempt + 1}/{max_retries})")
+                
+                # close current driver
+                _safe_close_driver(current_driver, logger)
+                
+                # wait a bit before relaunching
+                relaunch_delay = random.uniform(3, 8)
+                logger.info(f"Waiting {relaunch_delay:.1f}s before relaunching...")
+                time.sleep(relaunch_delay)
+                
+                # create new driver
+                current_driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
+                
+                # try navigation again with new driver
+                logger.info("Retrying navigation with fresh browser...")
+                current_driver.get(url)
+                
+                # wait for page to load
+                WebDriverWait(current_driver, 15).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "body"))
+                )
+                
+                # check again if still blocked
+                if _is_blocked_page(current_driver):
+                    logger.warning("Still blocked after relaunch, will retry...")
+                    continue
+            
+            # wait for final page state
+            WebDriverWait(current_driver, 10).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            
+            # successful navigation
+            logger.info("Successfully navigated to page")
+            return True, current_driver
+            
+        except Exception as e:
+            logger.warning(f"Navigation attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                # close and relaunch for any error
+                logger.info("Relaunching browser due to error...")
+                _safe_close_driver(current_driver, logger)
+                
+                relaunch_delay = random.uniform(2, 5)
+                time.sleep(relaunch_delay)
+                
+                current_driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
+                continue
+            else:
+                logger.error(f"Failed to navigate to {url} after {max_retries} attempts")
+                return False, current_driver
+    
+    return False, current_driver
 
 # gets the category path (used for logging)
 def _get_category_path(node_json):
@@ -182,7 +271,7 @@ def _click_all_show_buttons(driver, logger):
     logger.debug(f"Clicked {clicks_made} show-more buttons total")
 
 # extract clean walmart category links
-def _extract_walmart_category_links(driver, logger):
+def _extract_walmart_category_links(driver, logger, parent_node=None):
     """Return [(name, url), …] for the current hub-and-spoke grid."""
     links = []
 
@@ -198,11 +287,18 @@ def _extract_walmart_category_links(driver, logger):
         return links
 
     # 2. Scroll the grid so every virtual tile gets hydrated
-    grid = driver.find_element(By.CSS_SELECTOR, CATEGORY_GRID_CONTAINER)
+    try:
+        grid = driver.find_element(By.CSS_SELECTOR, CATEGORY_GRID_CONTAINER)
+        for _ in range(MAX_SCROLL_ATTEMPTS):
+            driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", grid)
+            time.sleep(SCROLL_PAUSE_MS / 1000)
+    except:
+        pass
+
+    # before extracting links - scroll the viewport for lazy-loaded content
     for _ in range(MAX_SCROLL_ATTEMPTS):
-        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight",
-                              grid)
-        time.sleep(SCROLL_PAUSE_MS / 1000)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(SCROLL_WAIT)
 
     # 3. Iterate over _actual_ tiles (ignore marketing cards automatically)
     for tile_link in driver.find_elements(By.CSS_SELECTOR, CATEGORY_TILE_LINK):
@@ -211,20 +307,28 @@ def _extract_walmart_category_links(driver, logger):
             if not VALID_HREF_RE.search(href):
                 continue        # skip marketing / promo cards
             
-            url = href
-            if not url.startswith("http"):
-                url = urljoin("https://www.walmart.com", url)
+            url = href if href.startswith("http") else urljoin("https://www.walmart.com", href)
 
-            # Pull the visible name
-            name = ""
-            # a) img alt text
-            img = tile_link.find_elements(By.CSS_SELECTOR, CATEGORY_TILE_IMG)
-            if img:
-                name = img[0].get_attribute("alt") or ""
-            # b) fallback to any span/div text
+            # -------- choose the name --------
+            # 1️⃣ visible caption (what users see)
+            name = (tile_link.text or "").strip()
+
+            # 2️⃣ fallback – img alt
             if not name:
-                name = (tile_link.text or "").strip()
+                img = tile_link.find_elements(By.CSS_SELECTOR, CATEGORY_TILE_IMG)
+                if img:
+                    name = img[0].get_attribute("alt") or ""
+
             name = _clean_category_name(name)
+            
+            # Strip parent prefix when designer stuffs it into the alt
+            if parent_node:
+                parent = parent_node.get("name", "").lower()
+                if name.lower().startswith(parent + " "):
+                    name = name[len(parent):].lstrip()
+            
+            if not name:
+                continue
 
             if name and url and "walmart.com" in url:
                 links.append((name, url))
@@ -252,11 +356,11 @@ def _is_leaf_page(driver, logger):
         logger.debug(f"Leaf check failed: {e}")
         return True  # safest default
 
-# main crawling logic - recursive DFS
-def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_depth):
+# main crawling logic - recursive DFS with driver replacement handling
+def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_depth, use_safari=True, proxy_manager=None):
     if depth > max_depth:
         logger.info(f"Max depth reached at: {_get_category_path(node_json)}")
-        return
+        return driver
 
     # get current category
     current_category = node_json.get("name", "Root")
@@ -277,16 +381,16 @@ def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_dep
         # check if this is a leaf page
         if _is_leaf_page(driver, logger):
             logger.info(f"Leaf reached (product grid): {_get_category_path(node_json)}")
-            return
+            return driver
         
         # extract subcategory links
-        subcategory_links = _extract_walmart_category_links(driver, logger)
+        subcategory_links = _extract_walmart_category_links(driver, logger, node_json)
         logger.info(f"Found {len(subcategory_links)} subcategories in {current_category}")
         
         # if no subcategories found, treat as leaf
         if not subcategory_links:
             logger.info(f"No subcategories found, treating as leaf: {_get_category_path(node_json)}")
-            return
+            return driver
         
         # process each subcategory
         for name, url in subcategory_links:
@@ -309,20 +413,20 @@ def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_dep
             if depth < max_depth:
                 try:
                     logger.info(f"Navigating to subcategory: {name} ({url})")
-                    driver.get(url)
                     
-                    # wait for navigation to complete
-                    WebDriverWait(driver, 15).until(
-                        EC.presence_of_element_located((By.TAG_NAME, "body"))
+                    # use safe navigation with automatic browser relaunching
+                    success, driver = _safe_navigate_with_relaunch(
+                        driver, url, logger, use_safari, proxy_manager
                     )
                     
-                    # random delay to avoid detection
-                    WebDriverWait(driver, 5).until(
-                        lambda d: d.execute_script("return document.readyState") == "complete"
-                    )
+                    if not success:
+                        logger.error(f"Failed to navigate to subcategory: {name}")
+                        continue
                     
-                    # recursive call
-                    _crawl_category_recursive(driver, child, depth + 1, visited, logger, max_depth)
+                    # recursive call (driver might have been replaced)
+                    driver = _crawl_category_recursive(
+                        driver, child, depth + 1, visited, logger, max_depth, use_safari, proxy_manager
+                    )
                     
                 except Exception as e:
                     logger.error(f"Error crawling subcategory {name}: {e}")
@@ -332,6 +436,8 @@ def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_dep
                 
     except Exception as e:
         logger.error(f"Error processing category {current_category}: {e}")
+    
+    return driver
 
 # * main crawl - crawl a category starting from the given URL and return the category tree as JSON
 def crawl_category(start_url: str = START_URL, max_depth: int = MAX_DEPTH, 
@@ -357,27 +463,26 @@ def crawl_category(start_url: str = START_URL, max_depth: int = MAX_DEPTH,
         
         # navigate to starting URL
         logger.info(f"Starting Walmart category crawl from: {start_url}")
-        driver.get(start_url)
         
-        # wait for initial page load
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        # use safe navigation with automatic browser relaunching
+        success, driver = _safe_navigate_with_relaunch(
+            driver, start_url, logger, use_safari, proxy_manager
         )
         
-        # give time for dynamic content
-        WebDriverWait(driver, 5).until(
-            lambda d: d.execute_script("return document.readyState") == "complete"
-        )
+        if not success:
+            logger.error(f"Failed to navigate to starting URL: {start_url}")
+            return root_json
         
-        # start recursive crawling
-        _crawl_category_recursive(driver, root_json, 0, visited, logger, max_depth)
+        # start recursive crawling (driver might be replaced during crawling)
+        driver = _crawl_category_recursive(
+            driver, root_json, 0, visited, logger, max_depth, use_safari, proxy_manager
+        )
         
     except Exception as e:
         logger.error(f"Error during category crawl: {e}")
         
     finally:
-        if driver:
-            driver.quit()
+        _safe_close_driver(driver, logger)
 
     # prune parent refs to prepare for JSON serialization
     logger.info("Crawl finished, pruning parent refs...")
