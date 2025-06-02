@@ -18,9 +18,9 @@ from selenium.webdriver.safari.service import Service as SafariService
 from selenium.webdriver.safari.options import Options as SafariOptions
 
 # import constants from base crawler
-# from ...base_crawler import GRID_HOVER_DELAY_RANGE
+from ...base_crawler import GRID_HOVER_DELAY_RANGE
 
-GRID_HOVER_DELAY_RANGE = (500, 750)
+# GRID_HOVER_DELAY_RANGE = (500, 750)
 
 # tracking seen product IDs to avoid dupes
 SEEN_PRODUCT_IDS: Set[str] = set()
