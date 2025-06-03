@@ -1,809 +1,1049 @@
 {
   "sample_info": {
-    "timestamp": "2025-06-03T10:14:53.040605",
-    "sample_count": 100,
-    "retailer": "target"
+    "timestamp": "2025-06-03T12:24:28.479810",
+    "total_products": 100,
+    "sampling_mode": "per_category_hierarchical_preserved",
+    "categories_selected": 20,
+    "products_per_category": 5
   },
-  "samples": [
-    {
-      "retailer": "target",
-      "title": "Australian Bitters Company Grapefruit Bitters 5 Pack: Elevate Your Cocktails with 4oz Bottles Perfect for Classic Mixed Drinks",
-      "price": "$77.98",
-      "url": "https://www.target.com/p/australian-bitters-company-grapefruit-bitters-5-pack-elevate-your-cocktails-with-4oz-bottles-perfect-for-classic-mixed-drinks/-/A-92318671#lnk=sametab",
-      "category": "Perfect Pairings",
-      "tcin": "92318671"
-    },
-    {
-      "retailer": "target",
-      "title": "Cabot Seriously Sharp Macaroni & Cheese - 6.25oz",
-      "price": "$1.69",
-      "url": "https://www.target.com/p/cabot-seriously-sharp-macaroni-38-cheese-6-25oz/-/A-88946167#lnk=sametab",
-      "category": "Cocoa",
-      "tcin": "88946167"
-    },
-    {
-      "retailer": "target",
-      "title": "Oatly Oatmilk Barista Edition Non-Dairy Milk Shelf Stable - 32oz",
-      "price": "$4.99",
-      "url": "https://www.target.com/p/oatly-oatmilk-non-dairy-milk-shelf-stable/-/A-94771082?preselect=82798362#lnk=sametab",
-      "category": "Craft Beer",
-      "tcin": "82798362"
-    },
-    {
-      "retailer": "target",
-      "title": "Organic Lowfat Chocolate Milk Shelf Stable - 8 fl oz/12ct - Good & Gather™",
-      "price": "$12.99",
-      "url": "https://www.target.com/p/organic-milk-shelf-stable-8-fl-oz-12ct-good-gather/-/A-94758441?preselect=87800845#lnk=sametab",
-      "category": "Scotch",
-      "tcin": "87800845"
-    },
-    {
-      "retailer": "target",
-      "title": "Smucker's Honey Single Serve Packets, 0.5 oz (Pack of 200)",
-      "price": "$84.95",
-      "url": "https://www.target.com/p/smucker-s-honey-single-serve-packets-0-5-oz-pack-of-200/-/A-1003638578#lnk=sametab",
-      "category": "Canned Vegetables",
-      "tcin": "1003638578"
-    },
-    {
-      "retailer": "target",
-      "title": "Skippy Natural Chunky Peanut Butter - 40oz",
-      "price": "$6.29",
-      "url": "https://www.target.com/p/skippy-natural-chunky-peanut-butter-40oz/-/A-14039583#lnk=sametab",
-      "category": "Rose Wine",
-      "tcin": "14039583"
-    },
-    {
-      "retailer": "target",
-      "title": "Krusteaz Gluten Free Meyer Lemon Bar, 18.42 OZ",
-      "price": "$16.04",
-      "url": "https://www.target.com/p/krusteaz-gluten-free-meyer-lemon-bar-18-42-oz/-/A-90486354#lnk=sametab",
-      "category": "Condiments & Salad Dressings",
-      "tcin": "90486354"
-    },
-    {
-      "retailer": "target",
-      "title": "OLIPOP Ginger Ale Prebiotic Soda - 12 fl oz Can",
-      "price": "$2.49",
-      "url": "https://www.target.com/p/olipop-ginger-ale-prebiotic-soda-12-fl-oz/-/A-89194118#lnk=sametab",
-      "category": "Import Beer",
-      "tcin": "89194118"
-    },
-    {
-      "retailer": "target",
-      "title": "Vita Coco Original Coconut Water - 1 L Carton",
-      "price": "$4.59",
-      "url": "https://www.target.com/p/vita-coco-original-coconut-water-1-l-carton/-/A-15024425#lnk=sametab",
-      "category": "Popcorn",
-      "tcin": "15024425"
-    },
-    {
-      "retailer": "target",
-      "title": "Green Mountain Coffee Medium Roast Half Caff Keurig K-Cup Coffee Pods - 96ct",
-      "price": "$55.99",
-      "url": "https://www.target.com/p/green-mountain-coffee-medium-roast-half-caff-keurig-k-cup-coffee-pods-96ct/-/A-80916628#lnk=sametab",
-      "category": "Frozen Pizza",
-      "tcin": "80916628"
-    },
-    {
-      "retailer": "target",
-      "title": "Torani Flavoring Syrup Classic Hazelnut - 12.7 Fl Oz",
-      "price": "$19.95",
-      "url": "https://www.target.com/p/torani-flavoring-syrup-classic-hazelnut-12-7-fl-oz/-/A-1003164963#lnk=sametab",
-      "category": "Cold Brew & Bottled Coffee",
-      "tcin": "1003164963"
-    },
-    {
-      "retailer": "target",
-      "title": "Pepperoni - 6oz - Market Pantry™",
-      "price": "$2.99",
-      "url": "https://www.target.com/p/pepperoni-6oz-market-pantry-8482/-/A-87762836#lnk=sametab",
-      "category": "Domestic Beer",
-      "tcin": "87762836"
-    },
-    {
-      "retailer": "target",
-      "title": "Fever Tree Elderflower Water- Premium Quality Mixer - Refreshing Beverage for Cocktails & Mocktails 150ml Bottles",
-      "price": "$9.98 - $54.98",
-      "url": "https://www.target.com/p/fever-tree-elderflower-water-premium-quality-mixer-refreshing-beverage-for-cocktails-mocktails-150ml-bottles/-/A-92822831?preselect=92822829#lnk=sametab",
-      "category": "Coffee Deals",
-      "tcin": "92822829"
-    },
-    {
-      "retailer": "target",
-      "title": "Syruvia Sugar Free Blackberry Syrup - 25.4 fl oz. Premium Flavoring Syrup For Coffee",
-      "price": "$11.99",
-      "url": "https://www.target.com/p/syruvia-sugar-free-blackberry-syrup-25-4-fl-oz-premium-flavoring-syrup-for-coffee/-/A-1003663485#lnk=sametab",
-      "category": "Soda & Pop",
-      "tcin": "1003663485"
-    },
-    {
-      "retailer": "target",
-      "title": "Annie's Organic Real Aged Cheddar Protein Super Mac and Cheese Cups - 11.44oz/4ct",
-      "price": "$7.39",
-      "url": "https://www.target.com/p/annie-39-s-organic-real-aged-cheddar-protein-super-mac-and-cheese-cups-11-44oz-4ct/-/A-94142118#lnk=sametab",
-      "category": "Beef",
-      "tcin": "94142118"
-    },
-    {
-      "retailer": "target",
-      "title": "Sapporo Ichiban Shio Ramen Noodle Soup - 18oz/5ct",
-      "price": "$4.99",
-      "url": "https://www.target.com/p/sapporo-ichiban-shio-ramen-noodle-soup-18oz-5ct/-/A-52396719#lnk=sametab",
-      "category": "Herbs, Rubs & Spices",
-      "tcin": "52396719"
-    },
-    {
-      "retailer": "target",
-      "title": "Crafted Cocktails Margarita Mix: 6 Pack  60 Calories Per Serving, All Natural Lime Juice and Organic Agave: Makes 8 Cocktails Per Bottle",
-      "price": "$43.20",
-      "url": "https://www.target.com/p/crafted-cocktails-margarita-mix-6-pack-60-calories-per-serving-all-natural-lime-juice-organic-agave-makes-8-cocktails-per-bottle/-/A-1001181339#lnk=sametab",
-      "category": "Chicken",
-      "tcin": "1001181339"
-    },
-    {
-      "retailer": "target",
-      "title": "Ice Mountain Brand 100% Natural Spring Water - 101.4 fl oz Jug",
-      "price": "$1.89",
-      "url": "https://www.target.com/p/ice-mountain-brand-100-natural-spring-water-101-4-fl-oz-jug/-/A-13052275#lnk=sametab",
-      "category": "Berries",
-      "tcin": "13052275"
-    },
-    {
-      "retailer": "target",
-      "title": "Whataburger Fancy Ketchup - 20oz",
-      "price": "$3.19",
-      "url": "https://www.target.com/p/whataburger-fancy-ketchup-20oz/-/A-88415370#lnk=sametab",
-      "category": "Tortillas, Pitas & Wraps",
-      "tcin": "88415370"
-    },
-    {
-      "retailer": "target",
-      "title": "Classico Four Cheese Pasta Sauce 24oz",
-      "price": "$2.99",
-      "url": "https://www.target.com/p/classico-four-cheese-pasta-sauce-24oz/-/A-13386273#lnk=sametab",
-      "category": "Bulk Pantry",
-      "tcin": "13386273"
-    },
-    {
-      "retailer": "target",
-      "title": "Nuts 'N More Spread Peanut Butter Salted Caramel - Case of 6 - 15 oz",
-      "price": "$81.48",
-      "url": "https://www.target.com/p/nuts-n-more-spread-peanut-butter-salted-caramel-case-of-6-15-oz/-/A-91913564#lnk=sametab",
-      "category": "Cooking Oil & Vinegar",
-      "tcin": "91913564"
-    },
-    {
-      "retailer": "target",
-      "title": "Sliced Pears - 15oz - Market Pantry™",
-      "price": "$1.49",
-      "url": "https://www.target.com/p/sliced-pears-15oz-market-pantry-8482/-/A-13742548#lnk=sametab",
-      "category": "All Beer",
-      "tcin": "13742548"
-    },
-    {
-      "retailer": "target",
-      "title": "Tim Hortons Hot Chocolate K-Cup Pods - Keurig Certified K-Cup Pods for Keurig Brewers - 10 ct",
-      "price": "$9.49",
-      "url": "https://www.target.com/p/tim-hortons-hot-chocolate-k-cup-pods-keurig-certified-k-cup-pods-for-keurig-brewers-10-count/-/A-92233600#lnk=sametab",
-      "category": "Rose Wine",
-      "tcin": "92233600"
-    },
-    {
-      "retailer": "target",
-      "title": "Diced Pear Cups 4ct - Market Pantry™",
-      "price": "$2.69",
-      "url": "https://www.target.com/p/diced-pear-cups-4ct-market-pantry-8482/-/A-14651350#lnk=sametab",
-      "category": "Charcuterie Board Ideas",
-      "tcin": "14651350"
-    },
-    {
-      "retailer": "target",
-      "title": "Premier Protein 30g Protein Shake - Vanilla",
-      "price": "$9.59 - $31.99",
-      "url": "https://www.target.com/p/premier-protein-30g-protein-shake-vanilla/-/A-87935395?preselect=50835826#lnk=sametab",
-      "category": "Non-Alcoholic Drinks",
-      "tcin": "50835826"
-    },
-    {
-      "retailer": "target",
-      "title": "Tomato Ketchup - 32oz - Market Pantry™",
-      "price": "$1.99",
-      "url": "https://www.target.com/p/ketchup-32oz-market-pantry-8482/-/A-12995131#lnk=sametab",
-      "category": "Premium Candy",
-      "tcin": "12995131"
-    },
-    {
-      "retailer": "target",
-      "title": "Tillen Farms Pickled Crunchy Carrots - Case of 6/12 oz",
-      "price": "$71.49",
-      "url": "https://www.target.com/p/tillen-farms-pickled-crunchy-carrots-case-of-6-12-oz/-/A-90024539#lnk=sametab",
-      "category": "Rolls & Buns",
-      "tcin": "90024539"
-    },
-    {
-      "retailer": "target",
-      "title": "Rani Brand Authentic Indian Foods | Organic Ragi (Red Millet) Flour",
-      "price": "$16.99 - $21.99",
-      "url": "https://www.target.com/p/organic-ragi-red-millet-flour-rani-brand-authentic-indian-products/-/A-88952488?preselect=88952489#lnk=sametab",
-      "category": "Pork",
-      "tcin": "88952489"
-    },
-    {
-      "retailer": "target",
-      "title": "Ken's Steak House Lite Balsamic Vinaigrette Dressing - 16fl oz",
-      "price": "$3.19",
-      "url": "https://www.target.com/p/ken-39-s-steak-house-lite-balsamic-vinaigrette-dressing-16fl-oz/-/A-14775383#lnk=sametab",
-      "category": "Frosting & Icing",
-      "tcin": "14775383"
-    },
-    {
-      "retailer": "target",
-      "title": "Bianco DiNapoli Organic Whole Peeled Tomatoes with Basil - 28oz",
-      "price": "$4.99",
-      "url": "https://www.target.com/p/bianco-dinapoli-organic-whole-peeled-tomatoes-with-basil-28oz/-/A-93788069#lnk=sametab",
-      "category": "Marshmallows",
-      "tcin": "93788069"
-    },
-    {
-      "retailer": "target",
-      "title": "New York Shuk Za'atar Spice - 1.4oz",
-      "price": "$8.99",
-      "url": "https://www.target.com/p/new-york-shuk-za-39-atar-spice-1-4oz/-/A-88834204#lnk=sametab",
-      "category": "Chocolate Candy",
-      "tcin": "88834204"
-    },
-    {
-      "retailer": "target",
-      "title": "Alani Pink Slush Energy Drink -12 fl oz Can",
-      "price": "$2.59",
-      "url": "https://www.target.com/p/alani-pink-slush-energy-drink-12-fl-oz-can/-/A-90979171#lnk=sametab",
-      "category": "Perfect Meal Pairings",
-      "tcin": "90979171"
-    },
-    {
-      "retailer": "target",
-      "title": "Grape Liquid Water Enhancer Drops - 1.62 fl oz - Market Pantry™",
-      "price": "$2.29",
-      "url": "https://www.target.com/p/grape-liquid-water-enhancer-drops-1-62-fl-oz-market-pantry-8482/-/A-83909720#lnk=sametab",
-      "category": "White Wine",
-      "tcin": "83909720"
-    },
-    {
-      "retailer": "target",
-      "title": "CELSIUS Sparkling Tropical Vibe Functional Energy Drink - 12 fl oz Single Can",
-      "price": "$2.39",
-      "url": "https://www.target.com/p/celsius-tropical-vibe-energy-drink-12-fl-oz-can/-/A-88371892#lnk=sametab",
-      "category": "Whiskey",
-      "tcin": "88371892"
-    },
-    {
-      "retailer": "target",
-      "title": "Annie's 2 Pack/6oz Each Organic Super Mac Shells & White Cheddar Mac and Cheese",
-      "price": "$5.68",
-      "url": "https://www.target.com/p/annie-s-2-pack-6oz-each-organic-super-mac-shells-white-cheddar-mac-and-cheese/-/A-94629689#lnk=sametab",
-      "category": "Applesauce & Fruit Cups",
-      "tcin": "94629689"
-    },
-    {
-      "retailer": "target",
-      "title": "Campbell's Condensed Cream of Celery Soup - 10.5oz",
-      "price": "$1.79",
-      "url": "https://www.target.com/p/campbell-39-s-condensed-cream-of-celery-soup-10-5oz/-/A-14769016#lnk=sametab",
-      "category": "Fresh Dips, Salsas & Hummus",
-      "tcin": "14769016"
-    },
-    {
-      "retailer": "target",
-      "title": "Liquid I.v. Hydration Multiplier - Popsicle Firecracker Electrolyte Powder Drink Mix 1 Pack (16 Servings)",
-      "price": "$46.99",
-      "url": "https://www.target.com/p/liquid-i-v-hydration-multiplier-popsicle-firecracker-electrolyte-powder-drink-mix-1-pack-16-servings/-/A-1001638028#lnk=sametab",
-      "category": "Herbs, Rubs & Spices",
-      "tcin": "1001638028"
-    },
-    {
-      "retailer": "target",
-      "title": "O'Creme White Poppy (Anemone) Gumpaste Flowers - Set of 3",
-      "price": "$23.70",
-      "url": "https://www.target.com/p/o-creme-white-poppy-anemone-gumpaste-flowers-set-of-3/-/A-90522361#lnk=sametab",
-      "category": "Rolls & Buns",
-      "tcin": "90522361"
-    },
-    {
-      "retailer": "target",
-      "title": "Stonewall Kitchen Chocolate Brownie Mix, 18 oz (510.3 g)",
-      "price": "$17.99",
-      "url": "https://www.target.com/p/stonewall-kitchen-chocolate-brownie-mix-18-oz-510-3-g/-/A-92468231#lnk=sametab",
-      "category": "Fish & Seafood",
-      "tcin": "92468231"
-    },
-    {
-      "retailer": "target",
-      "title": "Pitted Green Olives with Garlic Snack Pouch - 1.05oz - Good & Gather™",
-      "price": "$1.29",
-      "url": "https://www.target.com/p/pitted-green-olives-with-garlic-snack-pouch-1-05oz-good-38-gather-8482/-/A-89254815#lnk=sametab",
-      "category": "Starbucks",
-      "tcin": "89254815"
-    },
-    {
-      "retailer": "target",
-      "title": "Starkist Premium White Chicken - 2.6oz",
-      "price": "$1.79",
-      "url": "https://www.target.com/p/starkist-premium-white-chicken-2-6oz/-/A-82303729#lnk=sametab",
-      "category": "Butter & Margarine",
-      "tcin": "82303729"
-    },
-    {
-      "retailer": "target",
-      "title": "Meri Meri Birthday Phrases Candles (Pack of 16)",
-      "price": "$12.00",
-      "url": "https://www.target.com/p/meri-meri-birthday-phrases-candles-pack-of-16/-/A-92899558#lnk=sametab",
-      "category": "Domestic Beer",
-      "tcin": "92899558"
-    },
-    {
-      "retailer": "target",
-      "title": "Hengstenberg Red Cabbage with Apple - Case of 12/24 oz",
-      "price": "$99.49",
-      "url": "https://www.target.com/p/hengstenberg-red-cabbage-with-apple-case-of-12-24-oz/-/A-90024496#lnk=sametab",
-      "category": "Organic Produce",
-      "tcin": "90024496"
-    },
-    {
-      "retailer": "target",
-      "title": "Organic Oat Flour - Non-GMO, Fine, Stone Ground from Whole Grain Oat Berries, Kosher, Vegan",
-      "price": "$10.30 - $86.77",
-      "url": "https://www.target.com/p/organic-oat-flour-non-gmo-fine-stone-ground-from-whole-grain-oat-berries-kosher-vegan/-/A-1004038481?preselect=1004038486#lnk=sametab",
-      "category": "Coffee Deals",
-      "tcin": "1004038486"
-    },
-    {
-      "retailer": "target",
-      "title": "Banza Gluten Free Chickpea Spaghetti - 8oz",
-      "price": "$2.99",
-      "url": "https://www.target.com/p/banza-gluten-free-chickpea-spaghetti-8oz/-/A-51487770#lnk=sametab",
-      "category": "Fresh Dips, Salsas & Hummus",
-      "tcin": "51487770"
-    },
-    {
-      "retailer": "target",
-      "title": "More Labs Morning Recovery Liquid Shot Sugar Free - Case of 12/3.4 fz",
-      "price": "$68.49",
-      "url": "https://www.target.com/p/more-labs-morning-recovery-liquid-shot-sugar-free-case-of-12-3-4-fz/-/A-1002927455#lnk=sametab",
-      "category": "Party Trays",
-      "tcin": "1002927455"
-    },
-    {
-      "retailer": "target",
-      "title": "Hellmann's Garlic Parmesan Mayonnaise - 11.5 fl oz",
-      "price": "$4.19",
-      "url": "https://www.target.com/p/hellmann-39-s-garlic-parmesan-mayonnaise-11-5-fl-oz/-/A-94284263#lnk=sametab",
-      "category": "Cream & Whipped Toppings",
-      "tcin": "94284263"
-    },
-    {
-      "retailer": "target",
-      "title": "Pure Almond Extract - 1oz - Good & Gather™",
-      "price": "$3.99",
-      "url": "https://www.target.com/p/pure-almond-extract-1oz-good-38-gather-8482/-/A-82247571#lnk=sametab",
-      "category": "Cold Brew & Bottled Coffee",
-      "tcin": "82247571"
-    },
-    {
-      "retailer": "target",
-      "title": "Lucky Leaf Premium Blueberry Fruit Filling and Topping, 21 oz Can (Pack of 2)",
-      "price": "$29.95",
-      "url": "https://www.target.com/p/lucky-leaf-premium-blueberry-fruit-filling-and-topping-21-oz-can-pack-of-2/-/A-1003391200#lnk=sametab",
-      "category": "Peanut Butter & Jelly",
-      "tcin": "1003391200"
-    },
-    {
-      "retailer": "target",
-      "title": "Pacific Foods Organic Gluten Free Low Sodium Free Range Chicken Broth - 32oz",
-      "price": "$3.39",
-      "url": "https://www.target.com/p/pacific-foods-organic-gluten-free-low-sodium-free-range-chicken-broth-32oz/-/A-12935526#lnk=sametab",
-      "category": "Bar & Wine Tools",
-      "tcin": "12935526"
-    },
-    {
-      "retailer": "target",
-      "title": "Smucker's Goober Peanut Butter and Grape Jelly Stripes, 18 Ounces (Pack of 4)",
-      "price": "$34.95",
-      "url": "https://www.target.com/p/smucker-s-goober-peanut-butter-and-grape-jelly-stripes-18-ounces-pack-of-4/-/A-1003336339#lnk=sametab",
-      "category": "Meal Kits",
-      "tcin": "1003336339"
-    },
-    {
-      "retailer": "target",
-      "title": "Harney & Sons Peaches & Ginger Tea - 20ct",
-      "price": "$6.00",
-      "url": "https://www.target.com/p/harney-sons-tea-bags-20ct/-/A-91485246?preselect=48331674#lnk=sametab",
-      "category": "Protein & Meal Replacement Drinks",
-      "tcin": "48331674"
-    },
-    {
-      "retailer": "target",
-      "title": "Betty Crocker Banana Nut Muffin Mix - 12.3oz",
-      "price": "$3.19",
-      "url": "https://www.target.com/p/betty-crocker-banana-nut-muffin-mix-12-3oz/-/A-13016259#lnk=sametab",
-      "category": "Frozen Turkey",
-      "tcin": "13016259"
-    },
-    {
-      "retailer": "target",
-      "title": "Bertolli Five Cheese Pasta Sauce - 24oz",
-      "price": "$2.99",
-      "url": "https://www.target.com/p/bertolli-five-cheese-pasta-sauce-24oz/-/A-12935636#lnk=sametab",
-      "category": "Candy Variety Packs",
-      "tcin": "12935636"
-    },
-    {
-      "retailer": "target",
-      "title": "Sliced Black Ripe Olives - 2.25oz - Market Pantry™",
-      "price": "$1.99",
-      "url": "https://www.target.com/p/sliced-ripe-black-olives-2-25oz-market-pantry-8482/-/A-13192033#lnk=sametab",
-      "category": "Frozen Turkey",
-      "tcin": "13192033"
-    },
-    {
-      "retailer": "target",
-      "title": "Frontier Co-op Organic Black Pepper (Coarse Grind) 1lb",
-      "price": "$21.99",
-      "url": "https://www.target.com/p/frontier-co-op-organic-black-pepper-coarse-grind-1lb/-/A-1003406697#lnk=sametab",
-      "category": "Perfect Pairings",
-      "tcin": "1003406697"
-    },
-    {
-      "retailer": "target",
-      "title": "Snapple Lemon Tea - 16 fl oz Bottle",
-      "price": "$1.69",
-      "url": "https://www.target.com/p/snapple-tea-bottles/-/A-92783327?preselect=12988783#lnk=sametab",
-      "category": "Cooking Oil & Vinegar",
-      "tcin": "12988783"
-    },
-    {
-      "retailer": "target",
-      "title": "Frontier Co-Op Organic Almond Extract - 4 oz",
-      "price": "$29.49",
-      "url": "https://www.target.com/p/frontier-co-op-organic-almond-extract-4-oz/-/A-90306511#lnk=sametab",
-      "category": "Scotch",
-      "tcin": "90306511"
-    },
-    {
-      "retailer": "target",
-      "title": "TABASCO  Green Pepper Jalapeno Sauce - 5oz",
-      "price": "$3.59",
-      "url": "https://www.target.com/p/tabasco-green-pepper-jalapeno-sauce-5oz/-/A-13207336#lnk=sametab",
-      "category": "Cream & Whipped Toppings",
-      "tcin": "13207336"
-    },
-    {
-      "retailer": "target",
-      "title": "Applesauce Pouches Strawberry - 12ct - Good & Gather™",
-      "price": "$6.69",
-      "url": "https://www.target.com/p/applesauce-pouches-strawberry-12ct-good-38-gather-8482/-/A-81496385#lnk=sametab",
-      "category": "Pork",
-      "tcin": "81496385"
-    },
-    {
-      "retailer": "target",
-      "title": "La Costena Chipotle Peppers in Adobo Sauce - 7oz",
-      "price": "$1.79",
-      "url": "https://www.target.com/p/la-costena-chipotle-peppers-in-adobo-sauce-7oz/-/A-52527972#lnk=sametab",
-      "category": "Whole Bean Coffee",
-      "tcin": "52527972"
-    },
-    {
-      "retailer": "target",
-      "title": "Red Bull Sugarfree Pink Edition Energy Drink - 8.4 fl oz Can",
-      "price": "$2.59",
-      "url": "https://www.target.com/p/red-bull-sugarfree-pink-edition-energy-drink-8-4-fl-oz-can/-/A-93521380#lnk=sametab",
-      "category": "Condensed & Powdered Milk",
-      "tcin": "93521380"
-    },
-    {
-      "retailer": "target",
-      "title": "Cock n Bull Tonic Water 10oz Soda Bottles - Ideal Mixer for Cocktails, Mocktails, and Bartenders - Premium Quality for Perfect Mixed Drinks - Refreshing Flavor Profile- Made In USA",
-      "price": "$14.98 - $87.98",
-      "url": "https://www.target.com/p/cock-n-bull-tonic-water-10oz-soda-bottles-ideal-mixer-for-cocktails-mocktails-and-bartenders-premium-quality-for-perfect-mixed-drinks-refreshing-flavor-profile-made-in-usa/-/A-92870832?preselect=92617822#lnk=sametab",
-      "category": "Applesauce & Fruit Cups",
-      "tcin": "92617822"
-    },
-    {
-      "retailer": "target",
-      "title": "College Inn Gluten Free Low Sodium Chicken Broth - 32oz",
-      "price": "$2.49",
-      "url": "https://www.target.com/p/college-inn-gluten-free-low-sodium-chicken-broth-32oz/-/A-13453555#lnk=sametab",
-      "category": "Gelatin & Pudding",
-      "tcin": "13453555"
-    },
-    {
-      "retailer": "target",
-      "title": "Duncan Hines Dolly Parton Blueberry Muffin Mix - 17.83oz",
-      "price": "$4.29",
-      "url": "https://www.target.com/p/duncan-hines-dolly-parton-blueberry-muffin-mix-17-83oz/-/A-91156013#lnk=sametab",
-      "category": "Soups, Broth & Chili",
-      "tcin": "91156013"
-    },
-    {
-      "retailer": "target",
-      "title": "Smucker's Natural Triple Berry Fruit Spread - 17.25oz",
-      "price": "$4.59",
-      "url": "https://www.target.com/p/smucker-39-s-natural-triple-berry-fruit-spread-17-25oz/-/A-82304642#lnk=sametab",
-      "category": "Pizza Crusts",
-      "tcin": "82304642"
-    },
-    {
-      "retailer": "target",
-      "title": "Alessi Peppercorns Black - Case of 6/1.34 oz",
-      "price": "$33.99",
-      "url": "https://www.target.com/p/alessi-peppercorns-black-case-of-6-1-34-oz/-/A-89157925#lnk=sametab",
-      "category": "Canned Fruit",
-      "tcin": "89157925"
-    },
-    {
-      "retailer": "target",
-      "title": "Lindley Mills Flour Organic Whole Wheat - 25 Ibs",
-      "price": "$75.99",
-      "url": "https://www.target.com/p/lindley-mills-flour-organic-whole-wheat-25-ibs/-/A-89252977#lnk=sametab",
-      "category": "Specialty Meats",
-      "tcin": "89252977"
-    },
-    {
-      "retailer": "target",
-      "title": "Unwell Mango Citrus Hydration Electrolyte Drink for Rapid Hydration + Focus - 16.9 fl oz Bottle",
-      "price": "$2.49",
-      "url": "https://www.target.com/p/unwell-hydrate-focus-mango-citrus-sports-drink-16-9-fl-oz-bottle/-/A-94249357#lnk=sametab",
-      "category": "Protein & Meal Replacement Drinks",
-      "tcin": "94249357"
-    },
-    {
-      "retailer": "target",
-      "title": "UNWELL Hydrate+Focus Mango Citrus Sports Drink - 8pk/16.9 fl oz",
-      "price": "$14.99",
-      "url": "https://www.target.com/p/unwell-hydrate-focus-mango-citrus-sports-drink-8pk-16-9-fl-oz/-/A-94310164#lnk=sametab",
-      "category": "Cream & Whipped Toppings",
-      "tcin": "94310164"
-    },
-    {
-      "retailer": "target",
-      "title": "Frontier Co-op Organic Black Garlic Finishing Salt, 16 oz (453 g)",
-      "price": "$30.99",
-      "url": "https://www.target.com/p/frontier-co-op-organic-black-garlic-finishing-salt-16-oz-453-g/-/A-1003406814#lnk=sametab",
-      "category": "Packaged Lunch Meat",
-      "tcin": "1003406814"
-    },
-    {
-      "retailer": "target",
-      "title": "Tazo Organic Zen Green Tea - 16ct/1.2oz",
-      "price": "$3.99",
-      "url": "https://www.target.com/p/tazo-regenerative-organic-tea-16ct/-/A-91154791?preselect=12954615#lnk=sametab",
-      "category": "Specialty Cheese",
-      "tcin": "12954615"
-    },
-    {
-      "retailer": "target",
-      "title": "Singing Dog Vanilla Vanilla Bean Paste 4 fl oz Jar.",
-      "price": "$32.79",
-      "url": "https://www.target.com/p/singing-dog-vanilla-vanilla-bean-paste-4-fl-oz-jar/-/A-88013042#lnk=sametab",
-      "category": "Frozen Single Serve Meals",
-      "tcin": "88013042"
-    },
-    {
-      "retailer": "target",
-      "title": "Torani Caramel Puremade Syrup - Case of 4 - 12.7 oz",
-      "price": "$33.73",
-      "url": "https://www.target.com/p/torani-caramel-puremade-syrup-case-of-4-12-7-oz/-/A-92784405#lnk=sametab",
-      "category": "Scotch",
-      "tcin": "92784405"
-    },
-    {
-      "retailer": "target",
-      "title": "Monster Energy Juice, Pacific Punch - 16 Ounce Can (Pack of 15)",
-      "price": "$56.99",
-      "url": "https://www.target.com/p/monster-energy-juice-pacific-punch-16-ounce-can-pack-of-15/-/A-1001527906#lnk=sametab",
-      "category": "Cakes, Cookies & Pies",
-      "tcin": "1001527906"
-    },
-    {
-      "retailer": "target",
-      "title": "Green Mountain Dark Magic Dark Roast Coffee Keurig K-Cup Pods - 60ct/24.1oz",
-      "price": "$32.99",
-      "url": "https://www.target.com/p/green-mountain-coffee-dark-magic-dark-roast-coffee-pods/-/A-87984348?preselect=91651999#lnk=sametab",
-      "category": "Bulk Pantry",
-      "tcin": "91651999"
-    },
-    {
-      "retailer": "target",
-      "title": "Cut Green Beans 14.5oz - Good & Gather™",
-      "price": "$0.69",
-      "url": "https://www.target.com/p/cut-green-beans-14-5oz-good-38-gather-8482/-/A-79466791#lnk=sametab",
-      "category": "Pork",
-      "tcin": "79466791"
-    },
-    {
-      "retailer": "target",
-      "title": "Smuckers Pineapple Toppings 12 oz (Pack of 3)",
-      "price": "$24.95",
-      "url": "https://www.target.com/p/smuckers-pineapple-toppings-12oz-pack-of-3/-/A-1003057956#lnk=sametab",
-      "category": "Rolls & Buns",
-      "tcin": "1003057956"
-    },
-    {
-      "retailer": "target",
-      "title": "AriZona Iced Tea with Lemon Flavor - 12pk/16 fl oz Bottles",
-      "price": "$7.99",
-      "url": "https://www.target.com/p/arizona-iced-tea-with-lemon-flavor-12pk-16-fl-oz-bottles/-/A-93832762#lnk=sametab",
-      "category": "Frozen Fish & Seafood",
-      "tcin": "93832762"
-    },
-    {
-      "retailer": "target",
-      "title": "Crystal Light On The Go Energy Variety Pack - 44ct Packets",
-      "price": "$10.99",
-      "url": "https://www.target.com/p/crystal-light-on-the-go-energy-variety-pack-44ct-packets/-/A-84846308#lnk=sametab",
-      "category": "Pantry Deals",
-      "tcin": "84846308"
-    },
-    {
-      "retailer": "target",
-      "title": "Castle Kitchen Sugar Free Classic Caramel Premium Dark Hot Chocolate Mix with Monkfruit (8 oz) - Vegan, Dairy Free, Plant Based - Keto & Diabetic -",
-      "price": "$14.99",
-      "url": "https://www.target.com/p/castle-kitchen-sugar-free-classic-caramel-premium-dark-hot-chocolate-mix-with-monkfruit-8-oz-vegan-dairy-free-plant-based-keto-diabetic/-/A-1001910343#lnk=sametab",
-      "category": "Fresh Dips, Salsas & Hummus",
-      "tcin": "1001910343"
-    },
-    {
-      "retailer": "target",
-      "title": "GoGo squeeZ BIG Applesauce and Fruit Puree with Vanilla and Cinnamon Variety Pack, BIG Pear, BIG Strawberry - 4.2oz/10ct",
-      "price": "$8.99",
-      "url": "https://www.target.com/p/gogo-squeez-big-variety-pack-apple-straw-pear-cinna-van-42-3oz-10ct/-/A-79276534#lnk=sametab",
-      "category": "Soda & Pop",
-      "tcin": "79276534"
-    },
-    {
-      "retailer": "target",
-      "title": "Ripple Kids Unsweetened Original Milk Alternative - 48 fl oz",
-      "price": "$5.79",
-      "url": "https://www.target.com/p/ripple-kids-plant-based-milk-alternative/-/A-94772611?preselect=88449674#lnk=sametab",
-      "category": "Breakfast & Cereal Deals",
-      "tcin": "88449674"
-    },
-    {
-      "retailer": "target",
-      "title": "Syruvia Peanut Butter Cup Syrup - 25.4 fl oz. Premium Flavoring Syrup For Coffee",
-      "price": "$12.99",
-      "url": "https://www.target.com/p/syruvia-peanut-butter-cup-syrup-25-4-fl-oz-premium-flavoring-syrup-for-coffee/-/A-1003642980#lnk=sametab",
-      "category": "Salt & Pepper",
-      "tcin": "1003642980"
-    },
-    {
-      "retailer": "target",
-      "title": "Lily's No Sugar Added, Baking Chips, Bag Milk Chocolate Style 9.0 oz",
-      "price": "$20.88",
-      "url": "https://www.target.com/p/lily-s-no-sugar-added-baking-chips-bag-milk-chocolate-style-9-0-oz/-/A-1003925093#lnk=sametab",
-      "category": "Candy Variety Packs",
-      "tcin": "1003925093"
-    },
-    {
-      "retailer": "target",
-      "title": "Taylors of Harrogate Yorkshire - 160ct",
-      "price": "$10.99",
-      "url": "https://www.target.com/p/taylors-of-harrogate-yorkshire-160ct/-/A-86906901#lnk=sametab",
-      "category": "Cheese",
-      "tcin": "86906901"
-    },
-    {
-      "retailer": "target",
-      "title": "GHIRARDELLI Premium Baking No Sugar Added Dark Chocolate Chips - 8oz",
-      "price": "$7.79",
-      "url": "https://www.target.com/p/ghirardelli-premium-baking-chocolate-chips/-/A-94737670?preselect=91529818#lnk=sametab",
-      "category": "Kids’ Multi-Pack Drinks",
-      "tcin": "91529818"
-    },
-    {
-      "retailer": "target",
-      "title": "Lakanto Cinnamon Maple Flavored Syrup, 13 oz (384 ml)",
-      "price": "$12.99",
-      "url": "https://www.target.com/p/lakanto-cinnamon-maple-flavored-syrup-13-oz-384-ml/-/A-90074121#lnk=sametab",
-      "category": "Kids’ Multi-Pack Drinks",
-      "tcin": "90074121"
-    },
-    {
-      "retailer": "target",
-      "title": "Spindrift Half Tea/Half Lemon Sparkling Water - 8pk/12 fl oz Cans",
-      "price": "$6.99",
-      "url": "https://www.target.com/p/spindrift-half-tea-half-lemon-sparkling-water-8pk-12-fl-oz-cans/-/A-53194798#lnk=sametab",
-      "category": "Meal Ideas",
-      "tcin": "53194798"
-    },
-    {
-      "retailer": "target",
-      "title": "Juice Monster, Pipeline Punch - 16 fl oz Can",
-      "price": "$2.49",
-      "url": "https://www.target.com/p/juice-monster-pipeline-punch-16-fl-oz-can/-/A-50255602#lnk=sametab",
-      "category": "Specialty Cheese",
-      "tcin": "50255602"
-    },
-    {
-      "retailer": "target",
-      "title": "Organic Unsweetened Pitted Prunes - 4oz - Good & Gather™",
-      "price": "$4.69",
-      "url": "https://www.target.com/p/organic-unsweetened-pitted-prunes-4oz-good-38-gather-8482/-/A-78261313#lnk=sametab",
-      "category": "Frozen Bread & Dough",
-      "tcin": "78261313"
-    },
-    {
-      "retailer": "target",
-      "title": "Caramel Vanilla Naturally Flavored Non-Dairy Almond Milk Creamer - 32 fl oz - Good & Gather™",
-      "price": "$4.59",
-      "url": "https://www.target.com/p/caramel-vanilla-naturally-flavored-non-dairy-almond-milk-creamer-32oz-good-38-gather-8482/-/A-90535171#lnk=sametab",
-      "category": "Non-Alcoholic Drinks",
-      "tcin": "90535171"
-    },
-    {
-      "retailer": "target",
-      "title": "Ben's Original Ready Rice Garden Vegetable Microwavable Pouch - 8.8oz",
-      "price": "$2.39",
-      "url": "https://www.target.com/p/ben-39-s-original-ready-rice-garden-vegetable-microwavable-pouch-8-8oz/-/A-13393921#lnk=sametab",
-      "category": "Frozen Fish & Seafood",
-      "tcin": "13393921"
-    },
-    {
-      "retailer": "target",
-      "title": "Ninja Thirsti FRUITI CHILL Lemonade Flavored Water Drops: Sugar-Free, Zero Calories, Sparkling, 3-Pack",
-      "price": "$19.99",
-      "url": "https://www.target.com/p/ninja-sweetened-lemonade-thirsti-vitamins-flavored-water-drops-3pk-wcflmndam/-/A-89638802#lnk=sametab",
-      "category": "Specialty Meats",
-      "tcin": "89638802"
-    },
-    {
-      "retailer": "target",
-      "title": "Diamond Crystal Salt Co. Kosher Salt Flakes - 16oz",
-      "price": "$4.99",
-      "url": "https://www.target.com/p/diamond-crystal-salt-co-kosher-salt-flakes-16oz/-/A-93410784#lnk=sametab",
-      "category": "Target Selects",
-      "tcin": "93410784"
-    },
-    {
-      "retailer": "target",
-      "title": "Pillsbury Creamy Supreme Chocolate Fudge Flavored Frosting - 16oz",
-      "price": "$1.99",
-      "url": "https://www.target.com/p/pillsbury-creamy-supreme-chocolate-fudge-flavored-frosting-16oz/-/A-13187265#lnk=sametab",
-      "category": "Salad Mixes",
-      "tcin": "13187265"
-    },
-    {
-      "retailer": "target",
-      "title": "Red Bull Amber Edition Energy Drink - 8.4 fl oz Can",
-      "price": "$2.59",
-      "url": "https://www.target.com/p/red-bull-amber-edition-energy-drink-8-4-fl-oz-can/-/A-86467878#lnk=sametab",
-      "category": "All Beer",
-      "tcin": "86467878"
-    },
-    {
-      "retailer": "target",
-      "title": "Carnation Breakfast Essentials High Protein Ready to Drink Rich Milk Chocolate - 6ct / 1.5QT",
-      "price": "$8.49",
-      "url": "https://www.target.com/p/carnation-breakfast-essentials-high-protein-ready-to-drink-rich-milk-chocolate-6ct-1-5qt/-/A-17292088#lnk=sametab",
-      "category": "Sugar & Sweeteners",
-      "tcin": "17292088"
-    },
-    {
-      "retailer": "target",
-      "title": "Stur Strawberry Watermelon Liquid Water Enhancer - 1.62 fl oz",
-      "price": "$3.49",
-      "url": "https://www.target.com/p/stur-strawberry-watermelon-liquid-water-enhancer-1-62-fl-oz/-/A-23985476#lnk=sametab",
-      "category": "Tortillas, Pitas & Wraps",
-      "tcin": "23985476"
-    },
-    {
-      "retailer": "target",
-      "title": "Reign Storm, Strawberry Apricot, Fitness & Wellness Energy Drink - 12 Fl Oz (Pack of 12)",
-      "price": "$46.99",
-      "url": "https://www.target.com/p/reign-storm-strawberry-apricot-fitness-wellness-energy-drink-12-fl-oz-pack-of-12/-/A-1001715221#lnk=sametab",
-      "category": "Liqueurs, Cordials & Schnapps",
-      "tcin": "1001715221"
-    }
-  ]
+  "hierarchy": {
+    "departments": [
+      {
+        "department_name": "Target Grocery",
+        "link_url": "https://www.target.com/c/grocery/-/N-5xt1a",
+        "sub_items": [
+          {
+            "name": "Grocery Deals",
+            "link_url": "https://www.target.com/c/grocery-deals/-/N-k4uyq",
+            "sub_items": [
+              {
+                "name": "Pantry Deals",
+                "link_url": "https://www.target.com/c/pantry-deals/-/N-6zb8v",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14768605",
+                    "title": "Pacific Foods Gluten Free Organic Low Sodium Plant Based Vegetable Broth - 32oz",
+                    "price": "$3.39",
+                    "url": "https://www.target.com/p/pacific-foods-gluten-free-organic-low-sodium-vegetable-broth-32oz/-/A-14768605#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13234239",
+                    "title": "Twinings Irish Breakfast Tea - 20ct",
+                    "price": "$3.99",
+                    "url": "https://www.target.com/p/twinnings-tea/-/A-92698864?preselect=13234239#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "85359181",
+                    "title": "Sanpellegrino Blood Orange Italian Sparkling Beverage - 6pk/11.15 fl oz Cans",
+                    "price": "$5.99",
+                    "url": "https://www.target.com/p/sanpellegrino-blood-orange-italian-sparkling-beverage-6pk-11-15-fl-oz-cans/-/A-85359181#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13388793",
+                    "title": "AriZona Arnold Palmer Lite Half Iced Tea & Half Lemonade - 128 fl oz Jug",
+                    "price": "$3.69",
+                    "url": "https://www.target.com/p/arizona-arnold-palmer-lite-half-iced-tea-half-lemonade-128-fl-oz-jug/-/A-13388793#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "92533702",
+                    "title": "Redmond Realsalt Salt Garlic - Pack of 6 - 4.75 oz",
+                    "price": "$50.06",
+                    "url": "https://www.target.com/p/redmond-realsalt-salt-garlic-pack-of-6-4-75-oz/-/A-92533702#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Frozen Foods",
+            "link_url": "https://www.target.com/c/frozen-foods-grocery/-/N-5xszd",
+            "sub_items": [
+              {
+                "name": "Frozen Fruit",
+                "link_url": "https://www.target.com/c/frozen-fruit-foods-grocery/-/N-5xsz7",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54422941",
+                    "title": "Honey Mustard Dressing 16fl oz - Market Pantry™",
+                    "price": "$1.99",
+                    "url": "https://www.target.com/p/honey-mustard-dressing-16fl-oz-market-pantry-8482/-/A-54422941#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "50081521",
+                    "title": "Sparkling ICE Variety Pack-Black Raspberry/Orange Mango/Kiwi Strawberry/Cherry Limeade - 12pk/17 fl oz Bottles",
+                    "price": "$11.39",
+                    "url": "https://www.target.com/p/sparkling-ice-variety-pack-black-raspberry-orange-mango-kiwi-strawberry-cherry-limeade-12pk-17-fl-oz-bottles/-/A-50081521#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14754561",
+                    "title": "Crystal Light Liquid Strawberry Lemonade Drink Mix - 1.62 fl oz Bottle",
+                    "price": "$2.99",
+                    "url": "https://www.target.com/p/crystal-light-liquid-strawberry-lemonade-drink-mix-1-62-fl-oz-bottle/-/A-14754561#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "90549256",
+                    "title": "SodaStream Diet Mountain Dew Drink Mix -  14.9 fl oz: Citrus Liquid Concentrate, Kosher, Soda Streamer Flavor",
+                    "price": "$6.49",
+                    "url": "https://www.target.com/p/sodastream-440ml-diet-mountain-dew-syrup-flavor/-/A-90549256#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89157993",
+                    "title": "Himalasalt Primordial Himalayan Sea Salt Fine Grain Shaker - Case of 6/6 oz",
+                    "price": "$54.49",
+                    "url": "https://www.target.com/p/himalasalt-primordial-himalayan-sea-salt-fine-grain-shaker-case-of-6-6-oz/-/A-89157993#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Snacks",
+            "link_url": "https://www.target.com/c/snacks-grocery/-/N-5xsy9",
+            "sub_items": [
+              {
+                "name": "Pretzels",
+                "link_url": "https://www.target.com/c/pretzels-snacks-grocery/-/N-f7azc",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "90522692",
+                    "title": "O'Creme White Small Carnation Gumpaste Flowers - Set of 6",
+                    "price": "$17.39",
+                    "url": "https://www.target.com/p/o-creme-white-small-carnation-gumpaste-flowers-set-of-6/-/A-90522692#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "76833339",
+                    "title": "Sustainably Caught Chunk Light Tuna in Water - 5oz - Good & Gather™",
+                    "price": "$1.19",
+                    "url": "https://www.target.com/p/sustainably-caught-chunk-light-tuna-in-water-5oz-good-38-gather-8482/-/A-76833339#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "93050624",
+                    "title": "Osem Breadcrumbs Plain - Case of 12 - 15oz",
+                    "price": "$70.93",
+                    "url": "https://www.target.com/p/osem-breadcrumbs-plain-case-of-12-15oz/-/A-93050624#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89252892",
+                    "title": "Bob's Red Mill Medium Grind Cornmeal - Case of 4/24 oz",
+                    "price": "$35.99",
+                    "url": "https://www.target.com/p/bob-s-red-mill-medium-grind-cornmeal-case-of-4-24-oz/-/A-89252892#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "81918000",
+                    "title": "Green Glitter Gel - 1.2oz - Favorite Day™",
+                    "price": "$1.99",
+                    "url": "https://www.target.com/p/green-glitter-gel-1-2oz-favorite-day-8482/-/A-81918000#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Meat & Seafood",
+            "link_url": "https://www.target.com/c/meat-seafood-grocery/-/N-5xsyh",
+            "sub_items": [
+              {
+                "name": "Fish & Seafood",
+                "link_url": "https://www.target.com/c/seafood-meat-grocery/-/N-4tgi0",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "47958979",
+                    "title": "Kraft Super Mario Brothers Shaped Mac and Cheese - 5.5oz",
+                    "price": "$1.29",
+                    "url": "https://www.target.com/p/kraft-mac-and-cheese-dinner-with-unicorn-pasta-shapes-5-5oz/-/A-47958979#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54632169",
+                    "title": "Diced Pimientos - 4oz - Good & Gather™",
+                    "price": "$2.29",
+                    "url": "https://www.target.com/p/diced-pimientos-4oz-good-38-gather-8482/-/A-54632169#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "46778429",
+                    "title": "Orgain Organic Vegan Protein Shake - Vanilla Bean - 12ct",
+                    "price": "$31.99",
+                    "url": "https://www.target.com/p/orgain-organic-vegan-protein-shake-vanilla-bean-12ct/-/A-46778429#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "91084330",
+                    "title": "Betty Crocker Oreo Lava Cake Mix - 8.3oz",
+                    "price": "$5.79",
+                    "url": "https://www.target.com/p/betty-crocker-oreo-lava-cake-mix-8-3oz/-/A-91084330#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14771429",
+                    "title": "Fleischmann's RapidRise Yeast - 0.25oz/3ct",
+                    "price": "$1.99",
+                    "url": "https://www.target.com/p/fleischmann-39-s-rapidrise-yeast-0-25oz-3ct/-/A-14771429#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Produce",
+            "link_url": "https://www.target.com/c/produce-grocery/-/N-u7fty",
+            "sub_items": [
+              {
+                "name": "Fresh Vegetables",
+                "link_url": "https://www.target.com/c/fresh-vegetables-produce-grocery/-/N-4tglh",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "47090031",
+                    "title": "JFC Nori Kom Fumi-Furikake - 1.7oz",
+                    "price": "$3.69",
+                    "url": "https://www.target.com/p/jfc-nori-kom-fumi-furikake-1-7oz/-/A-47090031#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1001259757",
+                    "title": "Celsius On-the-go Powder Stick Packs, Strawberry Coconut - 2.5 Oz Stick (Pack of 14)",
+                    "price": "$24.99",
+                    "url": "https://www.target.com/p/celsius-on-the-go-powder-stick-packs-strawberry-coconut-2-5-oz-stick-pack-of-14/-/A-1001259757#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54632234",
+                    "title": "Greek Pitted Kalamata Olives - 6.5oz - Good & Gather™",
+                    "price": "$3.19",
+                    "url": "https://www.target.com/p/greek-pitted-kalamata-olives-6-5oz-good-38-gather-8482/-/A-54632234#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14779733",
+                    "title": "Sweet Baby Ray's Barbecue Sauce - 28oz",
+                    "price": "$2.99",
+                    "url": "https://www.target.com/p/sweet-baby-ray-39-s-barbecue-sauce-28oz/-/A-14779733#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89948479",
+                    "title": "Duncan Hines EPIC Cinnabon Cake - 32.34oz",
+                    "price": "$6.39",
+                    "url": "https://www.target.com/p/duncan-hines-epic-cinnabon-cake-32-34oz/-/A-89948479#lnk=sametab"
+                  }
+                ]
+              },
+              {
+                "name": "Fresh Juices",
+                "link_url": "https://www.target.com/c/fresh-juices-produce-grocery/-/N-c5lky",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "15016469",
+                    "title": "Nestle Toll House Dark Chocolate Chips for Baking - 20oz",
+                    "price": "$7.59",
+                    "url": "https://www.target.com/p/nestle-toll-house-baking-chocolate-chips/-/A-94737659?preselect=15016469#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54600337",
+                    "title": "90 Second Black Lentils Microwavable Pouch  - 8oz - Good & Gather™",
+                    "price": "$3.19",
+                    "url": "https://www.target.com/p/black-lentils-microwavable-pouch-8oz-good-38-gather-8482/-/A-54600337#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "92290028",
+                    "title": "Gold/Silver Tall Spiral Birthday Candles 12ct - Spritz™",
+                    "price": "$3.00",
+                    "url": "https://www.target.com/p/gold-silver-tall-spiral-birthday-candles-12ct-spritz-8482/-/A-92290028#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54602333",
+                    "title": "Enriched Long Grain White Rice - 1lb - Good & Gather™",
+                    "price": "$0.85",
+                    "url": "https://www.target.com/p/enriched-long-grain-white-rice-good-gather/-/A-89229583?preselect=54602333#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "12921029",
+                    "title": "Hershey's Strawberry Syrup - 22oz",
+                    "price": "$3.79",
+                    "url": "https://www.target.com/p/hershey-s-strawberry-syrup-22oz/-/A-12921029#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Beverages",
+            "link_url": "https://www.target.com/c/beverages-grocery/-/N-5xt0r",
+            "sub_items": [
+              {
+                "name": "Tea",
+                "link_url": "https://www.target.com/c/tea-beverages-grocery/-/N-4yi5o",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "88083474",
+                    "title": "Barilla Ready Pasta Penne - 7oz",
+                    "price": "$1.79",
+                    "url": "https://www.target.com/p/barilla-ready-pasta-penne-7oz/-/A-88083474#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "54600337",
+                    "title": "90 Second Black Lentils Microwavable Pouch  - 8oz - Good & Gather™",
+                    "price": "$3.19",
+                    "url": "https://www.target.com/p/black-lentils-microwavable-pouch-8oz-good-38-gather-8482/-/A-54600337#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "94218646",
+                    "title": "Prime Ice Hydration Red Chill Sports Drink - 16.9 fl oz Bottle",
+                    "price": "$1.79",
+                    "url": "https://www.target.com/p/prime-hydration-ice-red-chill-sports-drink-16-9-fl-oz-bottle/-/A-94218646#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1001638024",
+                    "title": "Liquid I.v. Hydration Multiplier - Strawberry Lemonade - Hydration Powder Packets Electrolyte Powder Drink Mix 1 Pack (16 Servings)",
+                    "price": "$42.99",
+                    "url": "https://www.target.com/p/liquid-i-v-hydration-multiplier-strawberry-lemonade-hydration-powder-packets-electrolyte-powder-drink-mix-1-pack-16-servings/-/A-1001638024#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "50334995",
+                    "title": "Simple Mills Gluten Free Banana Muffin & Bread Almond Flour Baking Mix - 9oz",
+                    "price": "$7.99",
+                    "url": "https://www.target.com/p/simple-mills-gluten-free-banana-muffin-38-bread-almond-flour-baking-mix-9oz/-/A-50334995#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Pantry",
+            "link_url": "https://www.target.com/c/pantry-grocery/-/N-5xt13",
+            "sub_items": [
+              {
+                "name": "Boxed Meals & Side Dishes",
+                "link_url": "https://www.target.com/c/boxed-meals-side-dishes-pantry-grocery/-/N-5xsyf",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "94267362",
+                    "title": "Red Bull Zero Energy Drink - 4pk/12 fl oz Cans",
+                    "price": "$11.69",
+                    "url": "https://www.target.com/p/red-bull-zero-energy-drink-4pk-12-fl-oz-cans/-/A-94267362#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14919574",
+                    "title": "GHIRARDELLI White Vanilla Flavored Melting Wafers - 10oz",
+                    "price": "$6.29",
+                    "url": "https://www.target.com/p/ghirardelli-melting-wafers/-/A-94737667?preselect=14919574#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "14768277",
+                    "title": "Rosarita Spicy Jalapeño Refried Beans - 16oz",
+                    "price": "$1.59",
+                    "url": "https://www.target.com/p/rosarita-spicy-jalape-241-o-refried-beans-16oz/-/A-14768277#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1001644108",
+                    "title": "Crafted Cocktails Shrubs Variety Pack: Blackberry, Strawberry, Ginger & Asian Pear. Try our Shrubs for your homemade cocktails, sodas and recipes",
+                    "price": "$52.99",
+                    "url": "https://www.target.com/p/crafted-cocktails-shrubs-variety-pack-blackberry-strawberry-ginger-asian-pear-try-our-shrubs-for-your-homemade-cocktails-sodas-and-recipes/-/A-1001644108#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1004034860",
+                    "title": "McCormick Pure Ground Black Pepper, 6 oz (Pack of 2)",
+                    "price": "$32.95",
+                    "url": "https://www.target.com/p/mccormick-pure-ground-black-pepper-6-oz-pack-of-2/-/A-1004034860#lnk=sametab"
+                  }
+                ]
+              },
+              {
+                "name": "Canned & Packaged Foods",
+                "link_url": "https://www.target.com/c/canned-packaged-foods-pantry-grocery/-/N-5xt05",
+                "sub_items": [
+                  {
+                    "name": "Canned Fruit",
+                    "link_url": "https://www.target.com/c/canned-fruit-packaged-foods-pantry-grocery/-/N-6peje",
+                    "sub_items": [],
+                    "products": [
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "89158080",
+                        "title": "Spicely Organics - Organic Peppercorn - Black - Case of 6/.45 oz",
+                        "price": "$34.49",
+                        "url": "https://www.target.com/p/spicely-organics-organic-peppercorn-black-case-of-6-45-oz/-/A-89158080#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "92204954",
+                        "title": "Torani White Chocolate Syrup - Case of 4 - 12.7 fl oz",
+                        "price": "$30.21",
+                        "url": "https://www.target.com/p/torani-white-chocolate-syrup-case-of-4-12-7-fl-oz/-/A-92204954#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "78779150",
+                        "title": "Medium Shells - 16oz - Good & Gather™",
+                        "price": "$0.99",
+                        "url": "https://www.target.com/p/medium-shells-16oz-good-38-gather-8482/-/A-78779150#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "92889243",
+                        "title": "Just About Foods Flour Chickpea Organic - Pack of 5 -1 Lb",
+                        "price": "$39.88",
+                        "url": "https://www.target.com/p/just-about-foods-flour-chickpea-organic-pack-of-5-1-lb/-/A-92889243#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "1001715231",
+                        "title": "Yoo Hoo, Chocolate Drink - Glass Bottle, 15.5 Ounce (Pack of 24)",
+                        "price": "$56.99",
+                        "url": "https://www.target.com/p/yoo-hoo-chocolate-drink-glass-bottle-15-5-ounce-pack-of-24/-/A-1001715231#lnk=sametab"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Condiments & Salad Dressings",
+                "link_url": "https://www.target.com/c/condiments-salad-dressings-pantry-grocery/-/N-5xszw",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89923355",
+                    "title": "California Gold Nutrition CocoCeps, Organic Cocoa, Cordyceps & Reishi, Instant Organic Dark Cocoa Beverage, 7.9 oz (225 g)",
+                    "price": "$14.99",
+                    "url": "https://www.target.com/p/california-gold-nutrition-cococeps-organic-cocoa-cordyceps-reishi-instant-organic-dark-cocoa-beverage-7-9-oz-225-g/-/A-89923355#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89384289",
+                    "title": "Gluten Free Buttermilk Pancake & Waffle Mix - 16oz - Good & Gather™",
+                    "price": "$3.19",
+                    "url": "https://www.target.com/p/gluten-free-buttermilk-pancake-38-waffle-mix-16oz-good-38-gather-8482/-/A-89384289#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13651996",
+                    "title": "Heinz Sweet Relish - 12.7 fl oz",
+                    "price": "$3.79",
+                    "url": "https://www.target.com/p/heinz-sweet-relish-12-7-fl-oz/-/A-13651996#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "79359590",
+                    "title": "Tomato Sauce - 8oz - Good & Gather™",
+                    "price": "$0.55",
+                    "url": "https://www.target.com/p/tomato-sauce-good-gather/-/A-94669570?preselect=79359590#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "47111333",
+                    "title": "Progresso Traditional 99% Fat Free Chicken Noodle Soup - 19oz",
+                    "price": "$2.39",
+                    "url": "https://www.target.com/p/progresso-traditional-99-fat-free-chicken-noodle-soup-19oz/-/A-47111333#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Dairy",
+            "link_url": "https://www.target.com/c/dairy-grocery/-/N-5xszm",
+            "sub_items": [
+              {
+                "name": "Eggs",
+                "link_url": "https://www.target.com/c/eggs-dairy-grocery/-/N-5xszi",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "76628735",
+                    "title": "Quest Nutrition Ready To Drink Protein Shake - Chocolate",
+                    "price": "$8.89 - $27.99",
+                    "url": "https://www.target.com/p/quest-nutrition-ready-to-drink-protein-shake-chocolate/-/A-91125631?preselect=76628735#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "93199874",
+                    "title": "Lakanto Sugar-Free Blueberry Muffin Mix, 6.77 oz Bag",
+                    "price": "$9.99",
+                    "url": "https://www.target.com/p/lakanto-sugar-free-blueberry-muffin-mix-6-77-oz-bag/-/A-93199874#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1001321129",
+                    "title": "Rani Brand Authentic Indian Foods | Soya Beans Flour (Soy flour)",
+                    "price": "$9.99 - $12.99",
+                    "url": "https://www.target.com/p/rani-brand-authentic-indian-foods-soya-beans-flour-soy-flour/-/A-1002554466?preselect=1001321129#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "90024496",
+                    "title": "Hengstenberg Red Cabbage with Apple - Case of 12/24 oz",
+                    "price": "$99.49",
+                    "url": "https://www.target.com/p/hengstenberg-red-cabbage-with-apple-case-of-12-24-oz/-/A-90024496#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "87797703",
+                    "title": "Del Monte Sliced Peaches in 100% Juice - 60oz / 4pk",
+                    "price": "$8.99",
+                    "url": "https://www.target.com/p/del-monte-sliced-peaches-in-100-juice-60oz-4pk/-/A-87797703#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Deli",
+            "link_url": "https://www.target.com/c/deli-grocery/-/N-5hp74",
+            "sub_items": [
+              {
+                "name": "Prepared Salads & Sandwiches",
+                "link_url": "https://www.target.com/c/prepared-salads-sandwiches-deli-grocery/-/N-mdt7r",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13291672",
+                    "title": "Rosarita Traditional Refried Beans - 16oz",
+                    "price": "$1.59",
+                    "url": "https://www.target.com/p/rosarita-traditional-refried-beans/-/A-94669633?preselect=13291672#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13034221",
+                    "title": "Muir Glen Organic Fire Roasted Diced Tomatoes - 28oz",
+                    "price": "$5.29",
+                    "url": "https://www.target.com/p/muir-glen-organic-fire-roasted-diced-tomatoes/-/A-94669615?preselect=13034221#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "12959613",
+                    "title": "Aquafina Pure Unflavored Water - 24pk/16.9 fl oz Bottles",
+                    "price": "$5.59",
+                    "url": "https://www.target.com/p/aquafina-pure-unflavored-water-24pk-16-9-fl-oz-bottles/-/A-12959613#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "78779187",
+                    "title": "Extra-Wide Yolk-free Ribbons - 12oz - Good & Gather™",
+                    "price": "$1.19",
+                    "url": "https://www.target.com/p/extra-wide-yolk-free-ribbons-12oz-good-38-gather-8482/-/A-78779187#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "50380848",
+                    "title": "Bare Baked Crunchy Fuji & Reds Apple Chips - 3.4oz",
+                    "price": "$5.29",
+                    "url": "https://www.target.com/p/bare-baked-crunchy-fuji-reds-apple-chips-3-4oz/-/A-50380848#lnk=sametab"
+                  }
+                ]
+              },
+              {
+                "name": "Fresh Dips, Salsas & Hummus",
+                "link_url": "https://www.target.com/c/fresh-dips-salsas-hummus-deli-grocery/-/N-cjg5k",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "82568427",
+                    "title": "Ensure Max Protein Shake - Creamy Strawberry - 4ct/44 fl oz",
+                    "price": "$12.29",
+                    "url": "https://www.target.com/p/ensure-max-protein-shake-creamy-strawberry-4ct-44-fl-oz/-/A-82568427#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "79707558",
+                    "title": "Peet's Big Bang Medium Roast Coffee Keurig K-Cup Pods - 48ct",
+                    "price": "$34.99",
+                    "url": "https://www.target.com/p/peet-s-big-bang-medium-roast-coffee-keurig-k-cup-pods/-/A-87984724?preselect=79707558#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "12935579",
+                    "title": "Lipton Soup Secrets Extra Noodle Soup Mix - 4.9oz/2pk",
+                    "price": "$1.99",
+                    "url": "https://www.target.com/p/lipton-soup-secrets-extra-noodle-soup-mix-4-9oz-2pk/-/A-12935579#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "91946021",
+                    "title": "Bloom Raspberry Lemon Energy Drink - 12 fl oz Can",
+                    "price": "$2.59",
+                    "url": "https://www.target.com/p/bloom-raspberry-lemon-energy-drink-12-fl-oz-can/-/A-91946021#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "93815497",
+                    "title": "JUST ICE TEA Raspberry Black Tea - 4pk/12 fl oz Cans",
+                    "price": "$7.99",
+                    "url": "https://www.target.com/p/just-ice-tea-raspberry-black-tea-4pk-12-fl-oz-cans/-/A-93815497#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Wine, Beer & Liquor",
+            "link_url": "https://www.target.com/c/wine-beer-liquor-beverages/-/N-5n5q6",
+            "sub_items": [
+              {
+                "name": "Wine",
+                "link_url": "https://www.target.com/c/wine-beer-liquor-grocery/-/N-5xsxv",
+                "sub_items": [
+                  {
+                    "name": "Champagne & Sparkling Wine",
+                    "link_url": "https://www.target.com/c/champagne-sparkling-wine-beer-liquor-grocery/-/N-dd9ke",
+                    "sub_items": [],
+                    "products": [
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "89623074",
+                        "title": "Sweet Sticks Edible Art Metallic Mermaid Mini Palette, 5 colors",
+                        "price": "$28.20",
+                        "url": "https://www.target.com/p/sweet-sticks-edible-art-metallic-mermaid-mini-palette-5-colors/-/A-89623074#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "94267277",
+                        "title": "Red Bull Energy Drink - 8.4 fl oz Can",
+                        "price": "$2.59",
+                        "url": "https://www.target.com/p/red-bull-energy-drink-8-4-fl-oz-can/-/A-94267277#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "14776148",
+                        "title": "Del Monte French Style Green Beans - 14.5oz",
+                        "price": "$1.59",
+                        "url": "https://www.target.com/p/del-monte-french-style-green-beans-14-5oz/-/A-14776148#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "51341846",
+                        "title": "King Arthur Gluten Free Measure for Measure Flour - 48oz",
+                        "price": "$8.99",
+                        "url": "https://www.target.com/p/king-arthur-gluten-free-measure-for-measure-flour-48oz/-/A-51341846#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "13391915",
+                        "title": "Lawry's Herb & Garlic With Lemon Marinade - 12 fl oz",
+                        "price": "$2.99",
+                        "url": "https://www.target.com/p/lawry-s-herb-garlic-with-lemon-juice-marinade-12oz/-/A-13391915#lnk=sametab"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Perfect Pairings",
+                    "link_url": "https://www.target.com/c/perfect-pairings/-/N-kpr3f",
+                    "sub_items": [],
+                    "products": [
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "13101056",
+                        "title": "Hidden Valley Easy Squeeze Original Ranch Salad Dressing & Topping, Gluten Free, Keto-Friendly - 20 fl oz",
+                        "price": "$5.59",
+                        "url": "https://www.target.com/p/hidden-valley-easy-squeeze-original-ranch-salad-dressing-38-topping-gluten-free-keto-friendly-20-fl-oz/-/A-13101056#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "13260980",
+                        "title": "Del Monte Mandarin Oranges Fruit Cups",
+                        "price": "$2.99 - $8.29",
+                        "url": "https://www.target.com/p/del-monte-mandarin-oranges-fruit-cups/-/A-87443030?preselect=13260980#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "12935696",
+                        "title": "Knorr Pasta Sides Fusili with Cheddar Broccoli - 4.3oz",
+                        "price": "$1.39",
+                        "url": "https://www.target.com/p/knorr-pasta-sides-fusili-with-cheddar-broccoli-4-3oz/-/A-12935696#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "94163889",
+                        "title": "SodaStream Pepsi Wild Cherry Drink Mix",
+                        "price": "$6.49",
+                        "url": "https://www.target.com/p/sodastream-pepsi-wild-cherry-drink-mix/-/A-94163889#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "81542418",
+                        "title": "Best Foods Plant Based Vegan Mayo Dressing and Sandwich Spread – 11.5oz",
+                        "price": "$4.69",
+                        "url": "https://www.target.com/p/best-foods-vegan-dressing-and-sandwich-spread-8211-11-5oz/-/A-81542418#lnk=sametab"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Liquor",
+                "link_url": "https://www.target.com/c/liquor-wine-beer-grocery/-/N-5xsxw",
+                "sub_items": [
+                  {
+                    "name": "Bourbon",
+                    "link_url": "https://www.target.com/c/bourbon-liquor-wine-beer-grocery/-/N-xxj34",
+                    "sub_items": [],
+                    "products": [
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "90307223",
+                        "title": "Simple Kitchen Freeze-Dried Buttered Broccoli.",
+                        "price": "$9.25",
+                        "url": "https://www.target.com/p/simple-kitchen-freeze-dried-buttered-broccoli/-/A-90307223#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "90612982",
+                        "title": "Kevala Fleur De Sel, Less Sodium, Gourmet Sea Salt, 6.5 oz (184 g)",
+                        "price": "$13.99",
+                        "url": "https://www.target.com/p/kevala-fleur-de-sel-less-sodium-gourmet-sea-salt-6-5-oz-184-g/-/A-90612982#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "91990939",
+                        "title": "Sun Tropics Original Saba Banana Chips - 6oz",
+                        "price": "$3.99",
+                        "url": "https://www.target.com/p/sun-tropics-original-saba-banana-chips-6oz/-/A-91990939#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "88703456",
+                        "title": "Carbone Marinara Sauce - 24oz",
+                        "price": "$8.49",
+                        "url": "https://www.target.com/p/carbone-marinara-sauce-24oz/-/A-88703456#lnk=sametab"
+                      },
+                      {
+                        "retailer_id": 2,
+                        "asin": null,
+                        "tcin": "92075532",
+                        "title": "Talk O' Texas Crisp Okra Pickles Hot - Case of 12 - 16 oz",
+                        "price": "$90.01",
+                        "url": "https://www.target.com/p/talk-o-texas-crisp-okra-pickles-hot-case-of-12-16-oz/-/A-92075532#lnk=sametab"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Candy",
+            "link_url": "https://www.target.com/c/candy-grocery/-/N-5xt0d",
+            "sub_items": [
+              {
+                "name": "Chocolate Candy",
+                "link_url": "https://www.target.com/c/chocolate-candy-grocery/-/N-5xt0b",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "79472488",
+                    "title": "Semi Sweet Chocolate Morsels - 12oz - Good & Gather™",
+                    "price": "$3.59",
+                    "url": "https://www.target.com/p/baking-chips-good-gather/-/A-94737514?preselect=79472488#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "13209138",
+                    "title": "King Oscar Sardines in Olive Oil - 3.75oz",
+                    "price": "$3.59",
+                    "url": "https://www.target.com/p/king-oscar-sardines-in-olive-oil-3-75oz/-/A-13209138#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "92502878",
+                    "title": "SodaStream Pepsi Zero Drink Mix 14.9 fl oz/4pk: Liquid Concentrate, Cola Flavor, Mix Ready, No Major Allergens, Soft Drink",
+                    "price": "$19.99",
+                    "url": "https://www.target.com/p/sodastream-pepsi-zero-4pk-60oz/-/A-92502878#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "88251245",
+                    "title": "Raw Almond Flour by Now Foods  -  22 oz Powder",
+                    "price": "$20.09",
+                    "url": "https://www.target.com/p/now-foods-raw-almond-flour-22-oz-powder/-/A-88251245#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "87451020",
+                    "title": "Waterloo Orange Vanilla Sparkling Water - 8pk/12 fl oz Cans",
+                    "price": "$4.29",
+                    "url": "https://www.target.com/p/waterloo-orange-vanilla-sparkling-water-8pk-12-fl-oz-cans/-/A-87451020#lnk=sametab"
+                  }
+                ]
+              },
+              {
+                "name": "Gummy & Chewy Candy",
+                "link_url": "https://www.target.com/c/gummy-chewy-candy-grocery/-/N-5xt09",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "90522680",
+                    "title": "O'Creme Deep Red Hibiscus Gumpaste Flowers - Set of 3",
+                    "price": "$16.14",
+                    "url": "https://www.target.com/p/o-creme-deep-red-hibiscus-gumpaste-flowers-set-of-3/-/A-90522680#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1002217112",
+                    "title": "Louisiana Fish Classic Fried Chicken Seasoned Coating Mix KETO - Case of 6/5 oz",
+                    "price": "$37.99",
+                    "url": "https://www.target.com/p/louisiana-fish-classic-fried-chicken-seasoned-coating-mix-keto-case-of-6-5-oz/-/A-1002217112#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "85078009",
+                    "title": "Buttermilk Pancake & Waffle Mix - 32oz - Good & Gather™",
+                    "price": "$2.19",
+                    "url": "https://www.target.com/p/buttermilk-pancake-38-waffle-mix-32oz-good-38-gather-8482/-/A-85078009#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "94271438",
+                    "title": "LaCroix Blackberry Cucumber Flavored Sparkling Water - 8pk/12 fl oz Cans",
+                    "price": "$4.19",
+                    "url": "https://www.target.com/p/lacroix-blackberry-cucumber-flavored-sparkling-water-8pk-12-fl-oz-cans/-/A-94271438#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "1003486220",
+                    "title": "Baketivity Masterpiece Cookies Kids Baking Kit - Cooking Kit for Kids, Paint Brushes, Art Lessons - Baking Set for Girls, Boys Ages 6-12",
+                    "price": "$36.99",
+                    "url": "https://www.target.com/p/baketivity-masterpiece-cookies-kids-baking-kit-cooking-kit-for-kids-paint-brushes-art-lessons-baking-set-for-girls-boys-ages-6-12/-/A-1003486220#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Coffee",
+            "link_url": "https://www.target.com/c/coffee-beverages-grocery/-/N-4yi5p",
+            "sub_items": [
+              {
+                "name": "Cold Brew & Bottled Coffee",
+                "link_url": "https://www.target.com/c/cold-brew-coffee-beverages-grocery/-/N-260b3",
+                "sub_items": [],
+                "products": [
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "92813794",
+                    "title": "Organic Way Rose Hips Fruit Whole 4 Oz",
+                    "price": "$12.99",
+                    "url": "https://www.target.com/p/organic-way-rose-hips-fruit-whole-4-oz/-/A-92813794#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "89158087",
+                    "title": "Simply Organic - Ground Black Pepper - Case of 6/4.0 oz",
+                    "price": "$64.99",
+                    "url": "https://www.target.com/p/simply-organic-ground-black-pepper-case-of-6-4-0-oz/-/A-89158087#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "15400825",
+                    "title": "Smucker's Natural Creamy Peanut Butter - 26oz",
+                    "price": "$6.69",
+                    "url": "https://www.target.com/p/smucker-39-s-natural-stir-creamy-peanut-butter-26oz/-/A-15400825#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "76556915",
+                    "title": "Kosher Dill Snack Pickles - 16 fl oz - Market Pantry™",
+                    "price": "$2.89",
+                    "url": "https://www.target.com/p/kosher-dill-snack-pickles-16-fl-oz-market-pantry-8482/-/A-76556915#lnk=sametab"
+                  },
+                  {
+                    "retailer_id": 2,
+                    "asin": null,
+                    "tcin": "15989032",
+                    "title": "Justin's Vanilla Almond Butter - 1.15oz",
+                    "price": "$1.49",
+                    "url": "https://www.target.com/p/justin-39-s-vanilla-almond-butter-1-15oz/-/A-15989032#lnk=sametab"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Eat Well Your Way",
+            "link_url": "https://www.target.com/c/eat-well-your-way/-/N-nazlk",
+            "sub_items": [],
+            "products": [
+              {
+                "retailer_id": 2,
+                "asin": null,
+                "tcin": "14897056",
+                "title": "Lipton Kosher Recipe Secrets Onion Soup & Dip Mix - 1.9oz",
+                "price": "$2.99",
+                "url": "https://www.target.com/p/lipton-kosher-recipe-secrets-onion-soup-38-dip-mix-1-9oz/-/A-14897056#lnk=sametab"
+              },
+              {
+                "retailer_id": 2,
+                "asin": null,
+                "tcin": "15024425",
+                "title": "Vita Coco Original Coconut Water - 1 L Carton",
+                "price": "$4.59",
+                "url": "https://www.target.com/p/vita-coco-original-coconut-water-1-l-carton/-/A-15024425#lnk=sametab"
+              },
+              {
+                "retailer_id": 2,
+                "asin": null,
+                "tcin": "13300580",
+                "title": "Smucker's Simply Fruit Concord Grape Fruit Spread - 10oz",
+                "price": "$3.69",
+                "url": "https://www.target.com/p/smucker-39-s-simply-fruit-concord-grape-spread-10oz/-/A-13300580#lnk=sametab"
+              },
+              {
+                "retailer_id": 2,
+                "asin": null,
+                "tcin": "89240397",
+                "title": "Petite Kosher Dill Pickle Snack Pouch - 4.8oz - Good & Gather™",
+                "price": "$1.69",
+                "url": "https://www.target.com/p/petite-kosher-dill-pickle-snack-pouch-4-8oz-good-38-gather-8482/-/A-89240397#lnk=sametab"
+              },
+              {
+                "retailer_id": 2,
+                "asin": null,
+                "tcin": "92319914",
+                "title": "Bittertales Exquisite Hand-Crafted Aromatic Bitters 1 Pack: Elevate Your Cocktails with 125ml Bottles Perfect for Old Fashioned and Manhattan Classics",
+                "price": "$17.98",
+                "url": "https://www.target.com/p/bittertales-exquisite-hand-crafted-aromatic-bitters-1-pack-elevate-your-cocktails-with-125ml-bottles-perfect-for-old-fashioned-and-manhattan-classics/-/A-92319914#lnk=sametab"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }
