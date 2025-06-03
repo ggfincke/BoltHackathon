@@ -238,21 +238,21 @@ def _extract_product_price(card) -> str:
             lines = [line.strip() for line in price_text.split('\n') if line.strip()]
             
             for line in lines:
-                # look for lines that start with $ and contain a price
-                if line.startswith('$') and 'current price' not in line.lower():
-                    # extract just the price part (remove any trailing text after the price)
-                    price_match = re.match(r'(\$\d+\.?\d*)', line)
+                # look for lines that start with $ and contain a proper price format
+                if line.startswith('$'):
+                    # improved regex pattern to match proper price formats
+                    price_match = re.match(r'(\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', line)
                     if price_match:
                         return price_match.group(1)
                 
                 # handle "current price $X.XX" format
                 if 'current price' in line.lower():
-                    price_match = re.search(r'current price (\$\d+\.?\d*)', line.lower())
+                    price_match = re.search(r'current price (\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', line.lower())
                     if price_match:
                         return price_match.group(1)
             
-            # if no clean price found, try to extract first price-like pattern
-            price_match = re.search(r'\$\d+\.?\d*', price_text)
+            # if no clean price found, try to extract with improved pattern
+            price_match = re.search(r'\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?', price_text)
             if price_match:
                 return price_match.group(0)
         
@@ -263,7 +263,9 @@ def _extract_product_price(card) -> str:
             'span[itemprop="price"]',
             '.price-current',
             '.price-group .price-current',
-            '[aria-label*="current price"]'
+            '[aria-label*="current price"]',
+            '[data-automation-id="product-price"] [data-testid="price-current"]',
+            '.price-display .price-current'
         ]
         
         for selector in alternative_selectors:
@@ -271,16 +273,66 @@ def _extract_product_price(card) -> str:
                 alt_element = card.find_element(By.CSS_SELECTOR, selector)
                 alt_text = alt_element.text.strip()
                 if alt_text and alt_text.startswith('$'):
-                    # clean up alternative text
-                    price_match = re.match(r'(\$\d+\.?\d*)', alt_text)
+                    # clean up alternative text with improved regex
+                    price_match = re.match(r'(\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', alt_text)
                     if price_match:
                         return price_match.group(1)
             except NoSuchElementException:
                 continue
+        
+        # last resort: try to find any decimal price pattern in the entire card text
+        try:
+            full_card_text = card.text
+            # look for proper decimal prices in the full text
+            decimal_price_match = re.search(r'\$\d{1,3}(?:,\d{3})*\.\d{2}', full_card_text)
+            if decimal_price_match:
+                return decimal_price_match.group(0)
+        except:
+            pass
                 
         return "Unknown Price"
         
     except NoSuchElementException:
+        return "Unknown Price"
+
+# Additional helper function to validate and clean extracted prices
+def _validate_and_clean_price(price_str: str) -> str:
+    """
+    Validate that the extracted price makes sense and clean it if needed.
+    This helps catch cases where price extraction goes wrong.
+    """
+    if not price_str or price_str == "Unknown Price":
+        return "Unknown Price"
+    
+    # Remove $ sign for validation
+    clean_price = price_str.replace('$', '').replace(',', '')
+    
+    try:
+        price_float = float(clean_price)
+        
+        # Basic validation - grocery items shouldn't be over $500 or under $0.01
+        if price_float > 500.00:
+            # Likely a formatting error like $4998 instead of $49.98
+            # Try to fix common patterns
+            price_str_digits = clean_price.replace('.', '')
+            if len(price_str_digits) >= 3:
+                # Insert decimal point before last 2 digits
+                fixed_price = price_str_digits[:-2] + '.' + price_str_digits[-2:]
+                fixed_float = float(fixed_price)
+                if 0.01 <= fixed_float <= 500.00:
+                    return f"${fixed_float:.2f}"
+            
+            # If we can't fix it, mark as unknown
+            return "Unknown Price"
+        
+        elif price_float < 0.01:
+            return "Unknown Price"
+        
+        else:
+            # Price seems reasonable, format it properly
+            return f"${price_float:.2f}"
+            
+    except ValueError:
         return "Unknown Price"
 
 # scroll down the page to load all products
@@ -486,12 +538,20 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger, us
                 if not product_url:
                     continue
                 
+                # extract and validate price
+                raw_price = _extract_product_price(card)
+                validated_price = _validate_and_clean_price(raw_price)
+                
                 product_data = {
                     "wm_item_id": product_id,
                     "title": _extract_product_title(card),
-                    "price": _extract_product_price(card),
+                    "price": validated_price,
                     "url": product_url
                 }
+                
+                # log if price was corrected
+                if raw_price != validated_price and validated_price != "Unknown Price":
+                    logger.info(f"Price corrected for {product_data['title']}: {raw_price} -> {validated_price}")
                 
                 page_products.append(product_data)
                 SEEN_PRODUCT_IDS.add(product_id)
