@@ -1,0 +1,809 @@
+{
+  "sample_info": {
+    "timestamp": "2025-06-03T10:11:38.642483",
+    "sample_count": 100,
+    "retailer": "amazon"
+  },
+  "samples": [
+    {
+      "retailer": "amazon",
+      "title": "GHIRARDELLI Salted Caramel Premium Brownie Mix, 16 Oz",
+      "price": "$6.70",
+      "url": "https://www.amazon.com/dp/B07J21L457",
+      "category": "Packaged Dry Soup Mixes",
+      "asin": "B07J21L457"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Glaceau VitaminWater Zero, Variety Pack (20 fl. oz., 20 pk.) (pack of 2)",
+      "price": "$84.98",
+      "url": "https://www.amazon.com/dp/B01L27CFYS",
+      "category": "Processed Cheese Spreads",
+      "asin": "B01L27CFYS"
+    },
+    {
+      "retailer": "amazon",
+      "title": "The Original Fo 'Yo Chicken Seasoning",
+      "price": "$13.99",
+      "url": "https://www.amazon.com/dp/B07WW1PMD1",
+      "category": "Canned & Jarred Artichoke Hearts",
+      "asin": "B07WW1PMD1"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Kikkoman PANKO BREAD CRUMBS Japanese Style 8oz (2 pack) Home Grocery Product",
+      "price": "$12.99",
+      "url": "https://www.amazon.com/dp/B00NGTJTSQ",
+      "category": "Chocolate Cookies",
+      "asin": "B00NGTJTSQ"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Argo Baking Powder, 12-Ounce Boxes (Pack of 12)",
+      "price": "$54.87",
+      "url": "https://www.amazon.com/dp/B0029JVFUE",
+      "category": "Dried Apples",
+      "asin": "B0029JVFUE"
+    },
+    {
+      "retailer": "amazon",
+      "title": "NatureMills Premium Cinnamon – Whole Sticks (50g)",
+      "price": "$5.50",
+      "url": "https://www.amazon.com/dp/B0DVH976L4",
+      "category": "Manzanilla Condiment Olives",
+      "asin": "B0DVH976L4"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Assagio Classico Basil Leaves Case. Delight in the art of seasoning as you experiment with the myriad of culinary applications our Bay Leaves offer. Whether you're simmering them in broths, steeping them in sauces, or incorporating them into spice blends, these versatile leaves add a subtle yet unforgettable flavor dimension to your favorite recipes.",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0CX5LD6GT",
+      "category": "Fructose Sugar Substitutes",
+      "asin": "B0CX5LD6GT"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Peanut Caramel Snack Size Candy Bars, 2lb Pack of Pay Day Candy Bars Snack Size, Perfect for parties, lunchboxes or anytime, there’s More Than Enough to Share with Family, Friends or Coworkers",
+      "price": "$19.99",
+      "url": "https://www.amazon.com/dp/B0F8DWPQJ5",
+      "category": "Sports Nutrition Endurance & Energy Bars",
+      "asin": "B0F8DWPQJ5"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Margaret Holmes Diced Canned Rutabaga, 14.5 oz Cans, (Pack of 6) Bundled with a JFS Recipe Card",
+      "price": "$29.99",
+      "url": "https://www.amazon.com/dp/B08CBLLBN1",
+      "category": "Peanut Oils",
+      "asin": "B08CBLLBN1"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Maykoosh",
+      "price": "$81.91",
+      "url": "https://www.amazon.com/dp/B0DZ2VXQ4G",
+      "category": "Fruit Vinegars",
+      "asin": "B0DZ2VXQ4G"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Jacobsen Salt Co. Pure Flake Sea Salt – Kosher Salt, Coarse, Non-Iodized Made in USA, Non-GMO, Steak Seasoning, Gourmet, Real Salt Flakes – 4oz",
+      "price": "$19.41",
+      "url": "https://www.amazon.com/dp/B01M32JS5F",
+      "category": "Chocolate Candy Assortment Boxes",
+      "asin": "B01M32JS5F"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Ercadio 40 Pack Edible Martini Party Cupcake Toppers Drink Topper Picks Coffee Espresso Martini Themed for A Tini Bit Older Party Bachelorette Party Supplies",
+      "price": "$7.99",
+      "url": "https://www.amazon.com/dp/B0DZ61G7K9",
+      "category": "Dried Banana Chips",
+      "asin": "B0DZ61G7K9"
+    },
+    {
+      "retailer": "amazon",
+      "title": "A.C. Legg INC Snack Stick Seasoning (Seasons 25 lbs)",
+      "price": "$12.84",
+      "url": "https://www.amazon.com/dp/B00657SFY0",
+      "category": "Italian Seasonings",
+      "asin": "B00657SFY0"
+    },
+    {
+      "retailer": "amazon",
+      "title": "That Fudge Place Fudge Candy Gourmet Sweets Desserts (8 oz Bourbon Sea Salt Caramel)",
+      "price": "$8.00",
+      "url": "https://www.amazon.com/dp/B0F2TTMBCL",
+      "category": "Breadcrumbs",
+      "asin": "B0F2TTMBCL"
+    },
+    {
+      "retailer": "amazon",
+      "title": "P.A.N. Yellow Corn Meal – Pre-cooked Gluten Free and Kosher Flour for Arepas (2.2 lb/Pack of 1)",
+      "price": "$7.49",
+      "url": "https://www.amazon.com/dp/B004TDB31O",
+      "category": "Canned & Jarred Kimchi",
+      "asin": "B004TDB31O"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Barilla Tri-Color Rotini Pasta, 12 oz. Box (Pack of 16) - Non-GMO Pasta Made with Durum Wheat Semolina - Kosher Certified Pasta",
+      "price": "$26.56",
+      "url": "https://www.amazon.com/dp/B0025UCIPS",
+      "category": "Marshmallows",
+      "asin": "B0025UCIPS"
+    },
+    {
+      "retailer": "amazon",
+      "title": "BESTORE Crunchy Macadamia Nuts Mustard Flavored Nuts Coconut Flavored Macadamia Nuts (1, Coconut Flavored)",
+      "price": "$23.99",
+      "url": "https://www.amazon.com/dp/B0D1C8GGH9",
+      "category": "Granola Bars",
+      "asin": "B0D1C8GGH9"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Sunkist Soda Variety Pack, Singles To Go Orange, Strawberry, Grape and Peach (30 Total Sticks)",
+      "price": "$4.78",
+      "url": "https://www.amazon.com/dp/B0BFBZGNRX",
+      "category": "Dill Pickles",
+      "asin": "B0BFBZGNRX"
+    },
+    {
+      "retailer": "amazon",
+      "title": "eflowerwholesale",
+      "price": "$49.99",
+      "url": "https://www.amazon.com/dp/B00V5GUAH6",
+      "category": "Snack Food Garlic Dips & Spreads",
+      "asin": "B00V5GUAH6"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Elevation Energy Bar Crunchy Peanut Butter 14.4oz 408g (2 Boxes)",
+      "price": "$23.00",
+      "url": "https://www.amazon.com/dp/B0925XXSJ5",
+      "category": "Canned Pinto Beans",
+      "asin": "B0925XXSJ5"
+    },
+    {
+      "retailer": "amazon",
+      "title": "NuGo Fiber d'Lish Peanut Chocolate Chip, 12g High Fiber, Vegan, 160 Calories, 16 Count",
+      "price": "$24.79",
+      "url": "https://www.amazon.com/dp/B00GEAE7RM",
+      "category": "Tortellini Pasta",
+      "asin": "B00GEAE7RM"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Allegro Tea, Organic Decaf Green Tea Bags, 20 ct",
+      "price": "$5.49",
+      "url": "https://www.amazon.com/dp/B004TYC592",
+      "category": "Garam Masalas",
+      "asin": "B004TYC592"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Hakubaku, Organic Soba, 9.5 oz (269 g)(Pack of 4)",
+      "price": "$16.01",
+      "url": "https://www.amazon.com/dp/B01GLDD5F6",
+      "category": "Canned & Jarred Truffles",
+      "asin": "B01GLDD5F6"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Green Jay Gourmet Olive & Barrel Roll Martini Juice - 16 Ounces of Blue Cheese Stuffed Green Olives & 12.7 Ounces of Dirty Martini Mix",
+      "price": "$25.99",
+      "url": "https://www.amazon.com/dp/B09KDYC6DQ",
+      "category": "Seasoned Salts",
+      "asin": "B09KDYC6DQ"
+    },
+    {
+      "retailer": "amazon",
+      "title": "SmoothieBox - Blender Ready Frozen Smoothie Pouches - 4 Organic Flavors – Breakfast in 60 Seconds! (20 Pouches) (Variety)",
+      "price": "$185.00",
+      "url": "https://www.amazon.com/dp/B08BY3PM1L",
+      "category": "Dried Pineapples",
+      "asin": "B08BY3PM1L"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Morton & Bassett, Vanilla Bean, 0.1 Oz",
+      "price": "$50.45",
+      "url": "https://www.amazon.com/dp/B000HQNA2C",
+      "category": "Ready to Drink Liquid Coffee",
+      "asin": "B000HQNA2C"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Santa Cruz Organic Strawberry Lemonade, 32 Ounces",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B000RELFTO",
+      "category": "Walnuts",
+      "asin": "B000RELFTO"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Olive Paste - Spicy - 12oz (350g)",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0036Z8XGO",
+      "category": "Rock Salts",
+      "asin": "B0036Z8XGO"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Campbell's Sweets Factory Beer Cheddar, Buffalo Ranch, & Nacho Jalapeno Gourmet Popcorn Flavors - 3 Bag Variety Gift Pack Specialty Popped Popcorn",
+      "price": "$29.75",
+      "url": "https://www.amazon.com/dp/B0BPVXNX5V",
+      "category": "Olive Spreads",
+      "asin": "B0BPVXNX5V"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Kid Juice Pouches Variety Pack, (40 Count) School Snacks, (40 Count - 6 Oz Pouches)",
+      "price": "$31.99",
+      "url": "https://www.amazon.com/dp/B0F2Z1CXR4",
+      "category": "Indian Seasonings",
+      "asin": "B0F2Z1CXR4"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Nakano Seasoned Rice Vinegar 12 Oz (Pack of 6)",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B00HNPFZCI",
+      "category": "Microwave Popcorn",
+      "asin": "B00HNPFZCI"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Artisan Gourmet Flatbread Crackers Mini Croccantini Original 6oz (Pack of 6)",
+      "price": "$46.90",
+      "url": "https://www.amazon.com/dp/B09B1X5QQJ",
+      "category": "Chili Mixes",
+      "asin": "B09B1X5QQJ"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Emerald Nuts Roasted and Salted Virginia Peanuts (1-Pack), 10 Oz Resealable Bag, Kosher Certified, Non-GMO, Contains No Artificial Preservatives, Flavors or Synthetic Colors",
+      "price": "$8.35",
+      "url": "https://www.amazon.com/dp/B01INGFE80",
+      "category": "Vanilla Beans",
+      "asin": "B01INGFE80"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Silver Spring",
+      "price": "$3.01",
+      "url": "https://www.amazon.com/dp/B005OTKC4Q",
+      "category": "Table Salts",
+      "asin": "B005OTKC4Q"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Watkins Rainbow Decorating Sugar, Non-GMO, 4.6 Ounce, Pack of 3",
+      "price": "$29.48",
+      "url": "https://www.amazon.com/dp/B07SLZM423",
+      "category": "Packaged Herbed Stuffing",
+      "asin": "B07SLZM423"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Roland Foods Organic Red Quinoa, 12 Ounce",
+      "price": "$6.59",
+      "url": "https://www.amazon.com/dp/B0C8VZD1GD",
+      "category": "Panela",
+      "asin": "B0C8VZD1GD"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Chef-mate",
+      "price": "$40.45",
+      "url": "https://www.amazon.com/dp/B00155034W",
+      "category": "Almonds",
+      "asin": "B00155034W"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Simply Natural Sweetened Condensed Milk Creamer, 24 Single-Serve 28 gram Sachets, Made in USA, No Additives or Preservatives",
+      "price": "$19.99",
+      "url": "https://www.amazon.com/dp/B0F9Z4GMQM",
+      "category": "Dessert Sprinkles",
+      "asin": "B0F9Z4GMQM"
+    },
+    {
+      "retailer": "amazon",
+      "title": "S&B Prepared Wasabi in Tube, Family Size, 3.17 oz (90 g)",
+      "price": "$6.99",
+      "url": "https://www.amazon.com/dp/B0009RVFJE",
+      "category": "Applesauce Snack Cups & Pouches",
+      "asin": "B0009RVFJE"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Sweet Logic Keto Baking Mix - Fudge Brownie - Gluten-Free - Dairy Free - Diabetic-Friendly - High Protein - Allulose - Stevia - Low Sugar - Low Carb - Quick 20-Minute Prep (1-2G Carbs Per Serving)",
+      "price": "$9.99",
+      "url": "https://www.amazon.com/dp/B089T8VZBC",
+      "category": "Chinese Star Anise",
+      "asin": "B089T8VZBC"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Cuisinart Dark Coffee Roast Seasoning - Caramel, Garlic, and Bourbon Notes - CGSS-120",
+      "price": "$5.17",
+      "url": "https://www.amazon.com/dp/B0CLPHFR32",
+      "category": "Rich Tea Cookies",
+      "asin": "B0CLPHFR32"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Community Coffee Mardi Gras King Cake Flavored 32 Ounces, Medium Roast Ground Coffee, 32 Ounce Bag (Pack of 1)",
+      "price": "$11.98",
+      "url": "https://www.amazon.com/dp/B07RNMCRNP",
+      "category": "Carbonated Drinking Water",
+      "asin": "B07RNMCRNP"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Generic Simply Nature Heart of Palm Linguine - 12 oz (341g)",
+      "price": "$14.25",
+      "url": "https://www.amazon.com/dp/B0D9F39P3K",
+      "category": "Olive Oils",
+      "asin": "B0D9F39P3K"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Dry Mentha Pudina Powder| Mint Leaf Powder, Pudina Powder Vegan, Gluten Free, Vegan No Preservatives or Additives, Easy to Use -100 gm",
+      "price": "$43.76",
+      "url": "https://www.amazon.com/dp/B0DX7786F9",
+      "category": "Bonito Flakes",
+      "asin": "B0DX7786F9"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Good Sense Good Sense Shelled Pumpkin Seeds (Pepitas), Honey Roasted - 6 Ounce bags (PACK OF 12)",
+      "price": "$48.90",
+      "url": "https://www.amazon.com/dp/B08MBQNRM4",
+      "category": "Sausage Snacks",
+      "asin": "B08MBQNRM4"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Blazing Star BBQ Blazing Bundle (Reaper Rub & Seasoning/Scorpion Rub & Seasoning)",
+      "price": "$29.98",
+      "url": "https://www.amazon.com/dp/B0BRPQ6VGW",
+      "category": "Canned & Jarred Crushed Tomatoes",
+      "asin": "B0BRPQ6VGW"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Dynasty Jasmine Rice, 32 oz",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B00555H17A",
+      "category": "Rock Sugar",
+      "asin": "B00555H17A"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Chek Hup 2 In 1 Ipoh White Coffee & Creamer 12 Sachets ( 20 Pack )",
+      "price": "$239.00",
+      "url": "https://www.amazon.com/dp/B0874VP867",
+      "category": "Dessert Glitters",
+      "asin": "B0874VP867"
+    },
+    {
+      "retailer": "amazon",
+      "title": "BUSH'S BEST Canned Brown Sugar Hickory Baked Beans, Source of Plant Based Protein and Fiber, Low Fat, Gluten Free, 28 oz (Pack of 12)",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B01MQRSTPO",
+      "category": "Dried Cranberries",
+      "asin": "B01MQRSTPO"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Larabar Banana Chocolate Chip, Gluten Free Vegan Fruit & Nut Bars, 12 ct",
+      "price": "$11.99",
+      "url": "https://www.amazon.com/dp/B08TQ5DN4T",
+      "category": "Jaggery Sugar",
+      "asin": "B08TQ5DN4T"
+    },
+    {
+      "retailer": "amazon",
+      "title": "CELSIUS Sparkling Variety Pack (Orange, Wild Berry, Kiwi Guava - 12 pack",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0BX6N382C",
+      "category": "Olive Spreads",
+      "asin": "B0BX6N382C"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Lichfields English Mustard 50 X 4G Sachets (Pack Of 8 X 50X4G)",
+      "price": "$42.79",
+      "url": "https://www.amazon.com/dp/B00OD0B3KO",
+      "category": "Mints",
+      "asin": "B00OD0B3KO"
+    },
+    {
+      "retailer": "amazon",
+      "title": "COKOC Peelable Gummy Variety Pack – 4 Individual Packs in Mango, Grape, White Peach & Lychee Flavors Candy Treats",
+      "price": "$11.99",
+      "url": "https://www.amazon.com/dp/B0DXVH4DZQ",
+      "category": "Granola Bars",
+      "asin": "B0DXVH4DZQ"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Food to Live Adzuki Beans, 8 Ounces - Whole Dried Azuki Beans (Red Mung Beans), Raw, Vegan, Kosher, Sproutable, Bulk. Perfect for Red Bean Paste, and Asian Dishes.",
+      "price": "$10.65",
+      "url": "https://www.amazon.com/dp/B071Y6HXY7",
+      "category": "Chocolate Candy Assortment Boxes",
+      "asin": "B071Y6HXY7"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Brickman's Ketchup Packets, 9 Grams, Pack of 100",
+      "price": "$12.38",
+      "url": "https://www.amazon.com/dp/B0DNG231Q2",
+      "category": "Packaged Pickled Herrings",
+      "asin": "B0DNG231Q2"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Hotter Than Hell Habanero Cheddar Cheese Popcorn (Large 7 oz)",
+      "price": "$14.25",
+      "url": "https://www.amazon.com/dp/B07N33CZPP",
+      "category": "Granola Bars",
+      "asin": "B07N33CZPP"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Cavender's All Purpose Greek Seasoning - 8 oz (pack of 2)-",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B08GKGSTCD",
+      "category": "Italian Seasonings",
+      "asin": "B08GKGSTCD"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Sutter Buttes Orange Brownie Mix – Double Fudge Brownies with Blood Orange Extra Virgin Olive Oil (16.5 oz. box), Baking Kit for Quick and Easy Moist, Chewy Homemade Chocolate Brownies, Dairy-Free",
+      "price": "$18.98",
+      "url": "https://www.amazon.com/dp/B078GW98RP",
+      "category": "Plant-Based Milk",
+      "asin": "B078GW98RP"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Torto Instant Powdered Black Sesame Dessert, 1 Box (4 sachets)",
+      "price": "$8.98",
+      "url": "https://www.amazon.com/dp/B00A2SZGJU",
+      "category": "Coated Nuts",
+      "asin": "B00A2SZGJU"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Morton & Bassett Caraway Seeds, All Natural, Kosher, MSG Free, Gluten Free & Non-GMO, 2 Ounce (Pack of 3)",
+      "price": "$32.37",
+      "url": "https://www.amazon.com/dp/B0CHX428S8",
+      "category": "Flavored Drinking Water",
+      "asin": "B0CHX428S8"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Marshalls Creek Select Spices CURRY POWDER, JAMAICAN 10 oz.",
+      "price": "$12.99",
+      "url": "https://www.amazon.com/dp/B0D3FL9PFT",
+      "category": "Packaged Consomm� Soup",
+      "asin": "B0D3FL9PFT"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Unique Gingerbread House Making Gifts, Gingerbread House Making Because Stabbing, Cool Birthday 11oz 15oz Mug Gifts For Friends, Gingerbread house making kit, Gingerbread house making supplies",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0C2CWMDFC",
+      "category": "Dried Peaches",
+      "asin": "B0C2CWMDFC"
+    },
+    {
+      "retailer": "amazon",
+      "title": "MARTINELLIS Organic Juice Apple Sparkling, 10 FZ",
+      "price": "$11.00",
+      "url": "https://www.amazon.com/dp/B004SI6HYI",
+      "category": "Olive Spreads",
+      "asin": "B004SI6HYI"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Food to Live Gluten Free Organic Amaranth Flour, 2 Pounds – Non-GMO Whole Grain Flour, Vegan Fine Meal, Bulk Powder. High in Fiber, Protein. Great for Cooking, Baking, and as Thickener",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0BGF3HN8C",
+      "category": "Unpopped Popcorn Kernels",
+      "asin": "B0BGF3HN8C"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Farfalle Bow-Tie Pasta (4 oz, ZIN: 525461) - 3 Pack",
+      "price": "$14.36",
+      "url": "https://www.amazon.com/dp/B07CVQZBZ9",
+      "category": "Cake Toppers",
+      "asin": "B07CVQZBZ9"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Ken's Steak House Fat Free Raspberry Pecan Dressing 9 Fl Oz (Pack of 2)",
+      "price": "$12.30",
+      "url": "https://www.amazon.com/dp/B0BXTBV1S1",
+      "category": "Sour Flavored Candies",
+      "asin": "B0BXTBV1S1"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Mashal Baking Soda 100 gm",
+      "price": "$7.49",
+      "url": "https://www.amazon.com/dp/B07BQ86MH9",
+      "category": "Garlic Salts",
+      "asin": "B07BQ86MH9"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Heat and Eat Carolina Pork Rinds",
+      "price": "$27.50",
+      "url": "https://www.amazon.com/dp/B00QMTQZ9S",
+      "category": "Snack Muffins",
+      "asin": "B00QMTQZ9S"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Nestle Everyday Dairy Whitener, 400g Pouch",
+      "price": "$12.49",
+      "url": "https://www.amazon.com/dp/B00NYZR3T4",
+      "category": "Chocolate Cookies",
+      "asin": "B00NYZR3T4"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Spectrum Naturals Red Wine Vinegar 16.9 Oz - (Pack of 6) - Pack Of 6",
+      "price": "$60.50",
+      "url": "https://www.amazon.com/dp/B00HNPZAPK",
+      "category": "Bloody Mary Cocktail Mixers",
+      "asin": "B00HNPZAPK"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Natural Value Organic Black Beans, 15 Ounce (Pack of 12)",
+      "price": "$48.17",
+      "url": "https://www.amazon.com/dp/B077FYJSKX",
+      "category": "Dried Mixed Fruit",
+      "asin": "B077FYJSKX"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Sir Kensington's Mayonnaise Classic Non-GMO Project Verified Gluten Free 32 oz",
+      "price": "$19.99",
+      "url": "https://www.amazon.com/dp/B01IQJVT1K",
+      "category": "Packaged Pilaf",
+      "asin": "B01IQJVT1K"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Orgibite Natural Dried Yellow Apricots | Organic Vitamin-Rich Dried Fruit | Fruit Snack for Kids, Adults, Vegan | Healthy and Sugar Free Pack, 4,59 Oz (Pack of 10)",
+      "price": "$22.90",
+      "url": "https://www.amazon.com/dp/B0CPQ26HJ3",
+      "category": "Ginger Snaps",
+      "asin": "B0CPQ26HJ3"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Hayman, 100% Ethiopia Yirgacheffe, Green Coffee Beans To Roast With Coffee Roaster Machine, 12oz | Unroasted Ethiopian Beans",
+      "price": "$49.99",
+      "url": "https://www.amazon.com/dp/B09NC8JR8R",
+      "category": "Snickerdoodle Cookies",
+      "asin": "B09NC8JR8R"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Father's Day Gift - Hot Sauce Challenge Set, Hot Sauce Variety Pack Includes Hot Sauces from Mild To Extreme Flavors, Unique Gifts for Men, Thoughtfully Gourmet, Set of 10",
+      "price": "$39.99",
+      "url": "https://www.amazon.com/dp/B08STNKJNM",
+      "category": "Snack Food Seafood Dips & Spreads",
+      "asin": "B08STNKJNM"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Bazooka Sugar-Free Bubble Gum Bulk Pink Chewing Gum in Resealable Container, 60 Count To Go Cup (6 Pack) w/ Bazooka Joe Comics, Baseball Party Favors, Goodie Bags, Nostalgic 90s Candy",
+      "price": "$26.98",
+      "url": "https://www.amazon.com/dp/B01FXS0JVI",
+      "category": "Canned Garbanzo Beans",
+      "asin": "B01FXS0JVI"
+    },
+    {
+      "retailer": "amazon",
+      "title": "22 lbs BOLIVIA ORGANIC CARANAVI (AAA) GREEN COFFEE BEANS",
+      "price": "$179.99",
+      "url": "https://www.amazon.com/dp/B009B18Q5U",
+      "category": "Hazelnut Oils",
+      "asin": "B009B18Q5U"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Generic H‑E‑B Refried Beans with Jalapenos 16 oz 4 Cans",
+      "price": "$21.95",
+      "url": "https://www.amazon.com/dp/B0CWC9P489",
+      "category": "Barley Flour",
+      "asin": "B0CWC9P489"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Generic M.ade With Organic Linguine Pasta 16 oz (Pack of 12)",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0DB6FXDR3",
+      "category": "Sweet Basil Leaf",
+      "asin": "B0DB6FXDR3"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Milled Millet Groats (Pack of 1)",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0DVC9YQCC",
+      "category": "Canned & Jarred Artichoke Hearts",
+      "asin": "B0DVC9YQCC"
+    },
+    {
+      "retailer": "amazon",
+      "title": "BUSH'S BEST Organic Baked Beans with Brown Sugar, Source Of Plant Based Protein And Fiber, Low Fat, Gluten Free, 16 oz",
+      "price": "$2.29",
+      "url": "https://www.amazon.com/dp/B06XKSY9DF",
+      "category": "Jam, Jelly & Sweet Spread Gifts",
+      "asin": "B06XKSY9DF"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Keto Chow Essentials Kit - Keto Meal Replacement Shake Powder - Nutritionally Complete - Low Carb Shakes - Delicious Easy Meal Substitute - Protein Rich Keto Food You Choose The Fat - Single Meal",
+      "price": "$49.45",
+      "url": "https://www.amazon.com/dp/B0D45PPDG6",
+      "category": "Baker's Ammonia",
+      "asin": "B0D45PPDG6"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Carolina Gold Nuggets 3 - 1 Lb Packages",
+      "price": "$48.95",
+      "url": "https://www.amazon.com/dp/B01M9DS7DI",
+      "category": "Dessert Icings",
+      "asin": "B01M9DS7DI"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Earthborn Elements White Rice Flour and Quinoa Flour Bundle, 3.5 Gallon Buckets Each, Vegan, Gluten-Free Baking, Bulk Size",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B0CFS6X51D",
+      "category": "Bottled Iced Tea",
+      "asin": "B0CFS6X51D"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Stonyfield Farm Strawberry Banana Probiotic Smoothie, 6 Fl Oz, 4 Pack",
+      "price": "$5.39",
+      "url": "https://www.amazon.com/dp/B07FTSF154",
+      "category": "Caster Sugar",
+      "asin": "B07FTSF154"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Seasoned Pioneers Zanzibar Curry Powder African Spice Blend 40g Resealable Pouch",
+      "price": "$13.99",
+      "url": "https://www.amazon.com/dp/B00BXC8U8I",
+      "category": "Pickle Relishes",
+      "asin": "B00BXC8U8I"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Classic Collectible Gourmet Holiday Popcorn Tin Caramel, White Cheddar, and Butter Popcorn",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B00P76D860",
+      "category": "Dessert Decorating Kits",
+      "asin": "B00P76D860"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Basil Marseilles Ocimum basilicum 1,000 Seeds",
+      "price": "$9.11",
+      "url": "https://www.amazon.com/dp/B0D3NXM4WN",
+      "category": "Canned & Jarred Corn",
+      "asin": "B0D3NXM4WN"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Swift River Apples Dried Rings - Bulk 5 Lb Pack, Premium Apple Rings for Gourmet Chefs and Culinary Lovers",
+      "price": "$57.75",
+      "url": "https://www.amazon.com/dp/B0869P56VW",
+      "category": "Packaged Split Pea Soups",
+      "asin": "B0869P56VW"
+    },
+    {
+      "retailer": "amazon",
+      "title": "MANGIAR BENE RIZZOLI – Anchovies Spiced Paste – 60 Gr. Tube (100% Italian)",
+      "price": "$7.49",
+      "url": "https://www.amazon.com/dp/B0DL2W2R5J",
+      "category": "Polenta Meal",
+      "asin": "B0DL2W2R5J"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Lars Own Mild & Sweet Swedish Style Mustard - Perfect for Sandwiches, Potato Sausage, Yellow Pea Soup and Other Scandinavian Dishes",
+      "price": "$14.95",
+      "url": "https://www.amazon.com/dp/B0F63VX8BZ",
+      "category": "Kosher Salts",
+      "asin": "B0F63VX8BZ"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Giusti White Balsamic Vinegar Dressing – Condiment for Cooking and Finishing Dishes such as Salads, Vegetables, or Fish. Made in Italy with Balsamic Vinegar of Modena – 8.45 fl oz (250 ml) - Pack of 1",
+      "price": "Unknown Price",
+      "url": "https://www.amazon.com/dp/B00JGM8PBE",
+      "category": "Packaged Pilaf",
+      "asin": "B00JGM8PBE"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Cold Pressed Grapeseed Oil by Salute Sante! High Temperature Cooking, Healthy Grape Seed Oil, Non-GMO and Kosher for Salad Dressings, Marinades and Dips, Vegan, 500 Milliliter",
+      "price": "$19.95",
+      "url": "https://www.amazon.com/dp/B00028PUR8",
+      "category": "Sandwich Spreads",
+      "asin": "B00028PUR8"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Star Il mio Dado Vegetale Low Salt Vegetable Bouillon Cubes, 10 Cubes, 100 gr",
+      "price": "$12.99",
+      "url": "https://www.amazon.com/dp/B0DNTRHWH2",
+      "category": "Unroasted Coffee Beans",
+      "asin": "B0DNTRHWH2"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Keebler Cracker Oyster, 300 ct",
+      "price": "$65.99",
+      "url": "https://www.amazon.com/dp/B00I85RALG",
+      "category": "Powdered Sugar",
+      "asin": "B00I85RALG"
+    },
+    {
+      "retailer": "amazon",
+      "title": "TRUE LEMON KIDS Crisp Apple (10 Packets) - Hydration, No Preservatives, No Artificial Flavors, No Sweeteners - Low Sugar Water Flavoring - Juice Powdered Drink Mix for Kids",
+      "price": "$6.89",
+      "url": "https://www.amazon.com/dp/B09NYKB74R",
+      "category": "Dessert Sprinkles",
+      "asin": "B09NYKB74R"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Dole Fruit Bowls No Sugar Added Snacks, Mandarin Oranges, 4oz 24 Cups, Gluten & Dairy Free, Bulk Lunch Snacks for Kids & Adults",
+      "price": "$17.94",
+      "url": "https://www.amazon.com/dp/B00K4PM4L4",
+      "category": "Dried Farro",
+      "asin": "B00K4PM4L4"
+    },
+    {
+      "retailer": "amazon",
+      "title": "NESCAFÉ CLÁSICO Instant Coffee, Dark Roast Coffee, 1 Jar (10.5 Oz)",
+      "price": "$10.49",
+      "url": "https://www.amazon.com/dp/B00CJ8IUQ2",
+      "category": "Mate Tea",
+      "asin": "B00CJ8IUQ2"
+    },
+    {
+      "retailer": "amazon",
+      "title": "COLAVITA",
+      "price": "$25.63",
+      "url": "https://www.amazon.com/dp/B0C3K3RVYT",
+      "category": "Onion Salts",
+      "asin": "B0C3K3RVYT"
+    },
+    {
+      "retailer": "amazon",
+      "title": "Golden Buffalo Sesame Oil 17.66 Oz",
+      "price": "$18.50",
+      "url": "https://www.amazon.com/dp/B08BC6XLRG",
+      "category": "Snack Cupcakes",
+      "asin": "B08BC6XLRG"
+    }
+  ]
+}

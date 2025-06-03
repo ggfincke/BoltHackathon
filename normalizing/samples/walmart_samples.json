@@ -1,0 +1,809 @@
+{
+  "sample_info": {
+    "timestamp": "2025-06-03T10:16:05.557289",
+    "sample_count": 100,
+    "retailer": "walmart"
+  },
+  "samples": [
+    {
+      "retailer": "walmart",
+      "title": "2 LB TWO POUNDS DUBBLE BUBBLE 1/2 HALF INCH 15MM GUMBALLS BULK CANDY GOODY BAGS",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/2-LB-TWO-POUNDS-DUBBLE-BUBBLE-1-2-HALF-INCH-15MM-GUMBALLS-BULK-CANDY-GOODY-BAGS/5286511073",
+      "category": "Shop all",
+      "wm_item_id": "5286511073"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(4 pack) Great Value French Roast Ground, 100% Arabica, Medium Roast, Ground Coffee, 32 oz",
+      "price": "$5588",
+      "url": "https://www.walmart.com/ip/4-pack-Great-Value-French-Roast-Ground-100-Arabica-Medium-Roast-Ground-Coffee-32-oz/15377270766",
+      "category": "Cereal",
+      "wm_item_id": "15377270766"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Parent's Choice Organic Stage 2 Baby Food, Apple, Pear, and Broccoli Puree, 4 oz Pouch",
+      "price": "$098",
+      "url": "https://www.walmart.com/ip/ORG-APPLE-PEAR-BROC/13137872007",
+      "category": "Puffed Snacks",
+      "wm_item_id": "13137872007"
+    },
+    {
+      "retailer": "walmart",
+      "title": "ALLCAMP OUTDOOR GEAR Hopper Portable Cooler Bag 25L with 5 ice Pack Boxes(camo Grey)",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/ALLCAMP-OUTDOOR-GEAR-Hopper-Portable-Cooler-Bag-25L-with-5-ice-Pack-Boxes-camo-Grey/933076712",
+      "category": "Tomatoes",
+      "wm_item_id": "933076712"
+    },
+    {
+      "retailer": "walmart",
+      "title": "2 PACK, Doritos Tortilla Chips Cool Ranch Flavor Snack Chips",
+      "price": "$8.98",
+      "url": "https://www.walmart.com/ip/2-PACK-Doritos-Tortilla-Chips-Cool-Ranch-Flavor-Snack-Chips/8312262832",
+      "category": "Spring Water",
+      "wm_item_id": "8312262832"
+    },
+    {
+      "retailer": "walmart",
+      "title": "2X - Poppi Cherry Cola Prebiotic Soda 12 fl oz",
+      "price": "$15.92",
+      "url": "https://www.walmart.com/ip/2X-Poppi-Cherry-Cola-Prebiotic-Soda-12-fl-oz/13608010283",
+      "category": "Premium",
+      "wm_item_id": "13608010283"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Godiva Chocolatier Assorted Chocolate Truffle Gift Box for Birthday, Thank You, Anniversary, Congratulations Gift Basket Gourmet Candy with Praline, Ganache, Caramel in Velvety Dark Chocolate, 6pc",
+      "price": "$2771",
+      "url": "https://www.walmart.com/ip/Godiva-Chocolatier-Assorted-Chocolate-Truffle-Gift-Box-Birthday-Thank-You-Anniversary-Congratulations-Gift-Basket-Gourmet-Candy-Praline-Ganache-Caram/15148624698",
+      "category": "Beef jerky",
+      "wm_item_id": "15148624698"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Peanut Butter & Co, Smooth Operator Flavored Peanut Butter, 16 oz, 6 Pack",
+      "price": "$3192",
+      "url": "https://www.walmart.com/ip/Peanut-Butter-Co-Smooth-Operator-Flavored-Peanut-Butter-16-oz-6-Pack/174552551",
+      "category": "Elevated entertaining",
+      "wm_item_id": "174552551"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Bearded Butchers Hot Beef Sticks, 3.5 oz, 4 Stick per Pack, 16g Protein per Pack, Spicy Habanero and Cayenne, Gluten Free, No MSG",
+      "price": "$999",
+      "url": "https://www.walmart.com/ip/Bearded-Butchers-Hot-Beef-Sticks-3-5-oz-4-Stick-per-Pack-16g-Protein-per-Pack-Spicy-Habanero-and-Cayenne-Gluten-Free-No-MSG/16005653201",
+      "category": "pods",
+      "wm_item_id": "16005653201"
+    },
+    {
+      "retailer": "walmart",
+      "title": "36 Pack Apple & Eve 100% Juice Variety Pack (6.75 fl. oz.)",
+      "price": "$2257",
+      "url": "https://www.walmart.com/ip/36-Pack-Apple-Eve-100-Juice-Variety-Pack-6-75-fl-oz/547552926",
+      "category": "Premium",
+      "wm_item_id": "547552926"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Flipz Milk Chocolate Covered Pretzels, 7.5 Oz.",
+      "price": "$1345",
+      "url": "https://www.walmart.com/ip/Flipz-Milk-Chocolate-Covered-Pretzels-7-5-Oz/5226942215",
+      "category": "bettergoods",
+      "wm_item_id": "5226942215"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Rani Ginger Garlic Cooking Paste 26.5oz (750g) Glass Jar ~ Vegan | Gluten Free | NON-GMO | No Colors | Indian Origin",
+      "price": "$1499",
+      "url": "https://www.walmart.com/ip/Rani-Ginger-Garlic-Cooking-Paste-26-5oz-750g-Glass-Jar-Vegan-Gluten-Free-NON-GMO-No-Colors-Indian-Origin/892203950",
+      "category": "All bulk candy",
+      "wm_item_id": "892203950"
+    },
+    {
+      "retailer": "walmart",
+      "title": "ARM & HAMMER Pure Baking Soda, For Baking, Cleaning & Deodorizing, 1 lb Box",
+      "price": "$147",
+      "url": "https://www.walmart.com/ip/ARM-HAMMER-Pure-Baking-Soda-For-Baking-Cleaning-Deodorizing-1-lb-Box/10291025",
+      "category": "Plant-based proteins",
+      "wm_item_id": "10291025"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Whole Kernel Sweet Corn 15.25 oz (6 Pack)",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Whole-Kernel-Sweet-Corn-15-25-oz-6-Pack/300271596",
+      "category": "Sandwiches & wraps",
+      "wm_item_id": "300271596"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Simple Truth Sea Salt Roasted Deluxe Mixed Nuts 32 oz.",
+      "price": "$2397",
+      "url": "https://www.walmart.com/ip/Simple-Truth-Sea-Salt-Roasted-Deluxe-Mixed-Nuts-32-oz/8647251021",
+      "category": "Fresh soups",
+      "wm_item_id": "8647251021"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Soda Stream Dishwasher Safe Carb Bottle - Black - 2 pk",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Soda-Stream-Dishwasher-Safe-Carb-Bottle-Black-2-pk/8686256219",
+      "category": "Mayo",
+      "wm_item_id": "8686256219"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(12 pack) McCormick White Chicken Chili Seasoning Mix, 1.25 oz Envelope",
+      "price": "$2934",
+      "url": "https://www.walmart.com/ip/12-pack-McCormick-White-Chicken-Chili-Seasoning-Mix-1-25-oz-Envelope/485319987",
+      "category": "Capri Sun",
+      "wm_item_id": "485319987"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Rae Dunn Ivory LEMONADE Ceramic Pitcher Black LL Letter Wide bottom",
+      "price": "$5199",
+      "url": "https://www.walmart.com/ip/Rae-Dunn-Ivory-LEMONADE-Ceramic-Pitcher-Black-LL-Letter-Wide-bottom/5351564437",
+      "category": "bettergoods",
+      "wm_item_id": "5351564437"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Knorr Chicken Flavor Bouillon Cubes, 3.1 oz, 8 Pack Box",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Knorr-Chicken-Flavor-Bouillon-Cubes-3-1-oz-8-Pack-Box/10291772",
+      "category": "Red wine",
+      "wm_item_id": "10291772"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Great Value Chili Seasoning Mix, 1.25 oz",
+      "price": "$074",
+      "url": "https://www.walmart.com/ip/Great-Value-Chili-Seasoning-Mix-1-25-oz/871036105",
+      "category": "sausage",
+      "wm_item_id": "871036105"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(4 pack) Hills Bros. English Toffee Cappuccino Instant Coffee Mix, 16 Ounce Canister",
+      "price": "$1688",
+      "url": "https://www.walmart.com/ip/4-pack-Hills-Bros-English-Toffee-Cappuccino-Instant-Coffee-Mix-16-Ounce-Canister/5040027439",
+      "category": "Vanilla Coke",
+      "wm_item_id": "5040027439"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Pepperidge Farm Golden Baked VERONA STRAWBERRY Cookies 6.75 oz Bag - NEW",
+      "price": "$699",
+      "url": "https://www.walmart.com/ip/Pepperidge-Farm-Golden-Baked-VERONA-STRAWBERRY-Cookies-6-75-oz-Bag-NEW/5198938988",
+      "category": "vegetables",
+      "wm_item_id": "5198938988"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Duncan Hines Wilderness Apple Pie Filling and Topping 21 oz. (Pack of 6)",
+      "price": "$4605",
+      "url": "https://www.walmart.com/ip/Duncan-Hines-Wilderness-Apple-Pie-Filling-and-Topping-21-oz-Pack-of-6/535602963",
+      "category": "Tequila",
+      "wm_item_id": "535602963"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Equate Ultra Thin Pads with Wings, Size 2, Long Super Protection (42 Count)",
+      "price": "$544",
+      "url": "https://www.walmart.com/ip/Equate-Ultra-Thin-Pads-with-Wings-Unscented-Super-Size-2-42-Count/750807425",
+      "category": "Hot & ready",
+      "wm_item_id": "750807425"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Zulay Kitchen 1.7L Glass Electric Kettle BPA Free Borosilicate Glass Electric Tea Kettle",
+      "price": "$45.99",
+      "url": "https://www.walmart.com/ip/Zulay-Kitchen-1-7L-Glass-Electric-Kettle-BPA-Free-Borosilicate-Glass-Electric-Tea-Kettle/2635042174",
+      "category": "Juice",
+      "wm_item_id": "2635042174"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Ava Organics - Coconut Crispy Rollers - Original Coconut (Family Size - 14.1 oz bag)",
+      "price": "$2000",
+      "url": "https://www.walmart.com/ip/Ava-Organics-Coconut-Crispy-Rollers-Original-Coconut-Family-Size-14-1-oz-bag/5226644510",
+      "category": "Tropical fruits",
+      "wm_item_id": "5226644510"
+    },
+    {
+      "retailer": "walmart",
+      "title": "PLANTERS Winter Edition Brittle Nut Medley Trail Mix Snack with Honey Peanuts, Yogurt Raisins, Peanut Brittle, Pretzels & Cashews, Party Snacks, Plant Based Protein, 19.25 oz Canister",
+      "price": "$799",
+      "url": "https://www.walmart.com/ip/PLANTERS-Winter-Edition-Brittle-Nut-Medley-Trail-Mix-Snack-Honey-Peanuts-Yogurt-Raisins-Peanut-Brittle-Pretzels-Cashews-Party-Snacks-Plant-Based-Prot/21978574",
+      "category": "Totino's",
+      "wm_item_id": "21978574"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Pedialyte Electrolyte Powder, Variety Pouch: Grape and Orange, 12 Powder Packets",
+      "price": "$17.98",
+      "url": "https://www.walmart.com/ip/Pedialyte-Electrolyte-Powder-Orange-Grape-Variety-Pack-12-Powder-Packets/5212591443",
+      "category": "Mediterranean",
+      "wm_item_id": "5212591443"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Omega 3 Trail Mix - 28 oz - Kosher (1 Pack of 28 oz)",
+      "price": "$2998",
+      "url": "https://www.walmart.com/ip/Omega-3-Trail-Mix-28-oz-Kosher-1-Pack-of-28-oz/455486376",
+      "category": "Domestic beer",
+      "wm_item_id": "455486376"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Unknown Title",
+      "price": "$5.96",
+      "url": "https://www.walmart.com/sp/track",
+      "category": "Vodka",
+      "wm_item_id": null
+    },
+    {
+      "retailer": "walmart",
+      "title": "McCormick Grill Mates Gluten Free Montreal Steak Seasoning, 3.4 oz Bottle",
+      "price": "$212",
+      "url": "https://www.walmart.com/sp/track",
+      "category": "Get it today",
+      "wm_item_id": null
+    },
+    {
+      "retailer": "walmart",
+      "title": "Boylan Bottling Pure Cane Sugar Soda Pop, Diet Root Beer, 12 oz Glass Bottles (Pack of 12)",
+      "price": "$3900",
+      "url": "https://www.walmart.com/ip/Boylan-Bottling-Pure-Cane-Sugar-Soda-Pop-Diet-Root-Beer-12-oz-Glass-Bottles-Pack-of-12/426967098",
+      "category": "Smoothies",
+      "wm_item_id": "426967098"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Rotellas White Rosemary Focaccia Ciabatta Line Bread Loaf, 15 inch - 10 per case.",
+      "price": "$8251",
+      "url": "https://www.walmart.com/ip/Rotellas-White-Rosemary-Focaccia-Ciabatta-Line-Bread-Loaf-15-inch-10-per-case/468523826",
+      "category": "Tropicana",
+      "wm_item_id": "468523826"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Goya Tender Sweet Peas, Canned Vegetables, 15 oz",
+      "price": "$273",
+      "url": "https://www.walmart.com/ip/Goya-Tender-Sweet-Peas-Canned-Vegetables-15-oz/188621783",
+      "category": "Bulk mints",
+      "wm_item_id": "188621783"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Betty Crocker Chocolate Chip Muffin and Quick Bread Mix, 14.75 oz.",
+      "price": "$296",
+      "url": "https://www.walmart.com/ip/Betty-Crocker-Chocolate-Chip-Muffin-and-Quick-Bread-Mix-14-75-oz/25847984",
+      "category": "Nilla Wafers",
+      "wm_item_id": "25847984"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Hurst's Hambeens Great Northern Beans with Artificial Ham, 20 oz",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Hurst-s-Hambeens-Great-Northern-Beans-with-Artificial-Ham-20-oz/10295036",
+      "category": "Rum",
+      "wm_item_id": "10295036"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Tostitos, Creamy Spinach Dip, 15 oz",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Tostitos-Creamy-Spinach-Dip-15-oz/15922522386",
+      "category": "Pizzas",
+      "wm_item_id": "15922522386"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Fox Run One Piece Pie Crust Shield, Carbon Steel, 10-Inch",
+      "price": "$1099",
+      "url": "https://www.walmart.com/ip/Fox-Run-One-Piece-Pie-Crust-Shield-Carbon-Steel-10-Inch/34910284",
+      "category": "Emergency & institutional foods",
+      "wm_item_id": "34910284"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Thyme & Table Dinnerware Gray Ava Stoneware Dinner Round Plates, 4 Pack",
+      "price": "$1584",
+      "url": "https://www.walmart.com/ip/Thyme-Table-Dinnerware-Gray-Ava-Stoneware-Dinner-Round-Plates-4-Pack/827711758",
+      "category": "Snack nuts",
+      "wm_item_id": "827711758"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Jumex Fruit Nectar 33.8Oz Carton (Pack Of 6) Choose Flavor Below (Strawberry-Banana)",
+      "price": "$3228",
+      "url": "https://www.walmart.com/ip/Jumex-Fruit-Nectar-33-8Oz-Carton-Pack-Of-6-Choose-Flavor-Below-Strawberry-Banana/759299222",
+      "category": "Beverages",
+      "wm_item_id": "759299222"
+    },
+    {
+      "retailer": "walmart",
+      "title": "3dRose, Sourdough bread rolls, cooked in the bakers laboratory, Italy., 11oz Two-Tone Red Mug",
+      "price": "$1199",
+      "url": "https://www.walmart.com/ip/3dRose-Sourdough-bread-rolls-cooked-in-the-bakers-laboratory-Italy-11oz-Two-Tone-Red-Mug/15537511501",
+      "category": "nuts",
+      "wm_item_id": "15537511501"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Tostitos Scoops! Party Size Tortilla Chips - 14.5oz",
+      "price": "$569",
+      "url": "https://www.walmart.com/ip/Tostitos-Scoops-Party-Size-Tortilla-Chips-14-5oz/16243352939",
+      "category": "Water Bottles",
+      "wm_item_id": "16243352939"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Foxtail Foods Baked Pecan Pie, 37 Ounce -- 6 per case",
+      "price": "$14418",
+      "url": "https://www.walmart.com/ip/Foxtail-Foods-Baked-Pecan-Pie-37-Ounce-6-per-case/643986535",
+      "category": "Baking & Bakery",
+      "wm_item_id": "643986535"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Lion Coffee Classic Original Whole Bean Coffee, Medium Roast, A Taste of Aloha - 10 Ounce Bag",
+      "price": "$1495",
+      "url": "https://www.walmart.com/ip/Lion-Coffee-Classic-Original-Whole-Bean-Coffee-Medium-Roast-A-Taste-of-Aloha-10-Ounce-Bag/1373354931",
+      "category": "Modern Soda",
+      "wm_item_id": "1373354931"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Pepsi Cola Zero Sugar Soda Pop, 20 fl oz, Bottle, Allergens Not Contained",
+      "price": "$238",
+      "url": "https://www.walmart.com/ip/Pepsi-Cola-Zero-Sugar-Soda-Pop-20-fl-oz-Bottle-Allergens-Not-Contained/17619248",
+      "category": "Shop all",
+      "wm_item_id": "17619248"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Waiakea Hawaiian Alkaline Volcanic Water 23.6 oz (Pack of 15)",
+      "price": "$6199",
+      "url": "https://www.walmart.com/ip/Waiakea-Hawaiian-Alkaline-Volcanic-Water-23-6-oz-Pack-of-15/9782256626",
+      "category": "Mott's",
+      "wm_item_id": "9782256626"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Grape Lemonade, Sea Moss Gallon",
+      "price": "$4499",
+      "url": "https://www.walmart.com/ip/Grape-Lemonade-Sea-Moss-Gallon/5120670967",
+      "category": "Sam’s Choice",
+      "wm_item_id": "5120670967"
+    },
+    {
+      "retailer": "walmart",
+      "title": "2X - OREO Mini Chocolate Sandwich Cookies - Snack-Sak - 8oz",
+      "price": "$999",
+      "url": "https://www.walmart.com/ip/2X-OREO-Mini-Chocolate-Sandwich-Cookies-Snack-Sak-8oz/5657922455",
+      "category": "Oatmeal & grits",
+      "wm_item_id": "5657922455"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Frontier Peppermint Flavor, Certified Organic, 2 Oz",
+      "price": "$1001",
+      "url": "https://www.walmart.com/ip/Frontier-Peppermint-Flavor-Certified-Organic-2-Oz/28645061",
+      "category": "Cold-pressed juices & juice shots",
+      "wm_item_id": "28645061"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Artificial Sunflower Girasoles Glass Dome Mother’s Day Gift Yellow Flowers",
+      "price": "$28.49",
+      "url": "https://www.walmart.com/sp/track",
+      "category": "Roses",
+      "wm_item_id": null
+    },
+    {
+      "retailer": "walmart",
+      "title": "Gatorade G2 Low Sugar Grape Sports Drink Mix Powder, 19.4 oz Canister",
+      "price": "$3250",
+      "url": "https://www.walmart.com/ip/Gatorade-G2-Grape-Thirst-Quencher-Drink-Mix-Powder-19-4-oz-Canister/102589778",
+      "category": "Fresh herbs",
+      "wm_item_id": "102589778"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Bulk American Classic Candy Variety Pack, 1.5lb Bag - Individually Wrapped Bulk Candy Variety For Parties, Piñatas, Treats - Variety Of Classic American Favorites, Family Size (24oz)",
+      "price": "$1600",
+      "url": "https://www.walmart.com/sp/track",
+      "category": "Pretzels",
+      "wm_item_id": null
+    },
+    {
+      "retailer": "walmart",
+      "title": "Heinz Sweet Relish, 10 fl oz Jar",
+      "price": "$286",
+      "url": "https://www.walmart.com/ip/Heinz-Sweet-Relish-10-fl-oz-Jar/15561341",
+      "category": "Tyson",
+      "wm_item_id": "15561341"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Rito Spearmint Lozenges 3 lb. Bulk Bag",
+      "price": "$4500",
+      "url": "https://www.walmart.com/ip/Rito-Spearmint-Lozenges-3-lb-Bulk-Bag/1108206835",
+      "category": "bettergoods",
+      "wm_item_id": "1108206835"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Bush's Sweet Heat Baked Beans, Canned Beans, 28 oz Can",
+      "price": "$222",
+      "url": "https://www.walmart.com/ip/Bush-s-Sweet-Heat-Baked-Beans-with-Brown-Sugar-and-Jalapeno-Canned-Beans-28-oz-Can/996066417",
+      "category": "Instant coffee",
+      "wm_item_id": "996066417"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Coca-Cola Zero Sugar Soda Bottles",
+      "price": "$17.99",
+      "url": "https://www.walmart.com/ip/Coca-Cola-Zero-Sugar-Soda-Bottles/16446850866",
+      "category": "Shop All Soda",
+      "wm_item_id": "16446850866"
+    },
+    {
+      "retailer": "walmart",
+      "title": "SunChips Harvest Cheddar 100% Whole Grain Value Pack Bundled by SUPERDEALS | 1.5 Oz Bag | Harvest Cheddar | Pack of 12 with mystery gift",
+      "price": "$2200",
+      "url": "https://www.walmart.com/ip/SunChips-Harvest-Cheddar-100-Whole-Grain-Value-Pack-Bundled-by-SUPERDEALS-1-5-Oz-Bag-Harvest-Cheddar-Pack-of-12-with-mystery-gift/9673004593",
+      "category": "Beautiful by Drew",
+      "wm_item_id": "9673004593"
+    },
+    {
+      "retailer": "walmart",
+      "title": "DeMet's Turtles, Original Milk Chocolate Pecan Bag, 6.3oz",
+      "price": "$482",
+      "url": "https://www.walmart.com/ip/DeMet-s-Turtles-Original-Milk-Chocolate-Pecan-Bag-6-3oz/582310066",
+      "category": "Beef jerky",
+      "wm_item_id": "582310066"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Pedialyte AdvancedCare Plus Electrolyte Powder, Berry Frost, 6 Powder Packets",
+      "price": "$1187",
+      "url": "https://www.walmart.com/ip/Pedialyte-AdvancedCare-Plus-Electrolyte-Powder-Berry-Frost-Powder-Packets-6-Count/854764848",
+      "category": "Apple sauce & fruit cups",
+      "wm_item_id": "854764848"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Chorizo Regular Sausage,7.9 Oz.",
+      "price": "$1175",
+      "url": "https://www.walmart.com/ip/Chorizo-Regular-Sausage-7-9-Oz/158750839",
+      "category": "Rolls",
+      "wm_item_id": "158750839"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Kauai Whole Bean Coffee, Koloa Estate Medium Roast 100% Arabica Whole Bean Coffee From HawaiiS Largest Coffee Grower - Bright Aroma With Light Floral Notes (24 Ounces)",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Kauai-Whole-Bean-Coffee-Koloa-Estate-Medium-Roast-100-Arabica-Whole-Bean-Coffee-Hawaii-S-Largest-Coffee-Grower-Bright-Aroma-Light-Floral-Notes-24-Oun/766195068",
+      "category": "pods",
+      "wm_item_id": "766195068"
+    },
+    {
+      "retailer": "walmart",
+      "title": "fried pork rinds 16 oz 2 jars",
+      "price": "$2899",
+      "url": "https://www.walmart.com/ip/fried-pork-rinds-16-oz-2-jars/14045810343",
+      "category": "Fresh",
+      "wm_item_id": "14045810343"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Minute Tapioca, 8 oz Box",
+      "price": "$400",
+      "url": "https://www.walmart.com/ip/Minute-Tapioca-8-oz-Box/13916853",
+      "category": "Candy",
+      "wm_item_id": "13916853"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Prima Della Sliced Italian Dry Salami, Plastic Tray Package, Ready to Eat Sliced Charcuterie Meat, 3 oz",
+      "price": "$424",
+      "url": "https://www.walmart.com/ip/Prima-Della-Sliced-Italian-Dry-Salami-3oz-Plastic-Tray-Package-Ready-to-Eat-Sliced-Charcuterie-Meat/5895274126",
+      "category": "Cream & creamers",
+      "wm_item_id": "5895274126"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Lee Kum Kee Premium Dark Soy Sauce, 1.75 L",
+      "price": "$1795",
+      "url": "https://www.walmart.com/ip/Lee-Kum-Kee-Premium-Dark-Soy-Sauce-1-75-L/14964208517",
+      "category": "Sauces & Spices",
+      "wm_item_id": "14964208517"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Singleton Coconut Clean Tail Butterfly Breaded Shrimp, 3 Pound - 4 per case.",
+      "price": "$21514",
+      "url": "https://www.walmart.com/ip/Singleton-Coconut-Clean-Tail-Butterfly-Breaded-Shrimp-3-Pound-4-per-case/164394600",
+      "category": "Deli",
+      "wm_item_id": "164394600"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Dulces Vero Rellerindos Tamarind Mexican Candy with Chili Pepper Filling, 24.7 oz, 65 Count",
+      "price": "$14.44",
+      "url": "https://www.walmart.com/ip/Dulces-Vero-Rellerindos-Tamarind-Mexican-Candy-with-Chili-Pepper-Filling-24-7-oz-65-Count/100279191",
+      "category": "Poppi",
+      "wm_item_id": "100279191"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Ruffles Regular Lightly Salted Potato Chips, 200g",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Ruffles-Regular-Lightly-Salted-Potato-Chips-200g/139516671",
+      "category": "Juice",
+      "wm_item_id": "139516671"
+    },
+    {
+      "retailer": "walmart",
+      "title": "New Orleans Kettle Chips - Sweet Creole Onion 3 Pack (8Oz/3Bags)",
+      "price": "$2699",
+      "url": "https://www.walmart.com/ip/New-Orleans-Kettle-Chips-Sweet-Creole-Onion-3-Pack-8Oz-3Bags/5212845895",
+      "category": "Meat",
+      "wm_item_id": "5212845895"
+    },
+    {
+      "retailer": "walmart",
+      "title": "MINIS Milk Chocolate Candy Bars 2 lb Bulk Bag, Bite Size, Roasted & Nougat & Caramel, Individually Wrapped (110 Pieces)",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/MINIS-Milk-Chocolate-Candy-Bars-2-lb-Bulk-Bag-Bite-Size-Roasted-Nougat-Caramel-Individually-Wrapped-110-Pieces/13155505139",
+      "category": "spices",
+      "wm_item_id": "13155505139"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Pokemon Pikachu Sculpted Tail Handle 20 Ounce Ceramic Mug",
+      "price": "$2895",
+      "url": "https://www.walmart.com/ip/Pokemon-Pikachu-Sculpted-Tail-Handle-20-Ounce-Ceramic-Mug/627175190",
+      "category": "Jade Leaf",
+      "wm_item_id": "627175190"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Scrumpch Dark Chocolate Chip Cookie Mix | Gluten Free, Allergen Friendly, Vegan, Dairy Free, Nut Free",
+      "price": "$1499",
+      "url": "https://www.walmart.com/ip/Scrumpch-Dark-Chocolate-Chip-Cookie-Mix-Gluten-Free-Allergen-Friendly-Vegan-Dairy-Free-Nut-Free/14861065400",
+      "category": "Low-calorie",
+      "wm_item_id": "14861065400"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Nature's Twist Sugar Free Strawberry Lemonade 16 oz 6-Bottle Pack - Refreshing Flavor & Smooth Texture",
+      "price": "$1650",
+      "url": "https://www.walmart.com/ip/Nature-s-Twist-Sugar-Free-Strawberry-Lemonade-16-oz-6-Bottle-Pack-Refreshing-Flavor-Smooth-Texture/622117195",
+      "category": "Pancake & waffle mix",
+      "wm_item_id": "622117195"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Tostitos Bite Size Tortilla Chips12.0 oz Pack of 2",
+      "price": "$21.90",
+      "url": "https://www.walmart.com/ip/Tostitos-Bite-Size-Tortilla-Chips12-0-oz-Pack-of-2/6597111496",
+      "category": "Sam’s Choice",
+      "wm_item_id": "6597111496"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Glass Serving Bowls Set of 6, Small Round Bowls for Kitchen, 7.2 oz",
+      "price": "$2999",
+      "url": "https://www.walmart.com/ip/Glass-Serving-Bowls-Set-of-6-Small-Round-Bowls-for-Kitchen-7-2-oz/823969420",
+      "category": "Oatmeal Cookies",
+      "wm_item_id": "823969420"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Cheesecake Factory At Home Vanilla Bean Mini Cupcake - 3 per pack -- 12 packs per case.",
+      "price": "$10583",
+      "url": "https://www.walmart.com/ip/Cheesecake-Factory-At-Home-Vanilla-Bean-Mini-Cupcake-3-per-pack-12-packs-per-case/167979058",
+      "category": "Matcha tea",
+      "wm_item_id": "167979058"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Clear American Tangerine Mango, 33.8 fl oz",
+      "price": "$084",
+      "url": "https://www.walmart.com/ip/Clear-American-Tangerine-Mango-33-8-fl-oz/463557731",
+      "category": "Pepsi",
+      "wm_item_id": "463557731"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(3 pack) Great Value Strawberry Mango Powdered Liquid Drink Mix, Sugar-Free, 0.99 oz, 10 Packets",
+      "price": "$594",
+      "url": "https://www.walmart.com/ip/3-pack-Great-Value-Strawberry-Mango-Powdered-Liquid-Drink-Mix-Sugar-Free-0-99-oz-10-Packets/14282303180",
+      "category": "Kombucha",
+      "wm_item_id": "14282303180"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Starbucks Medium Roast Whole Bean CoffeeVariety Pack3 Bags (12 Oz Each)",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Starbucks-Medium-Roast-Whole-Bean-Coffee-Variety-Pack-3-Bags-12-Oz-Each/5177889307",
+      "category": "Pizzas",
+      "wm_item_id": "5177889307"
+    },
+    {
+      "retailer": "walmart",
+      "title": "PLANTERS Deluxe Unsalted Mixed Nuts, Party Snacks, Plant-Based Protein, 15.25 Oz Steel Can",
+      "price": "$996",
+      "url": "https://www.walmart.com/ip/Planters-Deluxe-Unsalted-Mixed-Nuts-15-25-oz-Canister/188469282",
+      "category": "Cakes",
+      "wm_item_id": "188469282"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Native Forest Unsweetened Organic Coconut Milk Light 13.5 fl oz",
+      "price": "$1399",
+      "url": "https://www.walmart.com/ip/Native-Forest-Unsweetened-Organic-Coconut-Milk-Light-13-5-fl-oz/8284203859",
+      "category": "Vahdam",
+      "wm_item_id": "8284203859"
+    },
+    {
+      "retailer": "walmart",
+      "title": "From You Flowers - Be Mine Mini Orchid Garden for Birthday, Anniversary, Get Well, Congratulations, Thank You, All Occasions",
+      "price": "$7997",
+      "url": "https://www.walmart.com/ip/From-You-Flowers-Be-Mine-Mini-Orchid-Garden-for-Birthday-Anniversary-Get-Well-Congratulations-Thank-You-All-Occasions/2227966739",
+      "category": "Cheeses",
+      "wm_item_id": "2227966739"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(4 pack) (6 Cans) Dole Light Pineapple Juice Drink, 6 fl oz Can",
+      "price": "$1592",
+      "url": "https://www.walmart.com/ip/4-pack-Dole-Light-Pineapple-Juice-Drink-6-fl-oz-Cans-6-Count/5265400080",
+      "category": "Muffin mixes",
+      "wm_item_id": "5265400080"
+    },
+    {
+      "retailer": "walmart",
+      "title": "V8 Antioxidants Original 100% Vegetable Juice, 46 Fl Oz Bottle - Pack Of 1 & Lotus Biscoff Cookie - 0.2 Oz - 1 ct",
+      "price": "$1199",
+      "url": "https://www.walmart.com/ip/V8-Antioxidants-Original-100-Vegetable-Juice-46-Fl-Oz-Bottle-Pack-Of-1-Lotus-Biscoff-Cookie-0-2-Oz-1-ct/16646074273",
+      "category": "Cola",
+      "wm_item_id": "16646074273"
+    },
+    {
+      "retailer": "walmart",
+      "title": "King Arthur Flour All-Purpose Flour Gluten Free 24 oz Pack of 4",
+      "price": "$4415",
+      "url": "https://www.walmart.com/ip/King-Arthur-Flour-All-Purpose-Flour-Gluten-Free-24-oz-Pack-of-4/444620905",
+      "category": "Traditional Medicinals",
+      "wm_item_id": "444620905"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Hellmann's Light Mayonnaise Squeeze Mayo Sandwich Spread 11.5 oz",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Hellmann-s-Made-with-Cage-Free-Eggs-Light-Mayonnaise-11-5-fl-oz-Bottle/43887965",
+      "category": "Citrus",
+      "wm_item_id": "43887965"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Xlear XyloSweet Non-GMO Xylitol Sweetener, Natural Sugar Substitute Granules, 1 Pound Bag 2 Pack",
+      "price": "$2399",
+      "url": "https://www.walmart.com/ip/Xlear-XyloSweet-Non-GMO-Xylitol-Sweetener-Natural-Sugar-Substitute-Granules-1-Pound-Bag-2-Pack/107745659",
+      "category": "Prepared Asian food",
+      "wm_item_id": "107745659"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Thyme & Table Pakka Wood Spoon, Blue",
+      "price": "$688",
+      "url": "https://www.walmart.com/ip/Thyme-Table-Pakka-Wood-Spoon-Blue/5170438168",
+      "category": "Fresh pasta",
+      "wm_item_id": "5170438168"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Ocean Spray Pink Cranberry Juice - 64 fl oz Bottle",
+      "price": "Unknown Price",
+      "url": "https://www.walmart.com/ip/Ocean-Spray-Pink-Cranberry-Juice-64-fl-oz-Bottle/16228157435",
+      "category": "Fresh herbs",
+      "wm_item_id": "16228157435"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Ocean Spray 100% Juice Cranberry Juice Blend, 10 fl oz Bottles, 6 Count",
+      "price": "$538",
+      "url": "https://www.walmart.com/ip/Ocean-Spray-100-Juice-Cranberry-Juice-Blend-10-fl-oz-Bottles-6-Count/10447881",
+      "category": "Prebiotic & probiotic drinks",
+      "wm_item_id": "10447881"
+    },
+    {
+      "retailer": "walmart",
+      "title": "LeafLea 40 Premium Natural Hibiscus Tea Bags, Supports Blood Pressure, 100% Hibiscus Herbal Tea Bags,Te De Hibisco, Caffeine-Free, Sugar-Free",
+      "price": "$1285",
+      "url": "https://www.walmart.com/sp/track",
+      "category": "Mediterranean",
+      "wm_item_id": null
+    },
+    {
+      "retailer": "walmart",
+      "title": "Kinder's Garlic Butter Dipping Sauce, 13.2oz",
+      "price": "$587",
+      "url": "https://www.walmart.com/ip/Kinder-s-Garlic-Butter-Dipping-Sauce-13-2oz/14752053857",
+      "category": "Tomatoes",
+      "wm_item_id": "14752053857"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Zenwtr Alkaline Water 50.7 fl oz (Pack Of 12)",
+      "price": "$7299",
+      "url": "https://www.walmart.com/ip/Zenwtr-Alkaline-Water-50-7-fl-oz-Pack-Of-12/9752617435",
+      "category": "Sophisticated snacks",
+      "wm_item_id": "9752617435"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Watkins Pure Peppermint Extract (Liquid), 2 fl oz",
+      "price": "$799",
+      "url": "https://www.walmart.com/ip/Watkins-Pure-Peppermint-Extract-Liquid-2-fl-oz/41488576",
+      "category": "Ranch",
+      "wm_item_id": "41488576"
+    },
+    {
+      "retailer": "walmart",
+      "title": "(4 pack) Great Value White Hominy, 110.4 oz",
+      "price": "$1592",
+      "url": "https://www.walmart.com/ip/4-pack-Great-Value-White-Hominy-110-4-oz/5262811108",
+      "category": "Jimmy Dean",
+      "wm_item_id": "5262811108"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Kikkoman Ponzu Citrus, 10 Fl Oz",
+      "price": "$29.62",
+      "url": "https://www.walmart.com/ip/Kikkoman-Ponzu-Citrus-10-Fl-Oz/10307464",
+      "category": "Spices",
+      "wm_item_id": "10307464"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Smucker's Sugar Free Seedless Strawberry Jam with Splenda Brand Sweetener, 12.75 Ounces",
+      "price": "$10.09",
+      "url": "https://www.walmart.com/ip/Smucker-s-Sugar-Free-Seedless-Strawberry-Jam-with-Splenda-Brand-Sweetener-12-75-Ounces/10308142",
+      "category": "Pantry",
+      "wm_item_id": "10308142"
+    },
+    {
+      "retailer": "walmart",
+      "title": "BetterBody Foods Organic Coconut Sugar, 24 oz",
+      "price": "$877",
+      "url": "https://www.walmart.com/ip/BetterBody-Foods-Organic-Coconut-Sugar-24-oz/296443014",
+      "category": "Indian",
+      "wm_item_id": "296443014"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Kettle Brand Potato Chips, Jalapeno Kettle Chips, Snack Bag, 1.5 Oz (Pack of 24)",
+      "price": "$4444",
+      "url": "https://www.walmart.com/ip/Kettle-Brand-Potato-Chips-Jalapeno-Kettle-Chips-Snack-Bag-1-5-Oz-Pack-of-24/745746141",
+      "category": "Canned goods",
+      "wm_item_id": "745746141"
+    },
+    {
+      "retailer": "walmart",
+      "title": "Ring Pop Colorfest Red Cherry holiday Candy - 30 Count Bulk Lollipop Pack Individually Wrapped Lollipop Suckers - Candy For Party Favors, Red Color Parties, Stocking Stuffers, holiday Gift Ex",
+      "price": "$27.95",
+      "url": "https://www.walmart.com/ip/Ring-Pop-Colorfest-Red-Cherry-holiday-Candy-30-Count-Bulk-Lollipop-Pack-Individually-Wrapped-Lollipop-Suckers-Candy-Party-Favors-Red-Color-Parties-St/5231607012",
+      "category": "Lime juice",
+      "wm_item_id": "5231607012"
+    }
+  ]
+}
