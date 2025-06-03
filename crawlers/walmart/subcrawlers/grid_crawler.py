@@ -191,7 +191,58 @@ def _extract_product_title(card) -> str:
 # extract product price from a product card element
 def _extract_product_price(card) -> str:
     try:
-        return card.find_element(By.CSS_SELECTOR, PRODUCT_PRICE_SELECTOR).text.strip()
+        # first try the main price element
+        price_element = card.find_element(By.CSS_SELECTOR, PRODUCT_PRICE_SELECTOR)
+        price_text = price_element.text.strip()
+        
+        # clean up the price text
+        if price_text:
+            # split by newlines and take the first meaningful price
+            lines = [line.strip() for line in price_text.split('\n') if line.strip()]
+            
+            for line in lines:
+                # look for lines that start with $ and contain a price
+                if line.startswith('$') and 'current price' not in line.lower():
+                    # extract just the price part (remove any trailing text after the price)
+                    price_match = re.match(r'(\$\d+\.?\d*)', line)
+                    if price_match:
+                        return price_match.group(1)
+                
+                # handle "current price $X.XX" format
+                if 'current price' in line.lower():
+                    price_match = re.search(r'current price (\$\d+\.?\d*)', line.lower())
+                    if price_match:
+                        return price_match.group(1)
+            
+            # if no clean price found, try to extract first price-like pattern
+            price_match = re.search(r'\$\d+\.?\d*', price_text)
+            if price_match:
+                return price_match.group(0)
+        
+        # fallback: try alternative price selectors
+        alternative_selectors = [
+            '[data-automation-id="product-price"] span[itemprop="price"]',
+            '[data-automation-id="product-price"] span:first-child', 
+            'span[itemprop="price"]',
+            '.price-current',
+            '.price-group .price-current',
+            '[aria-label*="current price"]'
+        ]
+        
+        for selector in alternative_selectors:
+            try:
+                alt_element = card.find_element(By.CSS_SELECTOR, selector)
+                alt_text = alt_element.text.strip()
+                if alt_text and alt_text.startswith('$'):
+                    # clean up alternative text
+                    price_match = re.match(r'(\$\d+\.?\d*)', alt_text)
+                    if price_match:
+                        return price_match.group(1)
+            except NoSuchElementException:
+                continue
+                
+        return "Unknown Price"
+        
     except NoSuchElementException:
         return "Unknown Price"
 
