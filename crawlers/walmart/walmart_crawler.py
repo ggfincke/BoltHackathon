@@ -274,10 +274,9 @@ class WalmartCrawler(BaseCrawler):
                     try:
                         if isinstance(item, dict):
                             # convert raw dict to ProductRecord
-                            from ..base_crawler import ProductRecord
                             product_record = ProductRecord(
                                 retailer_id=self.retailer_id,
-                                asin=item.get("wm_item_id"),  # Walmart uses wm_item_id
+                                wm_item_id=item.get("wm_item_id"),
                                 title=item.get("title", "Unknown Title"),
                                 price=item.get("price", "Unknown Price"),
                                 url=item.get("url", "")

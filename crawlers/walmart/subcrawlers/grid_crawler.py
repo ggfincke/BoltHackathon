@@ -165,7 +165,44 @@ def _safe_navigate_with_relaunch(driver, url, logger, use_safari=False, proxy_ma
 
 # extract Walmart item ID from a product card
 def _get_product_id_from_card(card) -> Optional[str]:
-    return card.get_attribute('data-item-id')
+    # First try to get from data-item-id attribute
+    product_id = card.get_attribute('data-item-id')
+    if product_id:
+        return product_id
+    
+    # Fallback: extract from URL if data attribute not available
+    try:
+        link = card.find_element(By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR)
+        href = link.get_attribute('href')
+        if href:
+            return _extract_walmart_id_from_url(href)
+    except:
+        pass
+    
+    return None
+
+def _extract_walmart_id_from_url(url: str) -> Optional[str]:
+    """Extract Walmart item ID from URL like https://www.walmart.com/ip/.../19758064"""
+    if not url:
+        return None
+    
+    import re
+    
+    # Pattern to match Walmart URLs ending with item ID
+    pattern = r'/ip/[^/]+/(\d+)(?:\?.*)?$'
+    match = re.search(pattern, url)
+    
+    if match:
+        return match.group(1)
+    
+    # Alternative pattern for other Walmart URL formats
+    pattern2 = r'/(\d+)(?:\?.*)?$'
+    match2 = re.search(pattern2, url)
+    
+    if match2:
+        return match2.group(1)
+    
+    return None
 
 # extract product URL from a product card element
 def _extract_product_url(driver, card) -> Optional[str]:
