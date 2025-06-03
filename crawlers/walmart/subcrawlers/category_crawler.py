@@ -272,7 +272,6 @@ def _click_all_show_buttons(driver, logger):
 
 # extract clean walmart category links
 def _extract_walmart_category_links(driver, logger, parent_node=None):
-    """Return [(name, url), …] for the current hub-and-spoke grid."""
     links = []
 
     # wait until at least one anchor appears
