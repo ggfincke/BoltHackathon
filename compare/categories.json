@@ -1,0 +1,1798 @@
+{
+  "name": "Grocery Store",
+  "departments": [
+    {
+      "department_name": "Groceries",
+      "sub_items": [
+        {
+          "name": "Fresh & Perishable",
+          "sub_items": [
+            {
+              "name": "Produce",
+              "sub_items": [
+                {
+                  "name": "Fresh Fruit",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Vegetables",
+                  "sub_items": []
+                },
+                {
+                  "name": "Salad Mixes",
+                  "sub_items": []
+                },
+                {
+                  "name": "Berries",
+                  "sub_items": []
+                },
+                {
+                  "name": "Citrus",
+                  "sub_items": []
+                },
+                {
+                  "name": "Organic Produce",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Juices",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Dressings & Dips",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Meat & Seafood",
+              "sub_items": [
+                {
+                  "name": "Beef",
+                  "sub_items": []
+                },
+                {
+                  "name": "Chicken",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fish & Seafood",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Lunch Meat",
+                  "sub_items": []
+                },
+                {
+                  "name": "Pork",
+                  "sub_items": []
+                },
+                {
+                  "name": "Turkey",
+                  "sub_items": []
+                },
+                {
+                  "name": "Bacon",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sausages",
+                  "sub_items": []
+                },
+                {
+                  "name": "Hot Dogs",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sliced Deli Meat & Deli Cheese",
+                  "sub_items": []
+                },
+                {
+                  "name": "Meatless Alternatives",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Dairy",
+              "sub_items": [
+                {
+                  "name": "Milk",
+                  "sub_items": []
+                },
+                {
+                  "name": "Milk Substitutes",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cheese",
+                  "sub_items": []
+                },
+                {
+                  "name": "Eggs",
+                  "sub_items": []
+                },
+                {
+                  "name": "Yogurt",
+                  "sub_items": []
+                },
+                {
+                  "name": "Butter & Margarine",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cottage Cheese",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cream & Whipped Toppings",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cream Cheese",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sour Cream & Dips",
+                  "sub_items": []
+                },
+                {
+                  "name": "Coffee Creamers",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Deli",
+              "sub_items": [
+                {
+                  "name": "Prepared Salads & Sandwiches",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Dips, Salsas & Hummus",
+                  "sub_items": []
+                },
+                {
+                  "name": "Artisan Cheese & Cured Meats",
+                  "sub_items": [
+                    {
+                      "name": "Specialty Cheese",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Specialty Meats",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Prepared Meals & Sides",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Soups",
+                  "sub_items": []
+                },
+                {
+                  "name": "Charcuterie Board Ideas",
+                  "sub_items": []
+                },
+                {
+                  "name": "Meal Kits",
+                  "sub_items": []
+                },
+                {
+                  "name": "Party Trays",
+                  "sub_items": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Frozen Foods",
+          "sub_items": [
+            {
+              "name": "Frozen Single Serve Meals",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Family Meals",
+              "sub_items": []
+            },
+            {
+              "name": "Ice Cream & Novelties",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Foods: Kids",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Pizza",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Breakfast Food",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Meat, Poultry & Seafood",
+              "sub_items": [
+                {
+                  "name": "Frozen Chicken",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Beef",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Fish & Seafood",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Turkey",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Meatless Alternatives",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Frozen Appetizers & Snacks",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Desserts",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Fruit",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Potatoes",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Vegetables",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Bread & Dough",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Bakery & Bread",
+          "sub_items": [
+            {
+              "name": "Breads",
+              "sub_items": []
+            },
+            {
+              "name": "Donuts & Pastries",
+              "sub_items": []
+            },
+            {
+              "name": "Cakes, Cookies & Pies",
+              "sub_items": []
+            },
+            {
+              "name": "Bagels & Muffins",
+              "sub_items": []
+            },
+            {
+              "name": "Tortillas, Pitas & Wraps",
+              "sub_items": []
+            },
+            {
+              "name": "Refrigerated Doughs",
+              "sub_items": []
+            },
+            {
+              "name": "Rolls & Buns",
+              "sub_items": []
+            },
+            {
+              "name": "Pizza Crusts",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Beverages",
+          "sub_items": [
+            {
+              "name": "Coffee",
+              "sub_items": [
+                {
+                  "name": "Ground Coffee",
+                  "sub_items": []
+                },
+                {
+                  "name": "K-Cups & Coffee Pods",
+                  "sub_items": []
+                },
+                {
+                  "name": "Single-Serve Coffee Capsules & Pods",
+                  "sub_items": []
+                },
+                {
+                  "name": "Whole Bean Coffee",
+                  "sub_items": [
+                    {
+                      "name": "Roasted Coffee Beans",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Unroasted Coffee Beans",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Espresso",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cold Brew & Bottled Coffee",
+                  "sub_items": []
+                },
+                {
+                  "name": "Iced Coffee & Cold-Brew",
+                  "sub_items": []
+                },
+                {
+                  "name": "Instant Coffee",
+                  "sub_items": []
+                },
+                {
+                  "name": "Ready to Drink Liquid Coffee",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Tea Beverages",
+              "sub_items": [
+                {
+                  "name": "Black Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Green Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "White Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fruit & Herbal Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Chai Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dark Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mate Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Kombucha Tea",
+                  "sub_items": []
+                },
+                {
+                  "name": "Tea Samplers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Bottled Iced Tea",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Juice & Cider",
+              "sub_items": [
+                {
+                  "name": "Fruit Juice Beverages",
+                  "sub_items": []
+                },
+                {
+                  "name": "Vegetable Juice Beverages",
+                  "sub_items": []
+                },
+                {
+                  "name": "Lemonade",
+                  "sub_items": []
+                },
+                {
+                  "name": "Juice Smoothie Drinks",
+                  "sub_items": []
+                },
+                {
+                  "name": "Coconut Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sparkling Juice Drinks",
+                  "sub_items": []
+                },
+                {
+                  "name": "Ciders",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Water",
+              "sub_items": [
+                {
+                  "name": "Sports Drinking Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mineral Drinking Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Seltzer Drinking Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Flavored Drinking Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Tonic Drinking Water",
+                  "sub_items": []
+                },
+                {
+                  "name": "Carbonated Drinking Water",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Soda & Pop",
+              "sub_items": []
+            },
+            {
+              "name": "Energy Drinks",
+              "sub_items": []
+            },
+            {
+              "name": "Sports Drinks",
+              "sub_items": []
+            },
+            {
+              "name": "Kids' Multi-Pack Drinks",
+              "sub_items": []
+            },
+            {
+              "name": "Hot Chocolate & Malted Drinks",
+              "sub_items": [
+                {
+                  "name": "Hot Cocoa",
+                  "sub_items": []
+                },
+                {
+                  "name": "Malted Drinks",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Cocktail Mixers",
+              "sub_items": [
+                {
+                  "name": "Bloody Mary Cocktail Mixers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Margarita Cocktail Mixers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Daiquiri Cocktail Mixers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Martini Cocktail Mixers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cocktail Bitters",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Plant-Based Milk",
+              "sub_items": []
+            },
+            {
+              "name": "Powdered & Liquid Drink Mixes",
+              "sub_items": []
+            },
+            {
+              "name": "Meal Replacement & Protein Drinks",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Pantry Staples",
+          "sub_items": [
+            {
+              "name": "Canned & Packaged Foods",
+              "sub_items": [
+                {
+                  "name": "Canned Fruit",
+                  "sub_items": [
+                    {
+                      "name": "Canned & Jarred Apples",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Peaches",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Pears",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Pineapples",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Mixed Fruits",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Berries",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Canned Vegetables",
+                  "sub_items": [
+                    {
+                      "name": "Canned & Jarred Corn",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Tomatoes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned Beans",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Mushrooms",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Jarred Artichoke Hearts",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Canned Meat",
+                  "sub_items": [
+                    {
+                      "name": "Packaged Tuna Fish",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Packaged Chicken",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Packaged Salmon",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canned & Packaged Beef",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Olives, Pickles & Peppers",
+                  "sub_items": [
+                    {
+                      "name": "Pickles",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Condiment Olives",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Pickled Peppers",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Relishes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Capers",
+                      "sub_items": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Pasta, Rice & Grains",
+              "sub_items": [
+                {
+                  "name": "Italian Pasta",
+                  "sub_items": [
+                    {
+                      "name": "Spaghetti Pasta",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Penne Pasta",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Fettuccine Pasta",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Lasagna Pasta",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Rotini Pasta",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Noodles",
+                  "sub_items": [
+                    {
+                      "name": "Rice Noodles",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Egg Noodles",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Udon Noodles",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Soba Noodles",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Rice & Grains",
+                  "sub_items": [
+                    {
+                      "name": "White Rice",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Brown Rice",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Jasmine Rice",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Basmati Rice",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Wild Rice",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Quinoa",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Couscous",
+                      "sub_items": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Boxed Meals & Side Dishes",
+              "sub_items": [
+                {
+                  "name": "Packaged Macaroni & Cheese",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Rice Dishes",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Pasta Dishes",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Soups, Broth & Chili",
+              "sub_items": [
+                {
+                  "name": "Packaged Chicken Soups",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Tomato Soups",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Vegetable Soups",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Broths",
+                  "sub_items": []
+                },
+                {
+                  "name": "Packaged Chilis",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Condiments & Salad Dressings",
+              "sub_items": [
+                {
+                  "name": "Ketchup",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mustard",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mayonnaise",
+                  "sub_items": []
+                },
+                {
+                  "name": "Salad Dressings",
+                  "sub_items": []
+                },
+                {
+                  "name": "Hot Sauce",
+                  "sub_items": []
+                },
+                {
+                  "name": "Soy Sauce",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Sauces & Marinades",
+              "sub_items": [
+                {
+                  "name": "Pasta Sauces",
+                  "sub_items": []
+                },
+                {
+                  "name": "Steak Sauce",
+                  "sub_items": []
+                },
+                {
+                  "name": "Barbecue Sauce",
+                  "sub_items": []
+                },
+                {
+                  "name": "Teriyaki Sauce",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Peanut Butter & Jelly",
+              "sub_items": [
+                {
+                  "name": "Peanut Butter",
+                  "sub_items": []
+                },
+                {
+                  "name": "Almond Butter",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cashew Butter",
+                  "sub_items": []
+                },
+                {
+                  "name": "Jams, Jellies & Preserves",
+                  "sub_items": []
+                },
+                {
+                  "name": "Honey",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Dried Beans, Lentils & Peas",
+              "sub_items": [
+                {
+                  "name": "Dried Lentils",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dried Beans",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dried Peas",
+                  "sub_items": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Cooking & Baking Supplies",
+          "sub_items": [
+            {
+              "name": "Baking Staples",
+              "sub_items": [
+                {
+                  "name": "Baking Kits & Mixes",
+                  "sub_items": [
+                    {
+                      "name": "Cake Mixes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Brownie Mixes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Cookie Mixes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Pancake & Waffle Mixes",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Bread Mixes",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Baking Chips & Cocoa",
+                  "sub_items": [
+                    {
+                      "name": "Chocolate Chips",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Baking Chocolates",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Baking Cocoa",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Flours & Meals",
+                  "sub_items": [
+                    {
+                      "name": "All-Purpose Flour",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Whole Wheat Flour",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Almond Flour",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Corn Meal",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Sugar & Sweeteners",
+                  "sub_items": [
+                    {
+                      "name": "White Sugar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Brown Sugar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Powdered Sugar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Honey",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Maple Syrup",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Artificial Sweeteners",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Baking Powder, Baking Soda & Yeast",
+                  "sub_items": [
+                    {
+                      "name": "Baking Powder",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Baking Soda",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Active Dry Yeast",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Instant Yeast",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Extracts & Food Coloring",
+                  "sub_items": [
+                    {
+                      "name": "Vanilla Extract",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Almond Extract",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Food Coloring",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Frosting & Icing",
+                  "sub_items": [
+                    {
+                      "name": "Ready-Made Frosting",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Icing Tubes",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Sprinkles, Candles & Decorations",
+                  "sub_items": [
+                    {
+                      "name": "Cake Decorations",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Birthday Candles",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Sprinkles",
+                      "sub_items": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Cooking Oil & Vinegar",
+              "sub_items": [
+                {
+                  "name": "Cooking Oils",
+                  "sub_items": [
+                    {
+                      "name": "Olive Oil",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Vegetable Oil",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Canola Oil",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Coconut Oil",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Avocado Oil",
+                      "sub_items": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Vinegars",
+                  "sub_items": [
+                    {
+                      "name": "White Vinegar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Apple Cider Vinegar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Balsamic Vinegar",
+                      "sub_items": []
+                    },
+                    {
+                      "name": "Rice Vinegar",
+                      "sub_items": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Herbs, Spices & Seasonings",
+          "sub_items": [
+            {
+              "name": "Salt & Pepper",
+              "sub_items": [
+                {
+                  "name": "Table Salt",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sea Salt",
+                  "sub_items": []
+                },
+                {
+                  "name": "Kosher Salt",
+                  "sub_items": []
+                },
+                {
+                  "name": "Ground Pepper",
+                  "sub_items": []
+                },
+                {
+                  "name": "Peppercorns",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Herbs, Rubs & Spices",
+              "sub_items": [
+                {
+                  "name": "Basil",
+                  "sub_items": []
+                },
+                {
+                  "name": "Oregano",
+                  "sub_items": []
+                },
+                {
+                  "name": "Thyme",
+                  "sub_items": []
+                },
+                {
+                  "name": "Garlic Powder",
+                  "sub_items": []
+                },
+                {
+                  "name": "Onion Powder",
+                  "sub_items": []
+                },
+                {
+                  "name": "Paprika",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cumin",
+                  "sub_items": []
+                },
+                {
+                  "name": "Chili Powder",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Seasoning Blends",
+              "sub_items": [
+                {
+                  "name": "Italian Seasoning",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cajun Seasoning",
+                  "sub_items": []
+                },
+                {
+                  "name": "Taco Seasoning",
+                  "sub_items": []
+                },
+                {
+                  "name": "BBQ Rubs",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Breadcrumbs & Seasoned Coatings",
+              "sub_items": [
+                {
+                  "name": "Plain Breadcrumbs",
+                  "sub_items": []
+                },
+                {
+                  "name": "Seasoned Breadcrumbs",
+                  "sub_items": []
+                },
+                {
+                  "name": "Panko",
+                  "sub_items": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Snacks",
+          "sub_items": [
+            {
+              "name": "Chips",
+              "sub_items": [
+                {
+                  "name": "Potato Chips & Crisps",
+                  "sub_items": []
+                },
+                {
+                  "name": "Tortilla Chips & Crisps",
+                  "sub_items": []
+                },
+                {
+                  "name": "Corn Chips & Crisps",
+                  "sub_items": []
+                },
+                {
+                  "name": "Vegetable Chips & Crisps",
+                  "sub_items": []
+                },
+                {
+                  "name": "Pita Chips & Crisps",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Crackers",
+              "sub_items": [
+                {
+                  "name": "Saltine Crackers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Graham Crackers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cheese Crackers",
+                  "sub_items": []
+                },
+                {
+                  "name": "Water Crackers",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Cookies",
+              "sub_items": [
+                {
+                  "name": "Chocolate Chip Cookies",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sandwich Cookies",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sugar Cookies",
+                  "sub_items": []
+                },
+                {
+                  "name": "Oatmeal Cookies",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Nuts",
+              "sub_items": [
+                {
+                  "name": "Almonds",
+                  "sub_items": []
+                },
+                {
+                  "name": "Peanuts",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cashews",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mixed Nuts",
+                  "sub_items": []
+                },
+                {
+                  "name": "Walnuts",
+                  "sub_items": []
+                },
+                {
+                  "name": "Pistachios",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Popcorn",
+              "sub_items": [
+                {
+                  "name": "Microwave Popcorn",
+                  "sub_items": []
+                },
+                {
+                  "name": "Popped Popcorn",
+                  "sub_items": []
+                },
+                {
+                  "name": "Unpopped Kernels",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Pretzels",
+              "sub_items": []
+            },
+            {
+              "name": "Trail & Snack Mixes",
+              "sub_items": []
+            },
+            {
+              "name": "Granola & Cereal Bars",
+              "sub_items": [
+                {
+                  "name": "Granola Bars",
+                  "sub_items": []
+                },
+                {
+                  "name": "Protein Bars",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fruit Bars",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cereal Bars",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Salsa & Dips",
+              "sub_items": [
+                {
+                  "name": "Salsa",
+                  "sub_items": []
+                },
+                {
+                  "name": "Guacamole",
+                  "sub_items": []
+                },
+                {
+                  "name": "Cheese Dips",
+                  "sub_items": []
+                },
+                {
+                  "name": "Bean Dips",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Jerky & Meat Sticks",
+              "sub_items": [
+                {
+                  "name": "Beef Jerky",
+                  "sub_items": []
+                },
+                {
+                  "name": "Turkey Jerky",
+                  "sub_items": []
+                },
+                {
+                  "name": "Meat Sticks",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Dried Fruit & Raisins",
+              "sub_items": [
+                {
+                  "name": "Raisins",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dried Cranberries",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dried Apricots",
+                  "sub_items": []
+                },
+                {
+                  "name": "Dried Mixed Fruit",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Fruit Snacks",
+              "sub_items": []
+            },
+            {
+              "name": "Snack Cakes",
+              "sub_items": [
+                {
+                  "name": "Cupcakes",
+                  "sub_items": []
+                },
+                {
+                  "name": "Donuts",
+                  "sub_items": []
+                },
+                {
+                  "name": "Muffins",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Snack Variety Packs",
+              "sub_items": []
+            },
+            {
+              "name": "Snack Packs & On the Go Snacks",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Candy",
+          "sub_items": [
+            {
+              "name": "Chocolate Candy",
+              "sub_items": [
+                {
+                  "name": "Chocolate Bars",
+                  "sub_items": []
+                },
+                {
+                  "name": "Chocolate Covered Foods",
+                  "sub_items": []
+                },
+                {
+                  "name": "Chocolate Candy Assortments",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Gummy & Chewy Candy",
+              "sub_items": [
+                {
+                  "name": "Gummy Bears",
+                  "sub_items": []
+                },
+                {
+                  "name": "Gummy Worms",
+                  "sub_items": []
+                },
+                {
+                  "name": "Taffy",
+                  "sub_items": []
+                },
+                {
+                  "name": "Licorice",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Hard Candy",
+              "sub_items": [
+                {
+                  "name": "Lollipops",
+                  "sub_items": []
+                },
+                {
+                  "name": "Hard Candies",
+                  "sub_items": []
+                },
+                {
+                  "name": "Candy Canes",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Gum & Mints",
+              "sub_items": [
+                {
+                  "name": "Chewing Gum",
+                  "sub_items": []
+                },
+                {
+                  "name": "Breath Mints",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Candy Variety Packs",
+              "sub_items": []
+            },
+            {
+              "name": "Premium Candy",
+              "sub_items": []
+            },
+            {
+              "name": "Marshmallows",
+              "sub_items": []
+            },
+            {
+              "name": "Sour Candies",
+              "sub_items": []
+            },
+            {
+              "name": "Caramel Candy",
+              "sub_items": [
+                {
+                  "name": "Toffee",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fudge",
+                  "sub_items": []
+                },
+                {
+                  "name": "Nougat",
+                  "sub_items": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Breakfast & Cereal",
+          "sub_items": [
+            {
+              "name": "Cereal & Granola",
+              "sub_items": [
+                {
+                  "name": "Cold Breakfast Cereals",
+                  "sub_items": []
+                },
+                {
+                  "name": "Hot Cereals",
+                  "sub_items": []
+                },
+                {
+                  "name": "Granola",
+                  "sub_items": []
+                },
+                {
+                  "name": "Muesli",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Oatmeal",
+              "sub_items": [
+                {
+                  "name": "Instant Oatmeal",
+                  "sub_items": []
+                },
+                {
+                  "name": "Steel Cut Oats",
+                  "sub_items": []
+                },
+                {
+                  "name": "Rolled Oats",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Pancake Mixes, Waffle Mixes & Syrup",
+              "sub_items": [
+                {
+                  "name": "Pancake Mix",
+                  "sub_items": []
+                },
+                {
+                  "name": "Waffle Mix",
+                  "sub_items": []
+                },
+                {
+                  "name": "Maple Syrup",
+                  "sub_items": []
+                },
+                {
+                  "name": "Pancake Syrup",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Toaster Pastries",
+              "sub_items": [
+                {
+                  "name": "Pop-Tarts",
+                  "sub_items": []
+                },
+                {
+                  "name": "Toaster Strudel",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Instant Breakfast Drinks",
+              "sub_items": []
+            },
+            {
+              "name": "Applesauce & Fruit Cups",
+              "sub_items": [
+                {
+                  "name": "Applesauce Cups",
+                  "sub_items": []
+                },
+                {
+                  "name": "Mixed Fruit Cups",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Organic Breakfast & Cereal",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Baby Food",
+          "sub_items": [
+            {
+              "name": "Baby Food Jars & Pouches",
+              "sub_items": []
+            },
+            {
+              "name": "Baby Formula",
+              "sub_items": [
+                {
+                  "name": "Powder Baby Formula",
+                  "sub_items": []
+                },
+                {
+                  "name": "Liquid Baby Formula",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Baby Cereal",
+              "sub_items": []
+            },
+            {
+              "name": "Baby Snacks",
+              "sub_items": [
+                {
+                  "name": "Baby Crackers & Biscuits",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Baby Beverages",
+              "sub_items": [
+                {
+                  "name": "Baby Juices",
+                  "sub_items": []
+                },
+                {
+                  "name": "Baby Water",
+                  "sub_items": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Wine, Beer & Liquor",
+          "sub_items": [
+            {
+              "name": "Wine",
+              "sub_items": [
+                {
+                  "name": "Red Wine",
+                  "sub_items": []
+                },
+                {
+                  "name": "White Wine",
+                  "sub_items": []
+                },
+                {
+                  "name": "Rose Wine",
+                  "sub_items": []
+                },
+                {
+                  "name": "Champagne & Sparkling Wine",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Beer",
+              "sub_items": [
+                {
+                  "name": "Craft Beer",
+                  "sub_items": []
+                },
+                {
+                  "name": "Domestic Beer",
+                  "sub_items": []
+                },
+                {
+                  "name": "Import Beer",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Liquor",
+              "sub_items": [
+                {
+                  "name": "Vodka",
+                  "sub_items": []
+                },
+                {
+                  "name": "Whiskey",
+                  "sub_items": []
+                },
+                {
+                  "name": "Bourbon",
+                  "sub_items": []
+                },
+                {
+                  "name": "Tequila",
+                  "sub_items": []
+                },
+                {
+                  "name": "Rum",
+                  "sub_items": []
+                },
+                {
+                  "name": "Gin",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Hard Seltzers & Canned Cocktails",
+              "sub_items": []
+            },
+            {
+              "name": "Non-Alcoholic Drinks",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Fresh Flowers & Plants",
+          "sub_items": [
+            {
+              "name": "Fresh Cut Flowers",
+              "sub_items": [
+                {
+                  "name": "Fresh Cut Roses",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Cut Mixed Bouquets",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Cut Tulips",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Cut Lilies",
+                  "sub_items": []
+                },
+                {
+                  "name": "Fresh Cut Orchids",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Live Indoor Plants",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Flower & Plant Centerpieces",
+              "sub_items": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
