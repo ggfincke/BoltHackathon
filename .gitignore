@@ -6,3 +6,6 @@
 *.pyo
 *.pyc
 .env
+
+# crawl output; really large files
+normalizing/crawls

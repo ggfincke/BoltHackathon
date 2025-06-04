@@ -898,10 +898,6 @@
                 {
                   "name": "Jams, Jellies & Preserves",
                   "sub_items": []
-                },
-                {
-                  "name": "Honey",
-                  "sub_items": []
                 }
               ]
             },
@@ -1018,10 +1014,6 @@
                     },
                     {
                       "name": "Honey",
-                      "sub_items": []
-                    },
-                    {
-                      "name": "Maple Syrup",
                       "sub_items": []
                     },
                     {
