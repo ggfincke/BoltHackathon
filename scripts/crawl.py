@@ -14,17 +14,20 @@ Usage:
     python crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
 """
 
-import argparse
-import logging
 import sys
 import os
-from pathlib import Path
+import argparse
+import asyncio
+import redis
 import json
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Any, Optional
 
-# add the crawlers directory to the Python path
-sys.path.append(str(Path(__file__).parent / "crawlers"))
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))
 
-# import crawler classes
 from crawlers.amazon.amazon_crawler import AmazonCrawler
 from crawlers.target.target_crawler import TargetCrawler
 from crawlers.walmart.walmart_crawler import WalmartCrawler
@@ -40,19 +43,19 @@ RETAILER_CONFIG = {
         "class": AmazonCrawler,
         "retailer_id": 1,
         "description": "Amazon product crawler",
-        "default_hierarchy_file": "crawlers/amazon/amazon_grocery_hierarchy.json"
+        "default_hierarchy_file": "src/crawlers/amazon/amazon_grocery_hierarchy.json"
     },
     "target": {
         "class": TargetCrawler,
         "retailer_id": 2,
         "description": "Target product crawler",
-        "default_hierarchy_file": "crawlers/target/target_grocery_hierarchy.json"
+        "default_hierarchy_file": "src/crawlers/target/target_grocery_hierarchy.json"
     },
     "walmart": {
         "class": WalmartCrawler,
         "retailer_id": 3,
         "description": "Walmart product crawler",
-        "default_hierarchy_file": "crawlers/walmart/walmart_grocery_hierarchy.json"
+        "default_hierarchy_file": "src/crawlers/walmart/walmart_grocery_hierarchy.json"
     }
 }
 
