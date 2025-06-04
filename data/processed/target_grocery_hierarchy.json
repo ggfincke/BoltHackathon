@@ -1,0 +1,1017 @@
+{
+  "departments": [
+    {
+      "department_name": "Target Grocery",
+      "link_url": "https://www.target.com/c/grocery/-/N-5xt1a",
+      "sub_items": [
+        {
+          "name": "Grocery Deals",
+          "link_url": "https://www.target.com/c/grocery-deals/-/N-k4uyq",
+          "sub_items": [
+            {
+              "name": "Beverage Deals",
+              "link_url": "https://www.target.com/c/beverage-deals/-/N-bco2n",
+              "sub_items": []
+            },
+            {
+              "name": "Snack Deals",
+              "link_url": "https://www.target.com/c/snack-deals/-/N-18j28",
+              "sub_items": []
+            },
+            {
+              "name": "Coffee Deals",
+              "link_url": "https://www.target.com/c/coffee-deals/-/N-ku1vu",
+              "sub_items": []
+            },
+            {
+              "name": "Pantry Deals",
+              "link_url": "https://www.target.com/c/pantry-deals/-/N-6zb8v",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Foods Deals",
+              "link_url": "https://www.target.com/c/frozen-foods-deals/-/N-xi30j",
+              "sub_items": []
+            },
+            {
+              "name": "Breakfast & Cereal Deals",
+              "link_url": "https://www.target.com/c/breakfast-cereal-deals/-/N-e2zdw",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Frozen Foods",
+          "link_url": "https://www.target.com/c/frozen-foods-grocery/-/N-5xszd",
+          "sub_items": [
+            {
+              "name": "Frozen Single Serve Meals",
+              "link_url": "https://www.target.com/c/frozen-single-serve-meals-foods-grocery/-/N-wdysv",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Family Meals",
+              "link_url": "https://www.target.com/c/frozen-family-meals-foods-grocery/-/N-a3dpa",
+              "sub_items": []
+            },
+            {
+              "name": "Ice Cream & Novelties",
+              "link_url": "https://www.target.com/c/ice-cream-frozen-foods-grocery/-/N-5xsz2",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Foods: Kids",
+              "link_url": "https://www.target.com/c/frozen-foods-kids/-/N-rb4pu",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Pizza",
+              "link_url": "https://www.target.com/c/frozen-pizza-foods-grocery/-/N-5xsz4",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Breakfast Food",
+              "link_url": "https://www.target.com/c/frozen-breakfast-food-foods-grocery/-/N-5xsza",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Meat, Poultry & Seafood",
+              "link_url": "https://www.target.com/c/frozen-meat-poultry-seafood-foods-grocery/-/N-5xsz5",
+              "sub_items": [
+                {
+                  "name": "Frozen Chicken",
+                  "link_url": "https://www.target.com/c/frozen-chicken-meat-poultry-seafood-foods-grocery/-/N-zmsrg",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Beef",
+                  "link_url": "https://www.target.com/c/frozen-beef-meat-poultry-seafood-foods-grocery/-/N-1fu00",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Fish & Seafood",
+                  "link_url": "https://www.target.com/c/frozen-fish-seafood-meat-poultry-foods-grocery/-/N-cs8z5",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Turkey",
+                  "link_url": "https://www.target.com/c/frozen-turkey-meat-poultry-seafood-foods-grocery/-/N-bmm3h",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frozen Meatless Alternatives",
+                  "link_url": "https://www.target.com/c/frozen-meatless-alternatives-meat-poultry-seafood-foods-grocery/-/N-7taqq",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Frozen Appetizers & Snacks",
+              "link_url": "https://www.target.com/c/frozen-appetizers-snacks-foods-grocery/-/N-5xszb",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Desserts",
+              "link_url": "https://www.target.com/c/frozen-desserts-foods-grocery/-/N-5xsz9",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Fruit",
+              "link_url": "https://www.target.com/c/frozen-fruit-foods-grocery/-/N-5xsz7",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Potatoes",
+              "link_url": "https://www.target.com/c/frozen-potatoes-foods-grocery/-/N-a479c",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Vegetables",
+              "link_url": "https://www.target.com/c/frozen-vegetables-foods-grocery/-/N-5xsz3",
+              "sub_items": []
+            },
+            {
+              "name": "Frozen Bread & Dough",
+              "link_url": "https://www.target.com/c/frozen-bread-dough-foods-grocery/-/N-4tglw",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Snacks",
+          "link_url": "https://www.target.com/c/snacks-grocery/-/N-5xsy9",
+          "sub_items": [
+            {
+              "name": "Snack Variety Packs",
+              "link_url": "https://www.target.com/c/snack-variety-packs/-/N-sjs32",
+              "sub_items": []
+            },
+            {
+              "name": "Chips",
+              "link_url": "https://www.target.com/c/chips-snacks-grocery/-/N-5xsy7",
+              "sub_items": []
+            },
+            {
+              "name": "Cookies",
+              "link_url": "https://www.target.com/c/cookies-snacks-grocery/-/N-54v3e",
+              "sub_items": []
+            },
+            {
+              "name": "Crackers",
+              "link_url": "https://www.target.com/c/crackers-snacks-grocery/-/N-5xsy6",
+              "sub_items": []
+            },
+            {
+              "name": "Nuts",
+              "link_url": "https://www.target.com/c/nuts-snacks-grocery/-/N-tc851",
+              "sub_items": []
+            },
+            {
+              "name": "Toaster Pastries",
+              "link_url": "https://www.target.com/c/toaster-pastries-breakfast-cereal-grocery/-/N-5xt0i",
+              "sub_items": []
+            },
+            {
+              "name": "Trail & Snack Mixes",
+              "link_url": "https://www.target.com/c/trail-snack-mixes-snacks-grocery/-/N-5xsy1",
+              "sub_items": []
+            },
+            {
+              "name": "Pretzels",
+              "link_url": "https://www.target.com/c/pretzels-snacks-grocery/-/N-f7azc",
+              "sub_items": []
+            },
+            {
+              "name": "Salsa & Dips",
+              "link_url": "https://www.target.com/c/dips-spreads-chips-snacks-cookies-grocery/-/N-5xsy5",
+              "sub_items": []
+            },
+            {
+              "name": "Granola & Cereal Bars",
+              "link_url": "https://www.target.com/c/granola-cereal-bars-snacks-grocery/-/N-4ydo1",
+              "sub_items": []
+            },
+            {
+              "name": "Popcorn",
+              "link_url": "https://www.target.com/c/popcorn-snacks-grocery/-/N-5xsy0",
+              "sub_items": []
+            },
+            {
+              "name": "Fruit Snacks",
+              "link_url": "https://www.target.com/c/fruit-snacks-grocery/-/N-5xsy4",
+              "sub_items": []
+            },
+            {
+              "name": "Dried Fruit & Raisins",
+              "link_url": "https://www.target.com/c/dried-fruit-raisins-snacks-grocery/-/N-5xt0y",
+              "sub_items": []
+            },
+            {
+              "name": "Jerky & Meat Sticks",
+              "link_url": "https://www.target.com/c/jerky-meat-sticks-snacks-grocery/-/N-5xsy2",
+              "sub_items": []
+            },
+            {
+              "name": "Snack Cakes",
+              "link_url": "https://www.target.com/c/snack-cakes-snacks-grocery/-/N-5xsxz",
+              "sub_items": []
+            },
+            {
+              "name": "Applesauce & Fruit Cups",
+              "link_url": "https://www.target.com/c/applesauce-fruit-cups-snacks-grocery/-/N-5xsy8",
+              "sub_items": []
+            },
+            {
+              "name": "Gelatin & Pudding",
+              "link_url": "https://www.target.com/c/gelatin-pudding-snacks-grocery/-/N-5xsy3",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Meat & Seafood",
+          "link_url": "https://www.target.com/c/meat-seafood-grocery/-/N-5xsyh",
+          "sub_items": [
+            {
+              "name": "Beef",
+              "link_url": "https://www.target.com/c/beef-meat-seafood-grocery/-/N-4tgi8",
+              "sub_items": []
+            },
+            {
+              "name": "Chicken",
+              "link_url": "https://www.target.com/c/chicken-meat-seafood-grocery/-/N-4tgi7",
+              "sub_items": []
+            },
+            {
+              "name": "Fish & Seafood",
+              "link_url": "https://www.target.com/c/seafood-meat-grocery/-/N-4tgi0",
+              "sub_items": []
+            },
+            {
+              "name": "Packaged Lunch Meat",
+              "link_url": "https://www.target.com/c/packaged-lunch-meat-deli-grocery/-/N-4tgi6",
+              "sub_items": []
+            },
+            {
+              "name": "Pork",
+              "link_url": "https://www.target.com/c/pork-meat-seafood-grocery/-/N-4tgi2",
+              "sub_items": []
+            },
+            {
+              "name": "Turkey",
+              "link_url": "https://www.target.com/c/turkey-meat-seafood-grocery/-/N-4tghz",
+              "sub_items": []
+            },
+            {
+              "name": "Bacon",
+              "link_url": "https://www.target.com/c/bacon-meat-seafood-grocery/-/N-4tgi9",
+              "sub_items": []
+            },
+            {
+              "name": "Sausages",
+              "link_url": "https://www.target.com/c/sausages-meat-seafood-grocery/-/N-p9cdq",
+              "sub_items": []
+            },
+            {
+              "name": "Hot Dogs",
+              "link_url": "https://www.target.com/c/hot-dogs-meat-seafood-grocery/-/N-4tgi5",
+              "sub_items": []
+            },
+            {
+              "name": "Sliced Deli Meat & Deli Cheese",
+              "link_url": "https://www.target.com/c/sliced-deli-meat-cheese-grocery/-/N-zomk2",
+              "sub_items": []
+            },
+            {
+              "name": "Meatless Alternatives",
+              "link_url": "https://www.target.com/c/meatless-alternatives-meat-seafood-grocery/-/N-4tgi3",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Produce",
+          "link_url": "https://www.target.com/c/produce-grocery/-/N-u7fty",
+          "sub_items": [
+            {
+              "name": "Fresh Fruit",
+              "link_url": "https://www.target.com/c/fresh-fruit-produce-grocery/-/N-4tglt",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Vegetables",
+              "link_url": "https://www.target.com/c/fresh-vegetables-produce-grocery/-/N-4tglh",
+              "sub_items": []
+            },
+            {
+              "name": "Salad Mixes",
+              "link_url": "https://www.target.com/c/salad-mixes-produce-grocery/-/N-by5pi",
+              "sub_items": []
+            },
+            {
+              "name": "Berries",
+              "link_url": "https://www.target.com/c/berries/-/N-h0uds",
+              "sub_items": []
+            },
+            {
+              "name": "Citrus",
+              "link_url": "https://www.target.com/c/citrus/-/N-ofsqb",
+              "sub_items": []
+            },
+            {
+              "name": "Organic Produce",
+              "link_url": "https://www.target.com/c/organic-produce/-/N-h6rph",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Juices",
+              "link_url": "https://www.target.com/c/fresh-juices-produce-grocery/-/N-c5lky",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Dressings & Dips",
+              "link_url": "https://www.target.com/c/fresh-dressings-dips-produce-grocery/-/N-flfjt",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Bakery & Bread",
+          "link_url": "https://www.target.com/c/bakery-bread-grocery/-/N-5xt19",
+          "sub_items": [
+            {
+              "name": "Breads",
+              "link_url": "https://www.target.com/c/breads-bakery-bread-grocery/-/N-5xt18",
+              "sub_items": []
+            },
+            {
+              "name": "Donuts & Pastries",
+              "link_url": "https://www.target.com/c/donuts-pastries-bakery-bread-grocery/-/N-5xt15",
+              "sub_items": []
+            },
+            {
+              "name": "Cakes, Cookies & Pies",
+              "link_url": "https://www.target.com/c/cakes-cookies-pies-bakery-bread-grocery/-/N-5xt17",
+              "sub_items": []
+            },
+            {
+              "name": "Bagels & Muffins",
+              "link_url": "https://www.target.com/c/bagels-muffins-bakery-bread-grocery/-/N-4smkx",
+              "sub_items": []
+            },
+            {
+              "name": "Tortillas, Pitas & Wraps",
+              "link_url": "https://www.target.com/c/tortillas-pitas-wraps-bakery-bread-grocery/-/N-4ss7f",
+              "sub_items": []
+            },
+            {
+              "name": "Refrigerated Doughs",
+              "link_url": "https://www.target.com/c/refrigerated-doughs-dairy-grocery/-/N-4tgo6",
+              "sub_items": []
+            },
+            {
+              "name": "Rolls & Buns",
+              "link_url": "https://www.target.com/c/rolls-buns-bakery-bread-grocery/-/N-c51ff",
+              "sub_items": []
+            },
+            {
+              "name": "Pizza Crusts",
+              "link_url": "https://www.target.com/c/pizza-crusts-bakery-bread-grocery/-/N-5xt14",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Beverages",
+          "link_url": "https://www.target.com/c/beverages-grocery/-/N-5xt0r",
+          "sub_items": [
+            {
+              "name": "Juice & Cider",
+              "link_url": "https://www.target.com/c/juice-cider-beverages-grocery/-/N-5xt0o",
+              "sub_items": []
+            },
+            {
+              "name": "Kids’ Multi-Pack Drinks",
+              "link_url": "https://www.target.com/c/kids-multi-pack-drinks/-/N-5j6q6",
+              "sub_items": []
+            },
+            {
+              "name": "Soda & Pop",
+              "link_url": "https://www.target.com/c/soda-pop-beverages-food-beverage/-/N-5xt0m",
+              "sub_items": []
+            },
+            {
+              "name": "Sports Drinks",
+              "link_url": "https://www.target.com/c/sports-drinks-beverages-grocery/-/N-75dvf",
+              "sub_items": []
+            },
+            {
+              "name": "Water",
+              "link_url": "https://www.target.com/c/water-beverages-grocery/-/N-5xt0k",
+              "sub_items": []
+            },
+            {
+              "name": "Energy Drinks",
+              "link_url": "https://www.target.com/c/energy-drinks-beverages-grocery/-/N-4uez2",
+              "sub_items": []
+            },
+            {
+              "name": "Milk",
+              "link_url": "https://www.target.com/c/milk-dairy-grocery/-/N-5xszh",
+              "sub_items": []
+            },
+            {
+              "name": "Milk Substitutes",
+              "link_url": "https://www.target.com/c/milk-substitutes-dairy-grocery/-/N-zkvwk",
+              "sub_items": []
+            },
+            {
+              "name": "Tea",
+              "link_url": "https://www.target.com/c/tea-beverages-grocery/-/N-4yi5o",
+              "sub_items": []
+            },
+            {
+              "name": "Cocktail Mixers",
+              "link_url": "https://www.target.com/c/cocktail-mixers-beverages-grocery/-/N-4uez3",
+              "sub_items": []
+            },
+            {
+              "name": "Cocoa",
+              "link_url": "https://www.target.com/c/cocoa-beverages-grocery/-/N-4yi5n",
+              "sub_items": []
+            },
+            {
+              "name": "Powdered & Liquid Drink Mixes",
+              "link_url": "https://www.target.com/c/powdered-liquid-drink-mixes-beverages-grocery/-/N-5xt0n",
+              "sub_items": []
+            },
+            {
+              "name": "Protein & Meal Replacement Drinks",
+              "link_url": "https://www.target.com/c/protein-shakes-meal-replacement-drinks/-/N-4uez0",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Pantry",
+          "link_url": "https://www.target.com/c/pantry-grocery/-/N-5xt13",
+          "sub_items": [
+            {
+              "name": "Bulk Pantry",
+              "link_url": "https://www.target.com/c/bulk-pantry/-/N-gev3n",
+              "sub_items": []
+            },
+            {
+              "name": "Boxed Meals & Side Dishes",
+              "link_url": "https://www.target.com/c/boxed-meals-side-dishes-pantry-grocery/-/N-5xsyf",
+              "sub_items": []
+            },
+            {
+              "name": "Pasta, Rice & Grains",
+              "link_url": "https://www.target.com/c/pasta-rice-grains-pantry-grocery/-/N-5xsyc",
+              "sub_items": []
+            },
+            {
+              "name": "Canned & Packaged Foods",
+              "link_url": "https://www.target.com/c/canned-packaged-foods-pantry-grocery/-/N-5xt05",
+              "sub_items": [
+                {
+                  "name": "Canned Fruit",
+                  "link_url": "https://www.target.com/c/canned-fruit-packaged-foods-pantry-grocery/-/N-6peje",
+                  "sub_items": []
+                },
+                {
+                  "name": "Canned Vegetables",
+                  "link_url": "https://www.target.com/c/canned-vegetables-packaged-foods-pantry-grocery/-/N-sl97t",
+                  "sub_items": []
+                },
+                {
+                  "name": "Canned Meat",
+                  "link_url": "https://www.target.com/c/canned-meat-packaged-foods-pantry-grocery/-/N-2m8ve",
+                  "sub_items": []
+                },
+                {
+                  "name": "Canned Tuna & Seafood",
+                  "link_url": "https://www.target.com/c/canned-tuna-seafood-packaged-foods-pantry-grocery/-/N-7yq1l",
+                  "sub_items": []
+                },
+                {
+                  "name": "Olives, Pickles & Peppers",
+                  "link_url": "https://www.target.com/c/olives-pickles-peppers-canned-packaged-foods-pantry-grocery/-/N-40p8x",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Sauces & Marinades",
+              "link_url": "https://www.target.com/c/sauces-marinades-pantry-grocery/-/N-4tg6h",
+              "sub_items": []
+            },
+            {
+              "name": "Condiments & Salad Dressings",
+              "link_url": "https://www.target.com/c/condiments-salad-dressings-pantry-grocery/-/N-5xszw",
+              "sub_items": []
+            },
+            {
+              "name": "Peanut Butter & Jelly",
+              "link_url": "https://www.target.com/c/peanut-butter-jelly-pantry-grocery/-/N-5xszr",
+              "sub_items": []
+            },
+            {
+              "name": "Soups, Broth & Chili",
+              "link_url": "https://www.target.com/c/soups-broth-chili-pantry-grocery/-/N-5xszx",
+              "sub_items": []
+            },
+            {
+              "name": "Spices & Seasonings",
+              "link_url": "https://www.target.com/c/spices-seasonings-pantry-grocery/-/N-5xszu",
+              "sub_items": [
+                {
+                  "name": "Breadcrumbs & Seasoned Coatings",
+                  "link_url": "https://www.target.com/c/breadcrumbs-seasoned-coatings-spices-seasonings-pantry-grocery/-/N-4u9lh",
+                  "sub_items": []
+                },
+                {
+                  "name": "Herbs, Rubs & Spices",
+                  "link_url": "https://www.target.com/c/herbs-rubs-spices-seasonings-pantry-grocery/-/N-4u9lf",
+                  "sub_items": []
+                },
+                {
+                  "name": "Salt & Pepper",
+                  "link_url": "https://www.target.com/c/salt-pepper-spices-seasonings-pantry-grocery/-/N-4u9lg",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Baking Staples",
+              "link_url": "https://www.target.com/c/baking-staples-pantry-grocery/-/N-4u9lv",
+              "sub_items": [
+                {
+                  "name": "Baking Chips & Cocoa",
+                  "link_url": "https://www.target.com/c/baking-chips-cocoa-staples-pantry-grocery/-/N-5xt12",
+                  "sub_items": []
+                },
+                {
+                  "name": "Baking Kits & Mixes",
+                  "link_url": "https://www.target.com/c/baking-kits-mixes-staples-pantry-grocery/-/N-5xt11",
+                  "sub_items": []
+                },
+                {
+                  "name": "Baking Powder, Baking Soda & Yeast",
+                  "link_url": "https://www.target.com/c/baking-powder-soda-yeast-staples-pantry-grocery/-/N-5xt0s",
+                  "sub_items": []
+                },
+                {
+                  "name": "Condensed & Powdered Milk",
+                  "link_url": "https://www.target.com/c/condensed-powdered-milk-baking-staples-pantry-grocery/-/N-5xt03",
+                  "sub_items": []
+                },
+                {
+                  "name": "Extracts & Food Coloring",
+                  "link_url": "https://www.target.com/c/extracts-food-coloring-baking-staples-pantry-grocery/-/N-4u9lt",
+                  "sub_items": []
+                },
+                {
+                  "name": "Flours & Meals",
+                  "link_url": "https://www.target.com/c/flours-meals-baking-staples-pantry-grocery/-/N-4u9lu",
+                  "sub_items": []
+                },
+                {
+                  "name": "Frosting & Icing",
+                  "link_url": "https://www.target.com/c/frosting-icing-baking-staples-pantry-grocery/-/N-4u9ls",
+                  "sub_items": []
+                },
+                {
+                  "name": "Marshmallows",
+                  "link_url": "https://www.target.com/c/marshmallows-baking-staples-pantry-grocery/-/N-5xt0v",
+                  "sub_items": []
+                },
+                {
+                  "name": "Pie Crusts & Filling",
+                  "link_url": "https://www.target.com/c/pie-crusts-filling-baking-staples-pantry-grocery/-/N-4u9lr",
+                  "sub_items": []
+                },
+                {
+                  "name": "Sprinkles, Candles & Decorations",
+                  "link_url": "https://www.target.com/c/sprinkles-candles-decorations-baking-staples-pantry-grocery/-/N-5xt0z",
+                  "sub_items": []
+                },
+                {
+                  "name": "Syrups & Sauces",
+                  "link_url": "https://www.target.com/c/syrups-sauces-baking-staples-pantry-grocery/-/N-5xt0w",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Cooking Oil & Vinegar",
+              "link_url": "https://www.target.com/c/cooking-oil-vinegar-pantry-grocery/-/N-4u9ly",
+              "sub_items": []
+            },
+            {
+              "name": "Sugar & Sweeteners",
+              "link_url": "https://www.target.com/c/sugar-sweeteners-pantry-grocery/-/N-5xt0u",
+              "sub_items": []
+            },
+            {
+              "name": "Emergency Food",
+              "link_url": "https://www.target.com/c/emergency-food-pantry-grocery/-/N-4ykz6",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Breakfast & Cereal",
+          "link_url": "https://www.target.com/c/breakfast-cereal-grocery/-/N-wo2mp",
+          "sub_items": [
+            {
+              "name": "Cereal & Granola",
+              "link_url": "https://www.target.com/c/cereal-granola-breakfast-grocery/-/N-5xt0g",
+              "sub_items": []
+            },
+            {
+              "name": "Oatmeal",
+              "link_url": "https://www.target.com/c/oatmeal-breakfast-cereal-grocery/-/N-8tu6y",
+              "sub_items": []
+            },
+            {
+              "name": "Pancake Mixes, Waffle Mixes & Syrup",
+              "link_url": "https://www.target.com/c/pancake-mixes-waffle-syrup-breakfast-cereal-grocery/-/N-5xt0f",
+              "sub_items": []
+            },
+            {
+              "name": "Organic Breakfast & Cereal",
+              "link_url": "https://www.target.com/c/organic-breakfast-cereal/-/N-qrydr",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Dairy",
+          "link_url": "https://www.target.com/c/dairy-grocery/-/N-5xszm",
+          "sub_items": [
+            {
+              "name": "Cheese",
+              "link_url": "https://www.target.com/c/cheese-dairy-grocery/-/N-5xszk",
+              "sub_items": []
+            },
+            {
+              "name": "Eggs",
+              "link_url": "https://www.target.com/c/eggs-dairy-grocery/-/N-5xszi",
+              "sub_items": []
+            },
+            {
+              "name": "Yogurt",
+              "link_url": "https://www.target.com/c/yogurt-dairy-grocery/-/N-5xszf",
+              "sub_items": []
+            },
+            {
+              "name": "Butter & Margarine",
+              "link_url": "https://www.target.com/c/butter-margarine-dairy-grocery/-/N-5xszl",
+              "sub_items": []
+            },
+            {
+              "name": "Cottage Cheese",
+              "link_url": "https://www.target.com/c/cottage-cheese-dairy-grocery/-/N-4tgo9",
+              "sub_items": []
+            },
+            {
+              "name": "Cream & Whipped Toppings",
+              "link_url": "https://www.target.com/c/cream-whipped-toppings-dairy-grocery/-/N-5xszj",
+              "sub_items": []
+            },
+            {
+              "name": "Cream Cheese",
+              "link_url": "https://www.target.com/c/cream-cheese-dairy-grocery/-/N-4tgo8",
+              "sub_items": []
+            },
+            {
+              "name": "Sour Cream & Dips",
+              "link_url": "https://www.target.com/c/sour-cream-dips-dairy-grocery/-/N-5xszg",
+              "sub_items": []
+            },
+            {
+              "name": "Coffee Creamers",
+              "link_url": "https://www.target.com/c/coffee-creamers-beverages-grocery/-/N-5xszv",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Deli",
+          "link_url": "https://www.target.com/c/deli-grocery/-/N-5hp74",
+          "sub_items": [
+            {
+              "name": "Prepared Salads & Sandwiches",
+              "link_url": "https://www.target.com/c/prepared-salads-sandwiches-deli-grocery/-/N-mdt7r",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Dips, Salsas & Hummus",
+              "link_url": "https://www.target.com/c/fresh-dips-salsas-hummus-deli-grocery/-/N-cjg5k",
+              "sub_items": []
+            },
+            {
+              "name": "Artisan Cheese & Cured Meats",
+              "link_url": "https://www.target.com/c/artisan-cheese-cured-meats-deli-grocery/-/N-czzeu",
+              "sub_items": [
+                {
+                  "name": "Specialty Cheese",
+                  "link_url": "https://www.target.com/c/specialty-cheese/-/N-jfn2p",
+                  "sub_items": []
+                },
+                {
+                  "name": "Specialty Meats",
+                  "link_url": "https://www.target.com/c/specialty-meats/-/N-r4ma6",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Prepared Meals & Sides",
+              "link_url": "https://www.target.com/c/prepared-meals-sides-deli-grocery/-/N-7dopp",
+              "sub_items": []
+            },
+            {
+              "name": "Fresh Soups",
+              "link_url": "https://www.target.com/c/fresh-soups-deli-grocery/-/N-p2osw",
+              "sub_items": []
+            },
+            {
+              "name": "Charcuterie Board Ideas",
+              "link_url": "https://www.target.com/c/charcuterie-board-ideas/-/N-sv5if",
+              "sub_items": []
+            },
+            {
+              "name": "Meal Kits",
+              "link_url": "https://www.target.com/c/meal-kits-deli-grocery/-/N-fql6w",
+              "sub_items": []
+            },
+            {
+              "name": "Party Trays",
+              "link_url": "https://www.target.com/c/party-trays-deli-grocery/-/N-tgba0",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Wine, Beer & Liquor",
+          "link_url": "https://www.target.com/c/wine-beer-liquor-beverages/-/N-5n5q6",
+          "sub_items": [
+            {
+              "name": "Wine",
+              "link_url": "https://www.target.com/c/wine-beer-liquor-grocery/-/N-5xsxv",
+              "sub_items": [
+                {
+                  "name": "White Wine",
+                  "link_url": "https://www.target.com/c/white-wine-beer-liquor-grocery/-/N-yskry",
+                  "sub_items": []
+                },
+                {
+                  "name": "Red Wine",
+                  "link_url": "https://www.target.com/c/red-wine-beer-liquor-grocery/-/N-fups0",
+                  "sub_items": []
+                },
+                {
+                  "name": "Rose Wine",
+                  "link_url": "https://www.target.com/c/rose-wine-beer-liquor-grocery/-/N-qqz02",
+                  "sub_items": []
+                },
+                {
+                  "name": "Champagne & Sparkling Wine",
+                  "link_url": "https://www.target.com/c/champagne-sparkling-wine-beer-liquor-grocery/-/N-dd9ke",
+                  "sub_items": []
+                },
+                {
+                  "name": "Perfect Pairings",
+                  "link_url": "https://www.target.com/c/perfect-pairings/-/N-kpr3f",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Hard Seltzers & Canned Cocktails",
+              "link_url": "https://www.target.com/c/hard-seltzers/-/N-mar4j",
+              "sub_items": []
+            },
+            {
+              "name": "Beer",
+              "link_url": "https://www.target.com/c/beer-wine-liquor-grocery/-/N-5xsxx",
+              "sub_items": [
+                {
+                  "name": "All Beer",
+                  "link_url": "https://www.target.com/c/all-beer/-/N-d7mti",
+                  "sub_items": []
+                },
+                {
+                  "name": "Craft Beer",
+                  "link_url": "https://www.target.com/c/craft-beer-wine-liquor-grocery/-/N-o3thc",
+                  "sub_items": []
+                },
+                {
+                  "name": "Domestic Beer",
+                  "link_url": "https://www.target.com/c/domestic-beer-wine-liquor-grocery/-/N-jsxeu",
+                  "sub_items": []
+                },
+                {
+                  "name": "Import Beer",
+                  "link_url": "https://www.target.com/c/import-beer-wine-liquor-grocery/-/N-00g2y",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Liquor",
+              "link_url": "https://www.target.com/c/liquor-wine-beer-grocery/-/N-5xsxw",
+              "sub_items": [
+                {
+                  "name": "Top Spirits",
+                  "link_url": "https://www.target.com/c/top-spirits/-/N-y2mjk",
+                  "sub_items": []
+                },
+                {
+                  "name": "Vodka",
+                  "link_url": "https://www.target.com/c/vodka-liquor-wine-beer-grocery/-/N-ln0x9",
+                  "sub_items": []
+                },
+                {
+                  "name": "Bourbon",
+                  "link_url": "https://www.target.com/c/bourbon-liquor-wine-beer-grocery/-/N-xxj34",
+                  "sub_items": []
+                },
+                {
+                  "name": "Whiskey",
+                  "link_url": "https://www.target.com/c/whiskey-liquor-wine-beer-grocery/-/N-5xm96",
+                  "sub_items": []
+                },
+                {
+                  "name": "Tequila",
+                  "link_url": "https://www.target.com/c/tequila-liquor-wine-beer-grocery/-/N-0091p",
+                  "sub_items": []
+                },
+                {
+                  "name": "Rum",
+                  "link_url": "https://www.target.com/c/rum-liquor-wine-beer-grocery/-/N-vazqx",
+                  "sub_items": []
+                },
+                {
+                  "name": "Gin",
+                  "link_url": "https://www.target.com/c/gin-liquor-wine-beer-grocery/-/N-9vaw3",
+                  "sub_items": []
+                },
+                {
+                  "name": "Scotch",
+                  "link_url": "https://www.target.com/c/scotch-liquor-wine-beer-grocery/-/N-ar4qr",
+                  "sub_items": []
+                },
+                {
+                  "name": "Brandy & Cognac",
+                  "link_url": "https://www.target.com/c/brandy-cognac-liquor-wine-beer-grocery/-/N-hpmj8",
+                  "sub_items": []
+                },
+                {
+                  "name": "Liqueurs, Cordials & Schnapps",
+                  "link_url": "https://www.target.com/c/liqueurs-cordials-schnapps-liquor-wine-beer-grocery/-/N-fij4m",
+                  "sub_items": []
+                }
+              ]
+            },
+            {
+              "name": "Target Selects",
+              "link_url": "https://www.target.com/c/brands-we-love/-/N-iscgt",
+              "sub_items": []
+            },
+            {
+              "name": "Non-Alcoholic Drinks",
+              "link_url": "https://www.target.com/c/non-alcoholic-drinks-wine-beer-liquor-grocery/-/N-gjl0q",
+              "sub_items": []
+            },
+            {
+              "name": "Perfect Meal Pairings",
+              "link_url": "https://www.target.com/c/perfect-meal-pairings/-/N-10ab1",
+              "sub_items": []
+            },
+            {
+              "name": "Top Rated Wines Under $15",
+              "link_url": "https://www.target.com/c/game-day/-/N-ypj4e",
+              "sub_items": []
+            },
+            {
+              "name": "100 Calorie Or Less Drinks",
+              "link_url": "https://www.target.com/c/100-calorie-or-less-drinks/-/N-46b4e",
+              "sub_items": []
+            },
+            {
+              "name": "Bar & Wine Tools",
+              "link_url": "https://www.target.com/c/bar-wine-tools-kitchen-dining/-/N-5xts9",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Candy",
+          "link_url": "https://www.target.com/c/candy-grocery/-/N-5xt0d",
+          "sub_items": [
+            {
+              "name": "Chocolate Candy",
+              "link_url": "https://www.target.com/c/chocolate-candy-grocery/-/N-5xt0b",
+              "sub_items": []
+            },
+            {
+              "name": "Gum & Mints",
+              "link_url": "https://www.target.com/c/gum-mints-candy-grocery/-/N-5xt0a",
+              "sub_items": []
+            },
+            {
+              "name": "Gummy & Chewy Candy",
+              "link_url": "https://www.target.com/c/gummy-chewy-candy-grocery/-/N-5xt09",
+              "sub_items": []
+            },
+            {
+              "name": "Hard Candy",
+              "link_url": "https://www.target.com/c/hard-candy-grocery/-/N-5xt08",
+              "sub_items": []
+            },
+            {
+              "name": "Candy Variety Packs",
+              "link_url": "https://www.target.com/c/candy-variety-packs/-/N-iomx6",
+              "sub_items": []
+            },
+            {
+              "name": "Premium Candy",
+              "link_url": "https://www.target.com/c/premium-candy/-/N-m4inq",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Coffee",
+          "link_url": "https://www.target.com/c/coffee-beverages-grocery/-/N-4yi5p",
+          "sub_items": [
+            {
+              "name": "Ground Coffee",
+              "link_url": "https://www.target.com/c/ground-coffee-beverages-grocery/-/N-x2hqv",
+              "sub_items": []
+            },
+            {
+              "name": "K-Cups & Coffee Pods",
+              "link_url": "https://www.target.com/c/k-cups-coffee-pods-beverages-grocery/-/N-6kpkn",
+              "sub_items": []
+            },
+            {
+              "name": "Whole Bean Coffee",
+              "link_url": "https://www.target.com/c/whole-bean-coffee-beverages-grocery/-/N-n8upo",
+              "sub_items": []
+            },
+            {
+              "name": "Espresso",
+              "link_url": "https://www.target.com/c/espresso-coffee-beverages-grocery/-/N-2dpp9",
+              "sub_items": []
+            },
+            {
+              "name": "Cold Brew & Bottled Coffee",
+              "link_url": "https://www.target.com/c/cold-brew-coffee-beverages-grocery/-/N-260b3",
+              "sub_items": []
+            },
+            {
+              "name": "Instant Coffee",
+              "link_url": "https://www.target.com/c/instant-coffee-beverages-grocery/-/N-05hso",
+              "sub_items": []
+            }
+          ]
+        },
+        {
+          "name": "Snack Packs & On the Go Snacks",
+          "link_url": "https://www.target.com/c/snack-packs-on-the-go-snacks-deli-grocery/-/N-dhjbd",
+          "sub_items": []
+        },
+        {
+          "name": "Starbucks",
+          "link_url": "https://www.target.com/c/starbucks/-/N-5cofw",
+          "sub_items": []
+        },
+        {
+          "name": "Eat Well Your Way",
+          "link_url": "https://www.target.com/c/eat-well-your-way/-/N-nazlk",
+          "sub_items": []
+        },
+        {
+          "name": "Food Gifts",
+          "link_url": "https://www.target.com/c/food-gifts-grocery/-/N-54wac",
+          "sub_items": []
+        },
+        {
+          "name": "Fresh Flowers & Plants",
+          "link_url": "https://www.target.com/c/fresh-flowers-plants-produce-grocery/-/N-2dei4",
+          "sub_items": []
+        },
+        {
+          "name": "Meal Ideas",
+          "link_url": "https://www.target.com/c/meal-ideas/-/N-n8wao",
+          "sub_items": []
+        }
+      ]
+    }
+  ]
+}
