@@ -1,26 +1,26 @@
-# Supabase Database Subsystem
+# 🗄️ Supabase Database Subsystem
 
 The Supabase database subsystem provides a robust, scalable backend for storing and managing product data, categories, brands, pricing history, and UPC mappings. Built on PostgreSQL with real-time capabilities, it serves as the central data repository for the retail crawling system.
 
-## Architecture Overview
+## 🏗️ Architecture Overview
 
 ```
 supabase/
-├── migrations/              # Database schema migrations
-├── .branches/              # Supabase branch management
-├── .temp/                  # Temporary files
-├── config.toml             # Supabase project configuration
-└── .gitignore             # Git ignore rules
+├── migrations/              # 📊 Database schema migrations
+├── .branches/              # 🌿 Supabase branch management
+├── .temp/                  # 📁 Temporary files
+├── config.toml             # ⚙️ Supabase project configuration
+└── .gitignore             # 🚫 Git ignore rules
 
 src/crawlers/
-└── supabase_backend.py     # Database integration layer
+└── supabase_backend.py     # 🔌 Database integration layer
 ```
 
-## Database Schema
+## 🗃️ Database Schema
 
-### Core Tables
+### 🏛️ Core Tables
 
-#### Products Table
+#### 📦 Products Table
 The central table storing normalized product information:
 ```sql
 CREATE TABLE products (
@@ -34,7 +34,7 @@ CREATE TABLE products (
 );
 ```
 
-#### Listings Table
+#### 🏪 Listings Table
 Retailer-specific product listings with pricing and availability:
 ```sql
 CREATE TABLE listings (
@@ -56,7 +56,7 @@ CREATE TABLE listings (
 );
 ```
 
-#### Categories Table
+#### 📂 Categories Table
 Hierarchical category structure with retailer-specific mappings:
 ```sql
 CREATE TABLE categories (
@@ -72,7 +72,7 @@ CREATE TABLE categories (
 );
 ```
 
-#### Brands Table
+#### 🏢 Brands Table
 Product brand information with normalization:
 ```sql
 CREATE TABLE brands (
@@ -83,7 +83,7 @@ CREATE TABLE brands (
 );
 ```
 
-#### UPCs Table
+#### 🏷️ UPCs Table
 Universal Product Code mappings:
 ```sql
 CREATE TABLE upcs (
@@ -97,7 +97,7 @@ CREATE TABLE upcs (
 );
 ```
 
-#### Price Histories Table
+#### 💰 Price Histories Table
 Historical pricing data for trend analysis:
 ```sql
 CREATE TABLE price_histories (
@@ -111,7 +111,7 @@ CREATE TABLE price_histories (
 );
 ```
 
-#### Retailers Table
+#### 🛍️ Retailers Table
 Retailer information and configuration:
 ```sql
 CREATE TABLE retailers (
@@ -125,9 +125,9 @@ CREATE TABLE retailers (
 );
 ```
 
-### Indexes and Performance
+### 🚀 Indexes and Performance
 
-#### Primary Indexes
+#### 🔍 Primary Indexes
 ```sql
 -- Product lookup optimization
 CREATE INDEX idx_products_brand_category ON products(brand_id, category_id);

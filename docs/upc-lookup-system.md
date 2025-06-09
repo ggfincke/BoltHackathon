@@ -1,29 +1,29 @@
-# UPC Lookup System
+# 🏷️ UPC Lookup System
 
 The UPC lookup system (`src/crawlers/upc_lookup/`) provides sophisticated UPC/barcode enrichment capabilities for product data. It integrates multiple UPC lookup services with intelligent fallback mechanisms, confidence scoring, and efficient caching to enhance product data with Universal Product Codes.
 
-## Architecture Overview
+## 🏗️ Architecture Overview
 
 ```
 src/crawlers/upc_lookup/
-├── base_upc_lookup.py       # Abstract base class for UPC services
-├── barcode_lookup.py        # BarcodeLookup.com service integration
-├── upc_manager.py           # Multi-service UPC management orchestrator
-└── __init__.py             # Module initialization
+├── base_upc_lookup.py       # 🧱 Abstract base class for UPC services
+├── barcode_lookup.py        # 🔍 BarcodeLookup.com service integration
+├── upc_manager.py           # 🎯 Multi-service UPC management orchestrator
+└── __init__.py             # 🔧 Module initialization
 ```
 
-## Core Components
+## 🔧 Core Components
 
-### Base UPC Lookup (`base_upc_lookup.py`)
+### 🧱 Base UPC Lookup (`base_upc_lookup.py`)
 
 Abstract interface defining the contract for all UPC lookup services:
 
-#### Key Features
-- **Standardized interface**: Consistent API across all UPC services
-- **Error handling**: Common error patterns and exception handling
-- **Rate limiting**: Built-in rate limiting and retry mechanisms
-- **Caching support**: Abstract caching interface for implementations
-- **Confidence scoring**: Standardized confidence rating system
+#### ✨ Key Features
+- 🔌 **Standardized interface**: Consistent API across all UPC services
+- 🛡️ **Error handling**: Common error patterns and exception handling
+- ⏱️ **Rate limiting**: Built-in rate limiting and retry mechanisms
+- 💾 **Caching support**: Abstract caching interface for implementations
+- 📊 **Confidence scoring**: Standardized confidence rating system
 
 #### Abstract Methods
 ```python

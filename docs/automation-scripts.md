@@ -1,27 +1,27 @@
-# Automation Scripts Subsystem
+# 🤖 Automation Scripts Subsystem
 
 The automation scripts subsystem (`scripts/`) provides command-line interfaces and automation tools for running crawlers, managing data, and performing maintenance tasks. These scripts serve as the primary interface for operating the retail crawling system in production and development environments.
 
-## Architecture Overview
+## 🏗️ Architecture Overview
 
 ```
 scripts/
-├── crawl.py                 # Main crawler CLI interface
-├── crawl.sh                 # Shell script wrapper for advanced automation
-└── manage_failed_upcs.py    # UPC lookup failure management tool
+├── crawl.py                 # 🕷️ Main crawler CLI interface
+├── crawl.sh                 # 📜 Shell script wrapper for advanced automation
+└── manage_failed_upcs.py    # 🔧 UPC lookup failure management tool
 ```
 
-## Main Crawler Interface (`crawl.py`)
+## 🕷️ Main Crawler Interface (`crawl.py`)
 
 The primary command-line interface for running retail crawlers across different modes and configurations.
 
-### Core Features
-- **Multi-retailer support**: Amazon, Target, Walmart crawling
-- **Flexible modes**: Full product data vs. URLs-only extraction
-- **Hierarchical crawling**: Build and utilize category hierarchies
-- **Concurrent processing**: Adjustable concurrency for performance optimization
-- **Multiple output backends**: JSON files, Redis queues, Supabase database
-- **Comprehensive error handling**: Robust error recovery and logging
+### ✨ Core Features
+- 🛍️ **Multi-retailer support**: Amazon, Target, Walmart crawling
+- 🔄 **Flexible modes**: Full product data vs. URLs-only extraction
+- 🌳 **Hierarchical crawling**: Build and utilize category hierarchies
+- ⚡ **Concurrent processing**: Adjustable concurrency for performance optimization
+- 📊 **Multiple output backends**: JSON files, Redis queues, Supabase database
+- 🛡️ **Comprehensive error handling**: Robust error recovery and logging
 
 ### Command Syntax
 ```bash
