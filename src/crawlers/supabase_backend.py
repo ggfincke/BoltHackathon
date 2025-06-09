@@ -136,7 +136,7 @@ class SupabaseBackend(OutputBackend):
                 'product_id': product_id,
                 'retailer_id': self._get_or_create_retailer(record.retailer_id),
                 'retailer_specific_id': getattr(record, 'asin', None) or getattr(record, 'tcin', None) or getattr(record, 'wm_item_id', None),
-                'upc': None, 
+                'upc': upc, 
                 'url': str(record.url),
                 'price': self._parse_price(record.price),
                 'currency': 'USD',
@@ -209,12 +209,12 @@ class SupabaseBackend(OutputBackend):
             if category_ids:
                 self._assign_product_categories(product_id, category_ids)
             
-            # create listing - note: retailer_specific_id is NOT the same as SKU
+            # create listing - note: retailer_specific_id is NOT the same as UPC
             listing_data = {
                 'product_id': product_id,
                 'retailer_id': retailer_id,
                 'retailer_specific_id': record.get('asin') or record.get('tcin') or record.get('wm_item_id'),
-                'sku': None,  # SKU would need to be normalized via API or other means
+                'upc': upc,  # UPC is now populated from UPC lookup service
                 'url': record.get('url'),
                 'price': self._parse_price(record.get('price')),
                 'currency': 'USD',

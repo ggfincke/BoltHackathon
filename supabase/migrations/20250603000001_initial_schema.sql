@@ -174,7 +174,8 @@ CREATE TABLE listings (
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     retailer_id UUID NOT NULL REFERENCES retailers(id) ON DELETE CASCADE,
     location_id UUID REFERENCES locations(id) ON DELETE SET NULL,
-    sku VARCHAR(255),
+    retailer_specific_id VARCHAR(255),
+    upc VARCHAR(255),
     url TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     currency VARCHAR(3) DEFAULT 'USD',
@@ -287,6 +288,7 @@ CREATE INDEX idx_product_categories_category_id ON product_categories(category_i
 CREATE INDEX idx_listings_product_id ON listings(product_id);
 CREATE INDEX idx_listings_retailer_id ON listings(retailer_id);
 CREATE INDEX idx_listings_location_id ON listings(location_id);
+CREATE INDEX idx_listings_retailer_specific_id ON listings(retailer_specific_id) WHERE retailer_specific_id IS NOT NULL;
 CREATE INDEX idx_listings_price ON listings(price);
 CREATE INDEX idx_listings_in_stock ON listings(in_stock);
 CREATE INDEX idx_price_histories_listing_id ON price_histories(listing_id);
