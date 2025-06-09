@@ -8,6 +8,7 @@ from datetime import datetime
 from supabase import create_client, Client
 from .base_crawler import OutputBackend, ProductRecord
 from .normalizers.category_normalizer import CategoryNormalizer
+from .upc_lookup import create_upc_manager, UPCManager
 
 # supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
