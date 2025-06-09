@@ -3,6 +3,7 @@
 from .base_upc_lookup import BaseUPCLookup, UPCResult
 from .barcode_lookup import BarcodeLookupService
 from .upc_manager import UPCManager, create_upc_manager
+from .failed_upc_manager import FailedUPCManager, create_failed_upc_manager
 
 # additional services 
 try:
@@ -12,6 +13,8 @@ try:
         'BarcodeLookupService',
         'UPCManager',
         'create_upc_manager',
+        'FailedUPCManager',
+        'create_failed_upc_manager',
         'UPCDatabaseService',
         'GoogleShoppingUPCService',
         'AmazonUPCService',
@@ -25,5 +28,7 @@ except ImportError:
         'UPCResult', 
         'BarcodeLookupService',
         'UPCManager',
-        'create_upc_manager'
+        'create_upc_manager',
+        'FailedUPCManager',
+        'create_failed_upc_manager'
     ]

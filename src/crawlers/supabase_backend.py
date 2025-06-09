@@ -8,11 +8,11 @@ from datetime import datetime
 from supabase import create_client, Client
 from .base_crawler import OutputBackend, ProductRecord
 from .normalizers.category_normalizer import CategoryNormalizer
-from .upc_lookup import create_upc_manager, UPCManager
+from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create_failed_upc_manager
 
 # supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
-    def __init__(self, supabase_url: str = None, supabase_key: str = None):
+    def __init__(self, supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True):
         self.logger = logging.getLogger(__name__)
         
         # use env or provided values
@@ -28,6 +28,17 @@ class SupabaseBackend(OutputBackend):
         
         # init category normalizer
         self.category_normalizer = CategoryNormalizer(self.supabase)
+        
+        # init UPC manager w/ supabase client for failed lookup storage
+        self.enable_upc_lookup = enable_upc_lookup
+        if self.enable_upc_lookup:
+            self.upc_manager = create_upc_manager(logger=self.logger, supabase_client=self.supabase)
+            self.failed_upc_manager = create_failed_upc_manager(supabase_client=self.supabase, logger=self.logger)
+            self.logger.info("UPC lookup enabled with failed lookup storage")
+        else:
+            self.upc_manager = None
+            self.failed_upc_manager = None
+            self.logger.info("UPC lookup disabled")
         
         # caches for retailers, brands, etc.
         self._retailer_cache = {}
@@ -88,12 +99,28 @@ class SupabaseBackend(OutputBackend):
             # extract/detect brand
             brand_id = self._extract_and_create_brand(record.title)
             
+            # lookup UPC if enabled
+            upc = None
+            if self.enable_upc_lookup and self.upc_manager:
+                try:
+                    upc_result = self.upc_manager.lookup_upc(
+                        product_name=record.title,
+                        retailer_source=retailer_name,
+                        original_url=str(record.url)
+                    )
+                    if upc_result and upc_result.upc:
+                        upc = upc_result.upc
+                        self.logger.info(f"Found UPC {upc} for product: {record.title}")
+                except Exception as e:
+                    self.logger.error(f"UPC lookup failed for {record.title}: {e}")
+            
             # create product w/ data
             product_data = {
                 'name': record.title,
                 'slug': self._create_slug(record.title),
                 'description': getattr(record, 'description', None),
                 'brand_id': brand_id,
+                'upc': upc, 
                 'is_active': True
             }
             
@@ -104,12 +131,12 @@ class SupabaseBackend(OutputBackend):
             if category_ids:
                 self._assign_product_categories(product_id, category_ids)
             
-            # create listing - note: retailer_specific_id is NOT the same as SKU
+            # create listing - note: retailer_specific_id is NOT the same as UPC
             listing_data = {
                 'product_id': product_id,
                 'retailer_id': self._get_or_create_retailer(record.retailer_id),
                 'retailer_specific_id': getattr(record, 'asin', None) or getattr(record, 'tcin', None) or getattr(record, 'wm_item_id', None),
-                'sku': None,  # SKU would need to be normalized via API or other means
+                'upc': None, 
                 'url': str(record.url),
                 'price': self._parse_price(record.price),
                 'currency': 'USD',
@@ -151,12 +178,28 @@ class SupabaseBackend(OutputBackend):
             # extract brand
             brand_id = self._extract_and_create_brand(record.get('title', ''))
             
+            # lookup UPC if enabled
+            upc = None
+            if self.enable_upc_lookup and self.upc_manager:
+                try:
+                    upc_result = self.upc_manager.lookup_upc(
+                        product_name=record.get('title', 'Unknown Product'),
+                        retailer_source=retailer_name,
+                        original_url=record.get('url', '')
+                    )
+                    if upc_result and upc_result.upc:
+                        upc = upc_result.upc
+                        self.logger.info(f"Found UPC {upc} for product: {record.get('title')}")
+                except Exception as e:
+                    self.logger.error(f"UPC lookup failed for {record.get('title')}: {e}")
+            
             # create product
             product_data = {
                 'name': record.get('title', 'Unknown Product'),
                 'slug': self._create_slug(record.get('title', 'Unknown Product')),
                 'description': record.get('description'),
                 'brand_id': brand_id,
+                'upc': upc,
                 'is_active': True
             }
             
@@ -459,5 +502,5 @@ class SupabaseBackend(OutputBackend):
         self.logger.debug(f"Processing URL record: {url}")
 
 # factory function to create Supabase backend
-def create_supabase_backend(supabase_url: str = None, supabase_key: str = None) -> SupabaseBackend:
-    return SupabaseBackend(supabase_url, supabase_key)
+def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True) -> SupabaseBackend:
+    return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup)

@@ -1,4 +1,3 @@
-
 import os
 import logging
 from typing import List, Optional, Dict, Any
@@ -7,11 +6,12 @@ from .barcode_lookup import BarcodeLookupService
 
 # UPCManager class - manages multiple UPC lookup services w/ fallback & caching
 class UPCManager:    
-    def __init__(self, logger: logging.Logger = None, enable_caching: bool = True):
+    def __init__(self, logger: logging.Logger = None, enable_caching: bool = True, supabase_client=None):
         self.logger = logger or logging.getLogger(__name__)
         self.services: List[BaseUPCLookup] = []
         self.enable_caching = enable_caching
         self._cache: Dict[str, UPCResult] = {}
+        self.supabase = supabase_client
         
         # init default services
         self._initialize_default_services()
@@ -68,7 +68,8 @@ class UPCManager:
         return False
     
     # lookup UPC
-    def lookup_upc(self, product_name: str, try_all_services: bool = True) -> Optional[UPCResult]:
+    def lookup_upc(self, product_name: str, try_all_services: bool = True, 
+                   retailer_source: str = None, original_url: str = None) -> Optional[UPCResult]:
         if not product_name or not product_name.strip():
             return None
         
@@ -84,6 +85,7 @@ class UPCManager:
         services_tried = 0
         services_available = 0
         last_error = None
+        services_attempted = []
         
         for service in self.services:
             # check if service is available
@@ -97,6 +99,7 @@ class UPCManager:
                 continue
             
             services_tried += 1
+            services_attempted.append(service.service_name)
             self.logger.info(f"Trying UPC lookup for '{product_name}' using {service.service_name} "
                            f"(service {services_tried}/{services_available})")
             
@@ -141,6 +144,40 @@ class UPCManager:
             if last_error:
                 self.logger.debug(f"Last error was: {last_error}")
         
+        # store failed lookup for manual review if we have supabase client
+        if self.supabase:
+            import asyncio
+            try:
+                # async store function
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # if already a running loop, create a task
+                    asyncio.create_task(self._store_failed_lookup(
+                        product_name=product_name,
+                        retailer_source=retailer_source,
+                        original_url=original_url,
+                        services_tried=services_attempted,
+                        last_error=last_error
+                    ))
+                else:
+                    # run coroutine directly
+                    loop.run_until_complete(self._store_failed_lookup(
+                        product_name=product_name,
+                        retailer_source=retailer_source,
+                        original_url=original_url,
+                        services_tried=services_attempted,
+                        last_error=last_error
+                    ))
+            except Exception:
+                # if asyncio doesn't work, use synchronous approach
+                self._store_failed_lookup_sync(
+                    product_name=product_name,
+                    retailer_source=retailer_source,
+                    original_url=original_url,
+                    services_tried=services_attempted,
+                    last_error=last_error
+                )
+
         # cache negative result to avoid repeated lookups
         if self.enable_caching:
             negative_result = UPCResult(
@@ -158,6 +195,86 @@ class UPCManager:
             self._cache[cache_key] = negative_result
         
         return None
+
+    # store failed lookup - async version
+    async def _store_failed_lookup(self, product_name: str, retailer_source: str = None, 
+                                  original_url: str = None, services_tried: List[str] = None, 
+                                  last_error: Exception = None):
+        # async version
+        try:
+            normalized_name = product_name.lower().strip()
+            
+            # check if already exists to avoid duplicates
+            existing = self.supabase.table('failed_upc_lookups')\
+                .select('id, retry_count')\
+                .eq('normalized_name', normalized_name)\
+                .execute()
+            
+            if existing.data:
+                # update retry count
+                self.supabase.table('failed_upc_lookups')\
+                    .update({'retry_count': existing.data[0]['retry_count'] + 1})\
+                    .eq('id', existing.data[0]['id'])\
+                    .execute()
+            else:
+                # insert new failed lookup
+                self.supabase.table('failed_upc_lookups')\
+                    .insert({
+                        'product_name': product_name,
+                        'normalized_name': normalized_name,
+                        'retailer_source': retailer_source,
+                        'original_url': original_url,
+                        'failure_reason': f"No UPC found after {len(services_tried or [])} service attempts",
+                        'services_tried': services_tried or [],
+                        'last_error': str(last_error) if last_error else None,
+                        'status': 'pending'
+                    })\
+                    .execute()
+                    
+            self.logger.info(f"Stored failed UPC lookup for manual review: {product_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to store failed UPC lookup: {e}")
+
+    # store failed lookup - sync version
+    def _store_failed_lookup_sync(self, product_name: str, retailer_source: str = None, 
+                                 original_url: str = None, services_tried: List[str] = None, 
+                                 last_error: Exception = None):
+        # sync version
+        try:
+            normalized_name = product_name.lower().strip()
+            
+            # check if already exists to avoid duplicates
+            existing = self.supabase.table('failed_upc_lookups')\
+                .select('id, retry_count')\
+                .eq('normalized_name', normalized_name)\
+                .execute()
+            
+            if existing.data:
+                # update retry count
+                self.supabase.table('failed_upc_lookups')\
+                    .update({'retry_count': existing.data[0]['retry_count'] + 1})\
+                    .eq('id', existing.data[0]['id'])\
+                    .execute()
+            else:
+                # insert new failed lookup
+                self.supabase.table('failed_upc_lookups')\
+                    .insert({
+                        'product_name': product_name,
+                        'normalized_name': normalized_name,
+                        'retailer_source': retailer_source,
+                        'original_url': original_url,
+                        'failure_reason': f"No UPC found after {len(services_tried or [])} service attempts",
+                        'services_tried': services_tried or [],
+                        'last_error': str(last_error) if last_error else None,
+                        'status': 'pending'
+                    })\
+                    .execute()
+                    
+            self.logger.info(f"Stored failed UPC lookup for manual review: {product_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to store failed UPC lookup: {e}")
     
     # get cache stats
     def get_cache_stats(self) -> Dict[str, Any]:
@@ -215,6 +332,6 @@ class UPCManager:
         self.logger.info("UPC manager cleanup completed")
 
 # factory function for easy initialization
-def create_upc_manager(logger: logging.Logger = None) -> UPCManager:
+def create_upc_manager(logger: logging.Logger = None, supabase_client=None) -> UPCManager:
     # create & return a configured UPC manager
-    return UPCManager(logger=logger)
+    return UPCManager(logger=logger, supabase_client=supabase_client)
