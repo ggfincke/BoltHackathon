@@ -1,101 +1,33 @@
-# imports
+"""
+Amazon crawler implementation for extracting product data.
+
+This module provides the AmazonCrawler class that extends BaseCrawler
+to crawl Amazon's grocery categories and extract product information.
+Supports hierarchical crawling, category filtering, and async URL extraction.
+"""
+
 import json
 import os
 import asyncio
 from pathlib import Path
 from typing import List
 
-# relative import
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
-
-# import the captcha solver from subcrawlers
 from .subcrawlers.category_crawler import crawl_category
 from .subcrawlers.grid_crawler import crawl_grid
 
-# Amazon Crawler
+# * Amazon crawler class *
+
+# amazon crawler
 class AmazonCrawler(BaseCrawler):
     def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
         super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
         self.base_url = "https://www.amazon.com"
         self.logger.info("AmazonCrawler initialized. Playwright will be launched as needed.")
     
-    # main crawl method - builds hierarchy or crawls specific category
-    def crawl(self, max_pages_per_cat: int = 5) -> None:
-        self.max_pages = max_pages_per_cat
-        
-        if self.hierarchical:
-            # build complete hierarchy
-            self.logger.info(f"Starting hierarchical crawl for Amazon (max_pages: {max_pages_per_cat})")
-            self._crawl_hierarchical(max_pages_per_cat)
-        else:
-            # single category crawl
-            if self.category:
-                self.logger.info(f"Starting single category crawl for: {self.category}")
-                self._crawl_single_category(max_pages_per_cat)
-            else:
-                self.logger.error("No category specified for non-hierarchical crawl")
-                raise ValueError("Category must be specified for non-hierarchical crawls")
+    # * Configuration and utility methods *
     
-    # crawl from a pre-built hierarchy file
-    def crawl_from_hierarchy_file(self, hierarchy_file: Path, 
-                                max_pages_per_cat: int = 5,
-                                category_filter: str = None,
-                                department_filter: str = None,
-                                concurrency: int = 5) -> None:
-        self.logger.info(f"Starting Amazon crawl from hierarchy file: {hierarchy_file}")
-        
-        # load hierarchy
-        hierarchy = self._load_hierarchy_file(hierarchy_file)
-        self.logger.info(f"Loaded Amazon hierarchy: {hierarchy.get('name', 'Unknown')}")
-        
-        # apply filters if specified
-        if category_filter or department_filter:
-            self.logger.info(f"Applying filters: category='{category_filter}', department='{department_filter}'")
-            hierarchy = self._filter_hierarchy(hierarchy, category_filter, department_filter)
-        
-        # extract leaf URLs for crawling
-        leaf_urls = self._extract_leaf_urls(hierarchy)
-        self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
-        
-        if not leaf_urls:
-            self.logger.warning("No leaf categories found to crawl")
-            return
-        
-        # crawl all URLs concurrently
-        self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
-    
-    # build complete Amazon category hierarchy
-    def _crawl_hierarchical(self, max_pages: int) -> None:
-        start_url = "https://www.amazon.com/s?i=wholefoods&ref=nb_sb_noss"
-        
-        # build hierarchy using category crawler
-        self.logger.info(f"Building Amazon hierarchy from: {start_url}")
-        hierarchy = self.loop.run_until_complete(
-            crawl_category(start_url, max_depth=MAX_DEPTH, logger=self.logger)
-        )
-        
-        if not self.urls_only:
-            # populate hierarchy with product data
-            self.logger.info("Populating hierarchy with product data...")
-            self._populate_leaf_nodes_with_products(hierarchy, max_pages)
-        
-        # output hierarchy
-        self.logger.info("Sending hierarchy to output backend...")
-        self.output_backend.send(hierarchy)
-    
-    # crawl a single category
-    def _crawl_single_category(self, max_pages: int) -> None:
-        # for single category, need the URL or predefined mappings
-        category_url = self._get_category_url(self.category)
-        
-        if self.urls_only:
-            urls = self._scrape_category_urls_only(category_url, max_pages)
-            self.output_backend.send(urls)
-        else:
-            products = self._scrape_category(category_url, max_pages)
-            self.output_backend.send(products)
-    
-    # map category name to Amazon URL
+    # map category name to amazon URL
     def _get_category_url(self, category: str) -> str:
         category_mappings = {
             "Beverages": "https://www.amazon.com/s?k=beverages&i=wholefoods",
@@ -116,6 +48,8 @@ class AmazonCrawler(BaseCrawler):
             return url
         else:
             return f"https://www.amazon.com{url}"
+    
+    # * Category scraping methods *
     
     # scrape products from a category URL
     def _scrape_category(self, url: str, max_pages: int) -> List[ProductRecord]:
@@ -160,6 +94,8 @@ class AmazonCrawler(BaseCrawler):
         
         self.logger.info(f"Found {len(urls)} URLs")
         return urls
+    
+    # * Concurrent crawling methods *
     
     # crawl multiple grid URLs concurrently
     def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
@@ -248,3 +184,83 @@ class AmazonCrawler(BaseCrawler):
         except Exception as e:
             self.logger.error(f"Error in batch {batch_name}: {e}")
             return []
+    
+    # * Hierarchical crawling methods *
+    
+    # build complete amazon category hierarchy
+    def _crawl_hierarchical(self, max_pages: int) -> None:
+        start_url = "https://www.amazon.com/s?i=wholefoods&ref=nb_sb_noss"
+        
+        # build hierarchy using category crawler
+        self.logger.info(f"Building Amazon hierarchy from: {start_url}")
+        hierarchy = self.loop.run_until_complete(
+            crawl_category(start_url, max_depth=MAX_DEPTH, logger=self.logger)
+        )
+        
+        if not self.urls_only:
+            # populate hierarchy with product data
+            self.logger.info("Populating hierarchy with product data...")
+            self._populate_leaf_nodes_with_products(hierarchy, max_pages)
+        
+        # output hierarchy
+        self.logger.info("Sending hierarchy to output backend...")
+        self.output_backend.send(hierarchy)
+    
+    # crawl a single category
+    def _crawl_single_category(self, max_pages: int) -> None:
+        # for single category, need the URL or predefined mappings
+        category_url = self._get_category_url(self.category)
+        
+        if self.urls_only:
+            urls = self._scrape_category_urls_only(category_url, max_pages)
+            self.output_backend.send(urls)
+        else:
+            products = self._scrape_category(category_url, max_pages)
+            self.output_backend.send(products)
+    
+    # * Main interface methods *
+    
+    # main crawl method - builds hierarchy or crawls specific category
+    def crawl(self, max_pages_per_cat: int = 5) -> None:
+        self.max_pages = max_pages_per_cat
+        
+        if self.hierarchical:
+            # build complete hierarchy
+            self.logger.info(f"Starting hierarchical crawl for Amazon (max_pages: {max_pages_per_cat})")
+            self._crawl_hierarchical(max_pages_per_cat)
+        else:
+            # single category crawl
+            if self.category:
+                self.logger.info(f"Starting single category crawl for: {self.category}")
+                self._crawl_single_category(max_pages_per_cat)
+            else:
+                self.logger.error("No category specified for non-hierarchical crawl")
+                raise ValueError("Category must be specified for non-hierarchical crawls")
+    
+    # crawl from a pre-built hierarchy file
+    def crawl_from_hierarchy_file(self, hierarchy_file: Path, 
+                                max_pages_per_cat: int = 5,
+                                category_filter: str = None,
+                                department_filter: str = None,
+                                concurrency: int = 5) -> None:
+        self.logger.info(f"Starting Amazon crawl from hierarchy file: {hierarchy_file}")
+        
+        # load hierarchy
+        hierarchy = self._load_hierarchy_file(hierarchy_file)
+        self.logger.info(f"Loaded Amazon hierarchy: {hierarchy.get('name', 'Unknown')}")
+        
+        # apply filters if specified
+        if category_filter or department_filter:
+            self.logger.info(f"Applying filters: category='{category_filter}', department='{department_filter}'")
+            hierarchy = self._filter_hierarchy(hierarchy, category_filter, department_filter)
+        
+        # extract leaf URLs for crawling
+        leaf_urls = self._extract_leaf_urls(hierarchy)
+        self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
+        
+        if not leaf_urls:
+            self.logger.warning("No leaf categories found to crawl")
+            return
+        
+        # crawl all URLs concurrently
+        self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)

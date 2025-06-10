@@ -1,4 +1,11 @@
-# imports
+"""
+Walmart crawler implementation for extracting product data.
+
+This module provides the WalmartCrawler class that extends BaseCrawler
+to crawl Walmart's grocery categories and extract product information.
+Supports hierarchical crawling, category filtering, and URL extraction.
+"""
+
 import json
 import os
 import asyncio
@@ -6,14 +13,13 @@ import concurrent.futures
 from pathlib import Path
 from typing import List
 
-# relative import
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
-
-# import from subcrawlers
 from .subcrawlers.category_crawler import crawl_category
 from .subcrawlers.grid_crawler import crawl_grid
 
-# Walmart Crawler
+# * Walmart crawler class *
+
+# walmart crawler
 class WalmartCrawler(BaseCrawler):
     def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
         super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
@@ -27,7 +33,7 @@ class WalmartCrawler(BaseCrawler):
         # reuse one loop
         self.loop = asyncio.get_event_loop()
 
-    # * helper methods
+    # * Configuration and utility methods *
     # load category config from json file
     def _load_category_config(self):
         config_path = os.getenv("WALMART_CATEGORY_CONFIG") or Path(__file__).parent / "walmart_grocery_hierarchy.json"
@@ -152,6 +158,8 @@ class WalmartCrawler(BaseCrawler):
         walk(cat_json)
         return urls
 
+    # * Category discovery methods *
+
     # discover category URLs
     def _discover_category_urls(self) -> list[str]:
         # resolve target nodes
@@ -175,6 +183,8 @@ class WalmartCrawler(BaseCrawler):
             all_urls.extend(urls)
             
         return all_urls
+
+    # * Category scraping methods *
 
     # scrape a category - full product data (for JSON test output)
     def _scrape_category(self, url: str, max_pages: int) -> list[ProductRecord]:
@@ -214,6 +224,8 @@ class WalmartCrawler(BaseCrawler):
         )
         self.logger.info(f"Found {len(urls)} URLs to send to Redis")
         return urls
+
+    # * Concurrent crawling methods *
 
     # crawl multiple grid URLs concurrently (new method for hierarchy file mode)
     def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
@@ -296,6 +308,8 @@ class WalmartCrawler(BaseCrawler):
             self.logger.error(f"Walmart Batch {batch_num} failed: {e}")
             return []
 
+    # * Hierarchical crawling methods *
+
     # scrape hierarchical structure with products attached to leaf nodes
     def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
         # resolve target nodes
@@ -377,11 +391,10 @@ class WalmartCrawler(BaseCrawler):
             # non-hierarchical mode - crawl normally
             self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
 
-    # These methods are now inherited from BaseCrawler - removed duplicate implementations
-    
-    # Implement required abstract methods from BaseCrawler
+    # * Main interface methods *
+
+    # main crawl method
     def crawl(self, max_pages_per_cat: int = 5) -> None:
-        """Main crawl method implementation for Walmart."""
         self.max_pages = max_pages_per_cat
         
         if self.hierarchical:
@@ -412,8 +425,7 @@ class WalmartCrawler(BaseCrawler):
                 raise ValueError("Category or department must be specified for non-hierarchical crawls")
     
     def _get_category_url(self, category: str) -> str:
-        """Map category name to Walmart URL."""
-        # Use the config-based category finder
+        # map category name to Walmart URL
         category_node = self._find_category_in_config(category)
         if category_node and "link_url" in category_node:
             return category_node["link_url"]

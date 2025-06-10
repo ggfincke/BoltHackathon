@@ -1,8 +1,18 @@
+"""
+UPC lookup manager for coordinating multiple UPC lookup services.
+
+This module provides the UPCManager class that manages multiple UPC lookup
+services with fallback, caching, and automatic failed lookup tracking.
+Supports multiple service providers with priority-based ordering.
+"""
+
 import os
 import logging
 from typing import List, Optional, Dict, Any
 from .base_upc_lookup import BaseUPCLookup, UPCResult
 from .barcode_lookup import BarcodeLookupService
+
+# * UPC manager class *
 
 # UPCManager class - manages multiple UPC lookup services w/ fallback & caching
 class UPCManager:    
@@ -16,7 +26,9 @@ class UPCManager:
         # init default services
         self._initialize_default_services()
     
-    # init
+    # * Service initialization methods *
+    
+    # initialize default services
     def _initialize_default_services(self):
         # init services
         services_added = 0
@@ -42,6 +54,7 @@ class UPCManager:
         else:
             self.logger.info(f"Initialized {services_added} UPC lookup service(s)")
     
+    # * Service management methods *
 
     # add service
     def add_service(self, service: BaseUPCLookup, priority: int = None):
@@ -66,6 +79,8 @@ class UPCManager:
         
         self.logger.warning(f"Service not found for removal: {service_name}")
         return False
+    
+    # * UPC lookup methods *
     
     # lookup UPC
     def lookup_upc(self, product_name: str, try_all_services: bool = True, 
@@ -196,6 +211,8 @@ class UPCManager:
         
         return None
 
+    # * Failed lookup storage methods *
+
     # store failed lookup - async version
     async def _store_failed_lookup(self, product_name: str, retailer_source: str = None, 
                                   original_url: str = None, services_tried: List[str] = None, 
@@ -276,6 +293,8 @@ class UPCManager:
         except Exception as e:
             self.logger.error(f"Failed to store failed UPC lookup: {e}")
     
+    # * Utility methods *
+    
     # get cache stats
     def get_cache_stats(self) -> Dict[str, Any]:
         # get caching statistics
@@ -330,6 +349,8 @@ class UPCManager:
                 self.logger.error(f"Error cleaning up service {service.service_name}: {e}")
         
         self.logger.info("UPC manager cleanup completed")
+
+# * Factory functions *
 
 # factory function for easy initialization
 def create_upc_manager(logger: logging.Logger = None, supabase_client=None) -> UPCManager:

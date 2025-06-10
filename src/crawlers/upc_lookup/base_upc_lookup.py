@@ -1,9 +1,19 @@
+"""
+Base UPC lookup interface and result classes.
+
+This module provides the abstract base class for UPC lookup services
+and the UPCResult dataclass for standardizing lookup results across
+different service implementations.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 import logging
 
-# UPCResult class (result from lookup)
+# * Result classes *
+
+# UPC result class (result from lookup)
 @dataclass
 class UPCResult:
     upc: Optional[str]
@@ -16,7 +26,9 @@ class UPCResult:
         if self.metadata is None:
             self.metadata = {}
 
-# BaseUPCLookup class (abstract base class)
+# * Base UPC lookup class *
+
+# base UPC lookup class (abstract base class)
 class BaseUPCLookup(ABC):    
     def __init__(self, logger: logging.Logger = None):
         self.logger = logger or logging.getLogger(__name__)

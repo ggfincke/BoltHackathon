@@ -1,3 +1,11 @@
+"""
+BarcodeLookup.com UPC lookup service implementation.
+
+This module provides the BarcodeLookupService class that implements the
+BaseUPCLookup interface for looking up UPC codes using the BarcodeLookup.com
+website. Uses Selenium with undetected Chrome driver for web scraping.
+"""
+
 import re
 import random
 import time
@@ -13,7 +21,9 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 
 from .base_upc_lookup import BaseUPCLookup, UPCResult
 
-# BarcodeLookup.com UPC lookup service implementation
+# * BarcodeLookup service class *
+
+# barcodeLookup.com UPC lookup service implementation
 class BarcodeLookupService(BaseUPCLookup):
     def __init__(self, max_pages: int = 4, similarity_threshold: float = 0.45, 
                  headless: bool = True, logger=None):
@@ -23,6 +33,8 @@ class BarcodeLookupService(BaseUPCLookup):
         self.headless = headless
         self.driver = None
         self.wait = None
+        
+    # * Driver management methods *
         
     # driver setup
     def _setup_driver(self):
@@ -41,6 +53,8 @@ class BarcodeLookupService(BaseUPCLookup):
             except Exception as e:
                 self.logger.error(f"Failed to initialize BarcodeLookup driver: {e}")
                 self.driver = None
+    
+    # * Text processing methods *
     
     # normalize text for similarity comparison
     def _normalize_text(self, text: str) -> list[str]:
@@ -61,6 +75,8 @@ class BarcodeLookupService(BaseUPCLookup):
         
         # Weighted combination (60% Jaccard, 40% Sequence)
         return 0.6 * jaccard + 0.4 * seq_ratio
+    
+    # * Main lookup methods *
     
     # lookup UPC for a product name
     def lookup_upc(self, product_name: str) -> UPCResult:
@@ -171,7 +187,9 @@ class BarcodeLookupService(BaseUPCLookup):
                 "pages_searched": current_page,
                 "threshold": self.similarity_threshold
             }
-        )
+                    )
+    
+    # * Service management methods *
     
     # check if the service is available
     def is_available(self) -> bool:

@@ -1,6 +1,16 @@
+"""
+Failed UPC lookup manager for handling manual review processes.
+
+This module provides the FailedUPCManager class that manages failed UPC lookups
+requiring manual review, assignment to users, and resolution tracking.
+Supports batch operations and statistical reporting.
+"""
+
 import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+
+# * Failed UPC manager class *
 
 # FailedUPCManager class - manager for handling failed UPC lookups and manual review processes
 class FailedUPCManager:
@@ -8,6 +18,8 @@ class FailedUPCManager:
     def __init__(self, supabase_client, logger: logging.Logger = None):
         self.supabase = supabase_client
         self.logger = logger or logging.getLogger(__name__)
+    
+    # * Review management methods *
     
     # get failed lookups needing manual review
     def get_pending_reviews(self, limit: int = 50, offset: int = 0) -> Dict[str, Any]:
@@ -76,6 +88,8 @@ class FailedUPCManager:
                 "success": False,
                 "error": str(e)
             }
+    
+    # * Resolution methods *
     
     # resolve failed lookup with manually found UPC
     def resolve_with_upc(self, lookup_id: str, manual_upc: str, 
@@ -158,6 +172,8 @@ class FailedUPCManager:
                 "error": str(e)
             }
     
+    # * Query and reporting methods *
+    
     # get failed lookups assigned to a specific user
     def get_reviews_by_user(self, user_id: str, status: str = None, limit: int = 50) -> Dict[str, Any]:
         try:
@@ -237,6 +253,8 @@ class FailedUPCManager:
                 "error": str(e),
                 "data": {}
             }
+    
+    # * Batch operations methods *
     
     # retry failed lookups that haven't exceeded max retries
     def retry_failed_lookups(self, upc_manager, max_retries: int = 3, limit: int = 10) -> Dict[str, Any]:
@@ -327,6 +345,8 @@ class FailedUPCManager:
                 "count": 0
             }
 
-# factory function to create a FailedUPCManager instance
+# * Factory functions *
+
+# factory function to create a failed UPC manager instance
 def create_failed_upc_manager(supabase_client, logger: logging.Logger = None) -> FailedUPCManager:
     return FailedUPCManager(supabase_client=supabase_client, logger=logger) 

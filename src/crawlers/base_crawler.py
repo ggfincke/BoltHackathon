@@ -353,13 +353,13 @@ class JsonFileBackend(OutputBackend):
         filename = f"{prefix}_{timestamp}.json"
         self._path = Path(filename)
         self.logger = logging.getLogger(__name__)
-    
+
+    # send records to json file
     def send(self, records) -> None:
-        """Send records to JSON file."""
         self.logger.debug(f"JsonFileBackend.send() called with {len(records) if hasattr(records, '__len__') else 'unknown'} records")
         
+        # hierarchical mode
         if self.hierarchical:
-            # Single hierarchical structure
             with self._path.open("w", encoding="utf-8") as f:
                 json.dump(records, f, indent=2, ensure_ascii=False, default=str)
             self.logger.info(f"Wrote hierarchical data to {self._path}")
@@ -368,15 +368,19 @@ class JsonFileBackend(OutputBackend):
             records_written = 0
             with self._path.open("a", encoding="utf-8") as f:
                 for r in records:
-                    if hasattr(r, 'model_dump_json'):  # ProductRecord
+                    # ProductRecord
+                    if hasattr(r, 'model_dump_json'): 
                         f.write(r.model_dump_json() + "\n")
                         records_written += 1
-                    elif isinstance(r, str):  # URL string
+                    # URL string
+                    elif isinstance(r, str):  
                         f.write(json.dumps({"url": r}) + "\n")
                         records_written += 1
-                    elif isinstance(r, dict):  # Raw dict
+                    # Raw dict
+                    elif isinstance(r, dict):  
                         f.write(json.dumps(r, default=str) + "\n")
                         records_written += 1
+                    # Unknown
                     else:
                         self.logger.warning(f"Skipping unknown record type: {type(r)}")
             

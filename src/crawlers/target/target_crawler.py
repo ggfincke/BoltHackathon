@@ -1,4 +1,11 @@
-# imports
+"""
+Target crawler implementation for extracting product data.
+
+This module provides the TargetCrawler class that extends BaseCrawler
+to crawl Target's grocery categories and extract product information.
+Supports hierarchical crawling, category filtering, and URL extraction.
+"""
+
 import json
 import os
 import asyncio
@@ -6,14 +13,13 @@ import concurrent.futures
 from pathlib import Path
 from typing import List
 
-# relative import
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
-
-# import from subcrawlers
 from .subcrawlers.category_crawler import crawl_category
 from .subcrawlers.grid_crawler import crawl_grid
 
-# Target Crawler
+# * Target crawler class *
+
+# target crawler
 class TargetCrawler(BaseCrawler):
     def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
         super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
@@ -27,7 +33,7 @@ class TargetCrawler(BaseCrawler):
         # reuse one loop
         self.loop = asyncio.get_event_loop()
 
-    # * helper methods
+    # * Configuration and utility methods *
     # load category config from json file
     def _load_category_config(self):
         config_path = os.getenv("TARGET_CATEGORY_CONFIG") or Path(__file__).parent / "target_grocery_hierarchy.json"
@@ -138,6 +144,8 @@ class TargetCrawler(BaseCrawler):
         walk(cat_json)
         return urls
 
+    # * Category discovery methods *
+
     # discover category URLs
     def _discover_category_urls(self) -> list[str]:
         # resolve target nodes
@@ -161,6 +169,8 @@ class TargetCrawler(BaseCrawler):
             all_urls.extend(urls)
             
         return all_urls
+
+    # * Category scraping methods *
 
     # scrape a category - full product data (for JSON test output)
     def _scrape_category(self, url: str, max_pages: int) -> list[ProductRecord]:
@@ -196,6 +206,8 @@ class TargetCrawler(BaseCrawler):
         )
         self.logger.info(f"Found {len(urls)} URLs to send to Redis")
         return urls
+
+    # * Concurrent crawling methods *
 
     # crawl multiple grid URLs concurrently (new method for hierarchy file mode)
     def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
@@ -279,6 +291,8 @@ class TargetCrawler(BaseCrawler):
             self.logger.error(f"Target Batch {batch_num} failed: {e}")
             return []
 
+    # * Hierarchical crawling methods *
+
     # scrape hierarchical structure with products attached to leaf nodes
     def _scrape_hierarchy(self, max_pages_per_cat: int, category_filter: str = None, department_filter: str = None) -> dict:
         # resolve target nodes
@@ -359,6 +373,8 @@ class TargetCrawler(BaseCrawler):
         else:
             # non-hierarchical mode - crawl normally
             self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+
+    # * Main interface methods *
 
     # main crawl method
     def crawl(self, max_pages_per_cat: int = 5) -> None:

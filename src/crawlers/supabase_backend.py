@@ -1,4 +1,12 @@
-# supabase_backend.py
+"""
+Supabase backend implementation for storing crawler data directly to database.
+
+This module provides the SupabaseBackend class that implements the OutputBackend
+interface for sending crawler data to a Supabase database. Includes automatic
+category normalization, UPC lookup, and database management for products,
+listings, and related entities.
+"""
+
 import os
 import logging
 import json
@@ -9,6 +17,8 @@ from supabase import create_client, Client
 from .base_crawler import OutputBackend, ProductRecord
 from .normalizers.category_normalizer import CategoryNormalizer
 from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create_failed_upc_manager
+
+# * Supabase backend class *
 
 # Supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
@@ -45,7 +55,7 @@ class SupabaseBackend(OutputBackend):
         self._brand_cache = {}
         self._product_cache = {}
     
-    # send records to Supabase
+    # send records to supabase
     def send(self, records) -> None:
         if not records:
             self.logger.warning("No records to send to Supabase")
@@ -77,6 +87,8 @@ class SupabaseBackend(OutputBackend):
                 continue
         
         self.logger.info(f"Successfully processed {success_count}/{len(records)} records")
+    
+    # * Record processing methods *
     
     # process a ProductRecord object w/ category normalization & insert into database
     def _process_product_record(self, record: ProductRecord) -> None:
@@ -254,6 +266,8 @@ class SupabaseBackend(OutputBackend):
         except Exception as e:
             self.logger.error(f"Error assigning categories to product {product_id}: {e}")
     
+    # * Brand management methods *
+    
     # extract brand from product name and create if needed
     def _extract_and_create_brand(self, product_name: str) -> Optional[str]:
         if not product_name:
@@ -313,6 +327,8 @@ class SupabaseBackend(OutputBackend):
         
         return None
     
+    # * Retailer management methods *
+    
     # get retailer info from cache or database
     def _get_retailer_info(self, retailer_id) -> Optional[dict]:
         if retailer_id in self._retailer_cache:
@@ -371,6 +387,8 @@ class SupabaseBackend(OutputBackend):
             self.logger.error(f"Error getting/creating retailer: {e}")
             raise
     
+    # * Product management methods *
+    
     # product creation with better deduplication
     def _get_or_create_product(self, product_data: dict, record: ProductRecord) -> str:
         try:
@@ -428,6 +446,8 @@ class SupabaseBackend(OutputBackend):
             self.logger.error(f"Error getting/creating product from dict: {e}")
             raise
     
+    # * Listing management methods *
+    
     # upsert listing
     def _upsert_listing(self, listing_data: dict) -> None:
         try:
@@ -452,6 +472,8 @@ class SupabaseBackend(OutputBackend):
         except Exception as e:
             self.logger.error(f"Error upserting listing: {e}")
             raise
+    
+    # * Utility methods *
     
     # determine retailer from record structure
     def _determine_retailer_from_dict(self, record: dict) -> Optional[str]:
@@ -501,6 +523,8 @@ class SupabaseBackend(OutputBackend):
     def _process_url_record(self, url: str) -> None:
         self.logger.debug(f"Processing URL record: {url}")
 
-# factory function to create Supabase backend
+# * Factory functions *
+
+# factory function to create supabase backend
 def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True) -> SupabaseBackend:
     return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup)

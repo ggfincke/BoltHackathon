@@ -1,9 +1,19 @@
+"""
+Category normalizer for handling category detection, mapping, and normalization.
+
+This module provides the CategoryNormalizer class that handles category
+normalization across different retailers, mapping retailer-specific categories
+to a standardized hierarchy, and database operations for category management.
+"""
+
 import os
 import logging
 import json
 import re
 from typing import List, Dict, Any, Optional, Set, Tuple
 from supabase import Client
+
+# * Category normalizer class *
 
 # category normalizer - handles category detection, mapping, & normalization
 class CategoryNormalizer:
@@ -23,6 +33,8 @@ class CategoryNormalizer:
         
         # load existing categories from database
         self._load_existing_categories()
+    
+    # * Initialization methods *
     
     # load main category hierarchy
     def _load_main_hierarchy(self):
@@ -57,6 +69,8 @@ class CategoryNormalizer:
             except Exception as e:
                 self.logger.error(f"Failed to load {retailer} hierarchy: {e}")
                 self.retailer_hierarchies[retailer] = {"departments": []}
+    
+    # * Index building methods *
     
     # build searchable indexes of all categories & paths
     def _build_category_index(self):
@@ -159,6 +173,8 @@ class CategoryNormalizer:
         except Exception as e:
             self.logger.error(f"Failed to load existing categories: {e}")
     
+    # * Main normalization methods *
+    
     # normalize & detect categories for a product
     def normalize_category(self, product_name: str, product_url: str, retailer_name: str, 
                           raw_category: str = None) -> List[str]:        
@@ -201,6 +217,8 @@ class CategoryNormalizer:
                 existing_categories.append('Groceries')
         
         return existing_categories[:3]  # limit to top 3
+    
+    # * Helper methods *
     
     # map retailer-specific category to main hierarchy category
     def _map_retailer_category(self, raw_category: str, retailer_name: str) -> Optional[str]:
