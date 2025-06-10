@@ -12,6 +12,13 @@ Usage:
     python crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
     python crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
     python crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
+    python crawl.py --retailer target --backend supabase --mode full --category "Snacks"
+    python crawl.py --retailer amazon --backend supabase --mode full --hierarchical
+
+
+Main usage:
+    python crawl.py --retailer amazon --from-hierarchy-file --mode full --backend supabase  --category "Marshmallows"
+
 """
 
 import sys
@@ -34,7 +41,8 @@ from crawlers.walmart.walmart_crawler import WalmartCrawler
 from crawlers.base_crawler import (
     JsonFileBackend, 
     create_redis_backend,
-    create_redis_client
+    create_redis_client,
+    create_supabase_backend
 )
 
 # retailer configurations
@@ -79,23 +87,41 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
     
     return logger
 
-# create output backend
-def create_output_backend(mode: str, retailer_id: int, hierarchical: bool = False, output_file: str = None):
-    if hierarchical:
+# create output backend based on config
+def create_output_backend(mode: str, retailer_id: int, backend_type: str = "json", 
+                         hierarchical: bool = False, output_file: str = None,
+                         supabase_url: str = None, supabase_key: str = None,
+                         enable_upc_lookup: bool = True):
+    
+    # supabase backend
+    if backend_type == "supabase":
+        # use Supabase backend for database storage
+        return create_supabase_backend(
+            supabase_url=supabase_url,
+            supabase_key=supabase_key,
+            enable_upc_lookup=enable_upc_lookup
+        )
+    # hierarchical mode (JSON)
+    elif hierarchical:
         # hierarchical structure always uses JSON backend
         prefix = output_file or "hierarchical_crawl"
         return JsonFileBackend(prefix=prefix, hierarchical=True)
+    # urls-only mode (JSON)
     elif mode == "urls-only":
-        if output_file:
-            # use JSON backend for file output in URL mode
-            return JsonFileBackend(prefix=output_file, hierarchical=False)
-        else:
+        if backend_type == "redis":
             # use Redis backend for URL-only mode
             return create_redis_backend(retailer_id)
+        else:
+            # use JSON backend for file output in URL mode
+            prefix = output_file or "urls_crawl"
+            return JsonFileBackend(prefix=prefix, hierarchical=False)
     # full mode (default)
     else:  
-        prefix = output_file or "product_crawl"
-        return JsonFileBackend(prefix=prefix, hierarchical=False)
+        if backend_type == "redis":
+            return create_redis_backend(retailer_id)
+        else:
+            prefix = output_file or "product_crawl"
+            return JsonFileBackend(prefix=prefix, hierarchical=False)
 
 # get list of available retailers
 def get_available_retailers():
@@ -116,41 +142,6 @@ def validate_hierarchy_file(file_path: str) -> Path:
         raise ValueError(f"Hierarchy file must be a JSON file: {file_path}")
     return path
 
-# send records to the output backend
-def send(self, records) -> None:
-    logger = logging.getLogger("JsonFileBackend")
-    
-    logger.debug(f"JsonFileBackend.send() called with {len(records) if hasattr(records, '__len__') else 'unknown'} records")
-    logger.debug(f"Records type: {type(records)}")
-    
-    if self.hierarchical:
-        # single hierarchical structure (dict) - write as formatted JSON
-        with self._path.open("w", encoding="utf-8") as f:
-            json.dump(records, f, indent=2, ensure_ascii=False, default=str)
-        logger.info(f"Wrote hierarchical data to {self._path}")
-    else:
-        # using ND-JSON (one line per record)
-        records_written = 0
-        with self._path.open("a", encoding="utf-8") as f:
-            for r in records:
-                # ProductRecord for JSON output (Pydantic model)
-                if hasattr(r, 'model_dump_json'):  
-                    f.write(r.model_dump_json() + "\n")
-                    records_written += 1
-                # URL string in URL-only mode
-                elif isinstance(r, str):
-                    f.write(json.dumps({"url": r}) + "\n")
-                    records_written += 1
-                # handle raw dicts from grid crawler
-                elif isinstance(r, dict):
-                    f.write(json.dumps(r, default=str) + "\n")
-                    records_written += 1
-                    logger.debug(f"Wrote raw dict: {r.get('title', r.get('asin', 'Unknown'))}")
-                else:
-                    logger.warning(f"Skipping unknown record type: {type(r)} - {r}")
-        
-        logger.info(f"Wrote {records_written} records to {self._path}")
-
 # main function
 def main():
     parser = argparse.ArgumentParser(
@@ -170,6 +161,10 @@ Examples:
   %(prog)s --retailer amazon --from-hierarchy-file --mode full --concurrency 10
   %(prog)s --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
   %(prog)s --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
+  %(prog)s --retailer target --backend supabase --mode full --category "Snacks"
+  %(prog)s --retailer amazon --backend supabase --mode full --hierarchical
+  %(prog)s --retailer walmart --backend supabase --mode full --enable-upc-lookup
+  %(prog)s --retailer target --backend redis --mode urls-only
   %(prog)s --list-retailers
         """
     )
@@ -186,6 +181,13 @@ Examples:
         choices=["full", "urls-only"],
         default="full",
         help="Crawling mode (default: full)"
+    )
+    
+    parser.add_argument(
+        "--backend", "-b",
+        choices=["json", "redis", "supabase"],
+        default="json",
+        help="Output backend to use: json (file), redis (cache), or supabase (database) (default: json)"
     )
     
     parser.add_argument(
@@ -228,7 +230,31 @@ Examples:
     
     parser.add_argument(
         "--output", "-o",
-        help="Output file prefix (optional)"
+        help="Output file prefix (optional, ignored when using supabase backend)"
+    )
+    
+    # Supabase configuration
+    parser.add_argument(
+        "--supabase-url",
+        help="Supabase project URL (can also be set via SUPABASE_URL env var)"
+    )
+    
+    parser.add_argument(
+        "--supabase-key",
+        help="Supabase API key (can also be set via SUPABASE_ANON_KEY env var)"
+    )
+    
+    parser.add_argument(
+        "--enable-upc-lookup",
+        action="store_true",
+        default=True,
+        help="Enable UPC lookup when using Supabase backend (default: enabled)"
+    )
+    
+    parser.add_argument(
+        "--disable-upc-lookup",
+        action="store_true",
+        help="Disable UPC lookup when using Supabase backend"
     )
     
     parser.add_argument(
@@ -251,6 +277,12 @@ Examples:
         help="Test Redis connection and exit"
     )
     
+    parser.add_argument(
+        "--test-supabase",
+        action="store_true",
+        help="Test Supabase connection and exit"
+    )
+    
     args = parser.parse_args()
     
     # handle utility commands
@@ -271,12 +303,34 @@ Examples:
             sys.exit(1)
         return
     
+    if args.test_supabase:
+        try:
+            supabase_backend = create_supabase_backend(
+                supabase_url=args.supabase_url,
+                supabase_key=args.supabase_key,
+                enable_upc_lookup=False  # Skip UPC lookup for connection test
+            )
+            print("✅ Supabase connection successful")
+        except Exception as e:
+            print(f"❌ Supabase connection failed: {e}")
+            sys.exit(1)
+        return
+    
     # validate required arguments
     if not args.retailer:
         parser.error("--retailer is required (use --list-retailers to see options)")
     
-    # validate conflicting arguments (REMOVED the overly restrictive validation)
-    # Now --from-hierarchy-file can be used with --category, --department, and --hierarchical
+    # validate Supabase requirements
+    if args.backend == "supabase":
+        supabase_url = args.supabase_url or os.getenv('SUPABASE_URL')
+        supabase_key = args.supabase_key or os.getenv('SUPABASE_ANON_KEY')
+        
+        if not supabase_url or not supabase_key:
+            parser.error("Supabase backend requires --supabase-url and --supabase-key or "
+                        "SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
+    
+    # determine UPC lookup setting
+    enable_upc_lookup = args.enable_upc_lookup and not args.disable_upc_lookup
     
     # set up logging
     logger = setup_logging(args.log_level)
@@ -294,9 +348,20 @@ Examples:
         backend = create_output_backend(
             mode=args.mode,
             retailer_id=retailer_id,
+            backend_type=args.backend,
             hierarchical=args.hierarchical,
-            output_file=args.output
+            output_file=args.output,
+            supabase_url=args.supabase_url,
+            supabase_key=args.supabase_key,
+            enable_upc_lookup=enable_upc_lookup
         )
+        
+        # log backend info
+        backend_info = f"{args.backend} backend"
+        if args.backend == "supabase":
+            upc_status = "with UPC lookup" if enable_upc_lookup else "without UPC lookup"
+            backend_info += f" ({upc_status})"
+        logger.info(f"Using {backend_info}")
         
         # create crawler
         crawler = crawler_class(
