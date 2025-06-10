@@ -17,8 +17,6 @@ class AmazonCrawler(BaseCrawler):
     def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
         super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
         self.base_url = "https://www.amazon.com"
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
         self.logger.info("AmazonCrawler initialized. Playwright will be launched as needed.")
     
     # main crawl method - builds hierarchy or crawls specific category
@@ -87,8 +85,7 @@ class AmazonCrawler(BaseCrawler):
     
     # crawl a single category
     def _crawl_single_category(self, max_pages: int) -> None:
-        # for single category, we need to construct the URL or use predefined mappings
-        # this is a simplified implementation - you might want to add category URL mapping
+        # for single category, need the URL or predefined mappings
         category_url = self._get_category_url(self.category)
         
         if self.urls_only:
@@ -112,51 +109,8 @@ class AmazonCrawler(BaseCrawler):
         else:
             # fallback: search for the category term
             return f"https://www.amazon.com/s?k={category.lower()}&i=wholefoods"
-    
-    # load hierarchy from JSON file
-    def _load_hierarchy_file(self, hierarchy_file: Path) -> dict:
-        try:
-            with hierarchy_file.open('r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            self.logger.error(f"Failed to load hierarchy file {hierarchy_file}: {e}")
-            raise
-    
-    # filter hierarchy by category or department
-    def _filter_hierarchy(self, hierarchy: dict, category_filter: str = None, department_filter: str = None) -> dict:
-        # simplified implementation
-        if not category_filter and not department_filter:
-            return hierarchy
         
-        # might need to implement specific filtering logic
-        return hierarchy
-    
-    # extract all leaf node URLs from hierarchy
-    def _extract_leaf_urls(self, hierarchy: dict) -> List[str]:
-        leaf_urls = []
-        
-        def extract_recursive(node):
-            if isinstance(node, dict):
-                if "sub_items" in node:
-                    # if node has children
-                    if node["sub_items"]:  
-                        for child in node["sub_items"]:
-                            extract_recursive(child)
-                    # leaf node (products)
-                    else:  
-                        if "link_url" in node:
-                            leaf_urls.append(self._normalize_url(node["link_url"]))
-                # direct leaf node
-                elif "link_url" in node:  
-                    leaf_urls.append(self._normalize_url(node["link_url"]))
-            elif isinstance(node, list):
-                for item in node:
-                    extract_recursive(item)
-        
-        extract_recursive(hierarchy)
-        return leaf_urls
-    
-    # normalize URL to full Amazon URL
+    # normalize URL to full Amazon URL (override base method)
     def _normalize_url(self, url: str) -> str:
         if url.startswith('http'):
             return url
@@ -206,20 +160,6 @@ class AmazonCrawler(BaseCrawler):
         
         self.logger.info(f"Found {len(urls)} URLs")
         return urls
-    
-    # populate leaf nodes in hierarchy with product data
-    def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int) -> None:
-        if "sub_items" in node and node["sub_items"]:
-            # has children - recurse
-            for child in node["sub_items"]:
-                self._populate_leaf_nodes_with_products(child, max_pages)
-        else:
-            # leaf node - add products
-            if "link_url" in node:
-                self.logger.info(f"Crawling products for leaf node: {node.get('name')}")
-                url = self._normalize_url(node["link_url"])
-                products = self._scrape_category(url, max_pages)
-                node["products"] = [p.model_dump() for p in products]
     
     # crawl multiple grid URLs concurrently
     def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:

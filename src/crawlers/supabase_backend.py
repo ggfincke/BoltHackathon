@@ -10,7 +10,7 @@ from .base_crawler import OutputBackend, ProductRecord
 from .normalizers.category_normalizer import CategoryNormalizer
 from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create_failed_upc_manager
 
-# supabase backend for storing crawler data directly to db
+# Supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
     def __init__(self, supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True):
         self.logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class SupabaseBackend(OutputBackend):
         self._brand_cache = {}
         self._product_cache = {}
     
-    # send records to supabase
+    # send records to Supabase
     def send(self, records) -> None:
         if not records:
             self.logger.warning("No records to send to Supabase")

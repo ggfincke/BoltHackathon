@@ -324,19 +324,6 @@ class WalmartCrawler(BaseCrawler):
             
         return all_results
 
-    # populate leaf nodes with products
-    def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int):
-        # if node has sub_items, recurse into them
-        if node.get("sub_items"):
-            for child in node["sub_items"]:
-                self._populate_leaf_nodes_with_products(child, max_pages)
-        else:
-            # this is a leaf node - crawl products
-            if "link_url" in node:
-                self.logger.info(f"Crawling products for leaf node: {node.get('name')}")
-                products = self._scrape_category(node["link_url"], max_pages)
-                node["products"] = [p.model_dump() for p in products]
-
     # crawl from hierarchy file w/ optional filtering
     def crawl_from_hierarchy_file(self, hierarchy_file: Path, max_pages_per_cat: int = 5, 
                                  category_filter: str = None, department_filter: str = None,
@@ -378,204 +365,58 @@ class WalmartCrawler(BaseCrawler):
             # collect results to attach to hierarchy later
             collected_results = []
             
-            # temp backend that just collects results
-            class ResultCollector:
-                def __init__(self):
-                    self.results = []
-                
-                def send(self, records):
-                    if isinstance(records, list):
-                        self.results.extend(records)
-                    else:
-                        self.results.append(records)
-            
-            collector = ResultCollector()
-            self._out = collector
+            # use base crawler's common hierarchical collection methods
+            original_backend, collector = self._setup_hierarchical_collection()
             
             # crawl w/ the collector backend
             self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
             
-            # restore original backend
-            self._out = original_backend
-            
-            # create hierarchical structure w/ results
-            hierarchical_output = self._create_hierarchical_output(hierarchy, collector.results, category_filter, department_filter)
-            
-            # send hierarchical structure to the real backend
-            self.logger.info("Sending Walmart hierarchical structure to output backend")
-            self._out.send(hierarchical_output)
+            # restore backend and send hierarchical results
+            self._restore_backend_and_send_hierarchical(original_backend, collector, hierarchy, category_filter, department_filter)
         else:
             # non-hierarchical mode - crawl normally
             self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
 
-    # create hierarchical output structure w/ results attached
-    def _create_hierarchical_output(self, filtered_hierarchy: dict, results: list, category_filter: str = None, department_filter: str = None) -> dict:        
-        # copy hierarchy (avoid modifying the original)
-        import copy
-        output_hierarchy = copy.deepcopy(filtered_hierarchy)
+    # These methods are now inherited from BaseCrawler - removed duplicate implementations
+    
+    # Implement required abstract methods from BaseCrawler
+    def crawl(self, max_pages_per_cat: int = 5) -> None:
+        """Main crawl method implementation for Walmart."""
+        self.max_pages = max_pages_per_cat
         
-        # find leaf nodes & attach results
-        def attach_results_to_leaves(node):
-            sub_items = node.get("sub_items")
-            if sub_items and len(sub_items) > 0:
-                # has children - recurse
-                for child in sub_items:
-                    attach_results_to_leaves(child)
-            else:
-                # leaf node - attach results
+        if self.hierarchical:
+            # hierarchical crawl
+            self.logger.info(f"Starting hierarchical crawl for Walmart (max_pages: {max_pages_per_cat})")
+            hierarchy = self._scrape_hierarchy(max_pages_per_cat, self.category, self.department)
+            self.output_backend.send(hierarchy)
+        else:
+            # single category or department crawl
+            if self.category or self.department:
+                category_urls = self._discover_category_urls()
                 if self.urls_only:
-                    # URLs only mode
-                    node["product_urls"] = [str(r) if isinstance(r, str) else str(r.url) if hasattr(r, 'url') else str(r) for r in results]
+                    # extract URLs only
+                    all_urls = []
+                    for url in category_urls:
+                        urls = self._scrape_category_urls_only(url, max_pages_per_cat)
+                        all_urls.extend(urls)
+                    self.output_backend.send(all_urls)
                 else:
-                    # full mode - convert Walmart data to expected format
-                    walmart_products = []
-                    for r in results:
-                        if hasattr(r, 'model_dump'):
-                            walmart_products.append(r.model_dump())
-                        elif isinstance(r, dict):
-                            # raw dict from Walmart grid crawler
-                            walmart_products.append(r)
-                        else:
-                            walmart_products.append(r)
-                    
-                    node["products"] = walmart_products
-        
-        # handle different hierarchy structures (departments or sub_items at root)
-        if "departments" in output_hierarchy:
-            for dept in output_hierarchy["departments"]:
-                attach_results_to_leaves(dept)
-        elif "sub_items" in output_hierarchy:
-            # walmart structure has sub_items at root
-            for item in output_hierarchy["sub_items"]:
-                attach_results_to_leaves(item)
-        else:
-            attach_results_to_leaves(output_hierarchy)
-        
-        self.logger.info(f"Created Walmart hierarchical output with {len(results)} total items")
-        return output_hierarchy
-
-    # filter hierarchy based on category/department filters
-    def _filter_hierarchy(self, hierarchy: dict, category_filter: str = None, department_filter: str = None) -> dict:
-        if not (category_filter or department_filter):
-            return hierarchy
-            
-        self.logger.info(f"Walmart: Filtering hierarchy for category='{category_filter}', department='{department_filter}'")
-        
-        # recursively find a node that matches the target name
-        def find_matching_node(node, target_name):
-            # check if this node matches
-            node_name = node.get("name") or node.get("department_name")
-            if node_name == target_name:
-                self.logger.info(f"Walmart: Found matching node: {node_name}")
-                return node
-                
-            # recurse into sub_items
-            if node.get("sub_items"):
-                for child in node["sub_items"]:
-                    result = find_matching_node(child, target_name)
-                    if result:
-                        return result
-                        
-            return None
-        
-        # find target node
-        target_name = category_filter or department_filter
-        
-        # search in departments first (if they exist)
-        if "departments" in hierarchy:
-            for department in hierarchy["departments"]:
-                # check if this department matches
-                if department.get("department_name") == target_name or department.get("name") == target_name:
-                    self.logger.info(f"Walmart: Found matching department: {target_name}")
-                    return department
-                
-                # search within this department
-                result = find_matching_node(department, target_name)
-                if result:
-                    self.logger.info(f"Walmart: Found '{target_name}' within department: {department.get('department_name', 'Unknown')}")
-                    return result
-        
-        # walmart might have sub_items at root level
-        if "sub_items" in hierarchy:
-            for item in hierarchy["sub_items"]:
-                result = find_matching_node(item, target_name)
-                if result:
-                    self.logger.info(f"Walmart: Found '{target_name}' in sub_items")
-                    return result
-        
-        # if not found in departments structure, search the entire hierarchy
-        filtered_node = find_matching_node(hierarchy, target_name)
-        
-        if not filtered_node:
-            self.logger.warning(f"Walmart: Filter '{target_name}' not found in hierarchy")
-            # print available categories for debugging
-            self._print_available_categories(hierarchy)
-            return hierarchy
-            
-        self.logger.info(f"Walmart: Successfully filtered hierarchy to: {target_name}")
-        return filtered_node
-
-    # print available categories for debugging
-    def _print_available_categories(self, hierarchy: dict, max_items: int = 50):
-        categories = []
-        
-        def collect_categories(node, depth=0):
-            if len(categories) >= max_items:
-                return
-                
-            name = node.get("name") or node.get("department_name")
-            if name:
-                categories.append("  " * depth + name)
-            
-            if node.get("sub_items"):
-                for child in node["sub_items"]:
-                    collect_categories(child, depth + 1)
-        
-        # handle departments or sub_items at root
-        if "departments" in hierarchy:
-            for dept in hierarchy["departments"]:
-                collect_categories(dept)
-        elif "sub_items" in hierarchy:
-            for item in hierarchy["sub_items"]:
-                collect_categories(item)
-        else:
-            collect_categories(hierarchy)
-        
-        self.logger.info(f"Walmart: Available categories (showing first {min(len(categories), max_items)}):")
-        for cat in categories[:max_items]:
-            self.logger.info(cat)
-        
-        if len(categories) > max_items:
-            self.logger.info(f"Walmart: ... and {len(categories) - max_items} more categories")
-
-    # extract all leaf category URLs from a hierarchy
-    def _extract_leaf_urls(self, hierarchy: dict) -> List[str]:
-        leaf_urls = []
-        
-        def walk_hierarchy(node):
-            # handle the root level w/ "departments"  
-            if "departments" in node:
-                for dept in node["departments"]:
-                    walk_hierarchy(dept)
-                return
-            
-            # handle walmart's sub_items at root level
-            if "sub_items" in node and node.get("name") == "Walmart Grocery":
-                for item in node["sub_items"]:
-                    walk_hierarchy(item)
-                return
-            
-            # handle regular nodes w/ "sub_items"
-            sub_items = node.get("sub_items")
-            if sub_items and len(sub_items) > 0:
-                for child in sub_items:
-                    walk_hierarchy(child)
+                    # extract full product data
+                    all_products = []
+                    for url in category_urls:
+                        products = self._scrape_category(url, max_pages_per_cat)
+                        all_products.extend(products)
+                    self.output_backend.send(all_products)
             else:
-                # leaf node (no sub_items or empty sub_items) - collect the URL
-                if "link_url" in node:
-                    leaf_urls.append(node["link_url"])
-                    category_name = node.get('name', 'Unknown')
-                    self.logger.debug(f"Walmart: Found leaf URL: {node['link_url']} (category: {category_name})")
-                        
-        walk_hierarchy(hierarchy)
-        return leaf_urls
+                self.logger.error("No category or department specified for non-hierarchical crawl")
+                raise ValueError("Category or department must be specified for non-hierarchical crawls")
+    
+    def _get_category_url(self, category: str) -> str:
+        """Map category name to Walmart URL."""
+        # Use the config-based category finder
+        category_node = self._find_category_in_config(category)
+        if category_node and "link_url" in category_node:
+            return category_node["link_url"]
+        else:
+            # fallback: construct a search URL
+            return f"https://www.walmart.com/search?q={category.lower().replace(' ', '+')}"
