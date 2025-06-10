@@ -16,7 +16,7 @@ class Column:
     is_primary_key: bool = False
     is_foreign_key: bool = False
     is_nullable: bool = True
-    references: Optional[str] = None  # table.column format
+    references: Optional[str] = None 
 
 @dataclass
 class Table:
@@ -24,19 +24,18 @@ class Table:
     columns: List[Column]
     position: Tuple[float, float] = (0, 0)
 
-# parse the schema files and extract the table and relationship information
+# parse schema files & extract table/relationship info
 class DatabaseSchemaParser:
-    """Parse SQL schema files to extract table and relationship information"""
     
     def __init__(self):
         self.tables = {}
         self.relationships = []
     
+    # parse all SQL migration files in the schema directory
     def parse_schema_files(self, schema_dir: str):
-        """Parse all SQL migration files in the schema directory"""
         schema_path = Path(schema_dir)
         
-        # Read all migration files in order
+        # read all migration files in order
         migration_files = sorted([f for f in schema_path.glob("*.sql")])
         
         for file_path in migration_files:
@@ -45,13 +44,13 @@ class DatabaseSchemaParser:
                 content = f.read()
                 self._parse_sql_content(content)
     
+    # parse the SQL content to extract table definitions
     def _parse_sql_content(self, content: str):
-        """Parse SQL content to extract table definitions"""
-        # Remove comments and normalize whitespace
+        # remove comments & normalize whitespace
         content = re.sub(r'--.*?\n', '\n', content)
         content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
         
-        # Find CREATE TABLE statements
+        # find CREATE TABLE statements
         table_pattern = r'CREATE TABLE\s+(\w+)\s*\((.*?)\);'
         matches = re.findall(table_pattern, content, re.DOTALL | re.IGNORECASE)
         
@@ -61,7 +60,7 @@ class DatabaseSchemaParser:
             
             self._parse_table_definition(table_name, table_def)
         
-        # Find ALTER TABLE statements for foreign keys
+        # find ALTER TABLE statements for foreign keys
         alter_pattern = r'ALTER TABLE\s+(\w+)\s+ADD CONSTRAINT\s+\w+\s+FOREIGN KEY\s*\((\w+)\)\s+REFERENCES\s+(\w+)\s*\((\w+)\)'
         alter_matches = re.findall(alter_pattern, content, re.IGNORECASE)
         
@@ -73,8 +72,8 @@ class DatabaseSchemaParser:
                         col.references = f"{ref_table}.{ref_column}"
                         self.relationships.append((table_name, fk_column, ref_table, ref_column))
     
+    # parse individual table definition
     def _parse_table_definition(self, table_name: str, table_def: str):
-        """Parse individual table definition"""
         lines = [line.strip() for line in table_def.split(',')]
         
         for line in lines:
@@ -82,19 +81,19 @@ class DatabaseSchemaParser:
             if not line or line.upper().startswith('CONSTRAINT') or line.upper().startswith('UNIQUE'):
                 continue
             
-            # Parse column definition
+            # parse column definition
             col_match = re.match(r'(\w+)\s+([^,\s]+(?:\s*\([^)]+\))?)', line, re.IGNORECASE)
             if col_match:
                 col_name = col_match.group(1)
                 col_type = col_match.group(2)
                 
-                # Check for constraints
+                # check for constraints
                 is_pk = 'PRIMARY KEY' in line.upper()
                 is_nullable = 'NOT NULL' not in line.upper() and not is_pk
                 is_fk = False
                 references = None
                 
-                # Check for inline foreign key references
+                # check for inline foreign key references
                 fk_match = re.search(r'REFERENCES\s+(\w+)\s*\((\w+)\)', line, re.IGNORECASE)
                 if fk_match:
                     is_fk = True
@@ -112,8 +111,8 @@ class DatabaseSchemaParser:
                 
                 self.tables[table_name].columns.append(column)
 
+# generate schema diagram
 class SchemaDiagramGenerator:
-    """Generate visual database schema diagram"""
     
     def __init__(self, tables: Dict[str, Table], relationships: List[Tuple]):
         self.tables = tables
@@ -121,13 +120,13 @@ class SchemaDiagramGenerator:
         self.fig = None
         self.ax = None
         
-        # Visual settings
+        # visual settings
         self.table_width = 2.5
         self.table_header_height = 0.4
         self.row_height = 0.25
         self.margin = 0.5
         
-        # Colors
+        # colors
         self.colors = {
             'table_header': '#4A90E2',
             'table_body': '#F8F9FA',
@@ -138,24 +137,24 @@ class SchemaDiagramGenerator:
             'relationship': '#7F8C8D'
         }
     
+    # calculate optimal positions for tables
     def calculate_layout(self):
-        """Calculate optimal positions for tables"""
-        # Group tables by relationships to create logical clusters
+        # group tables by relationships to create logical clusters
         table_names = list(self.tables.keys())
         n_tables = len(table_names)
         
-        # Calculate grid dimensions
+        # calculate grid dimensions
         cols = int(np.ceil(np.sqrt(n_tables)))
         rows = int(np.ceil(n_tables / cols))
         
-        # Position tables in a grid with some clustering logic
+        # position tables in a grid with some clustering logic
         positions = {}
         
-        # Core tables (users, products, listings) get central positions
+        # core tables (users, products, listings) get central positions
         core_tables = ['users', 'products', 'listings', 'retailers', 'brands', 'categories']
         secondary_tables = ['subscriptions', 'notifications', 'baskets', 'locations']
         
-        # Position core tables first
+        # position core tables first
         core_positions = [
             (1, 3), (3, 3), (5, 3),  # users, products, listings
             (1, 1), (3, 1), (5, 1)   # retailers, brands, categories
@@ -165,7 +164,7 @@ class SchemaDiagramGenerator:
             if table in table_names and i < len(core_positions):
                 positions[table] = core_positions[i]
         
-        # Position secondary tables
+        # position secondary tables
         secondary_positions = [
             (0, 2), (2, 4), (4, 4), (6, 2)
         ]
@@ -176,7 +175,7 @@ class SchemaDiagramGenerator:
                 positions[table] = secondary_positions[sec_idx]
                 sec_idx += 1
         
-        # Position remaining tables
+        # position remaining tables
         remaining_positions = [
             (0, 0), (2, 0), (4, 0), (6, 0),
             (0, 4), (2, 2), (4, 2), (6, 4),
@@ -189,20 +188,20 @@ class SchemaDiagramGenerator:
                 positions[table_name] = remaining_positions[rem_idx]
                 rem_idx += 1
         
-        # Convert to actual coordinates
+        # convert to actual coordinates
         for table_name, (col, row) in positions.items():
             x = col * (self.table_width + self.margin)
             y = row * (max([len(t.columns) for t in self.tables.values()]) * self.row_height + 1)
             self.tables[table_name].position = (x, y)
     
+    # draw a single table
     def draw_table(self, table: Table):
-        """Draw a single table"""
         x, y = table.position
         
-        # Calculate table height
+        # calculate table height
         table_height = self.table_header_height + len(table.columns) * self.row_height
         
-        # Draw table border
+        # draw table border
         table_rect = FancyBboxPatch(
             (x, y), self.table_width, table_height,
             boxstyle="round,pad=0.02",
@@ -212,7 +211,7 @@ class SchemaDiagramGenerator:
         )
         self.ax.add_patch(table_rect)
         
-        # Draw header
+        # draw header
         header_rect = FancyBboxPatch(
             (x, y + table_height - self.table_header_height), 
             self.table_width, self.table_header_height,
@@ -223,7 +222,7 @@ class SchemaDiagramGenerator:
         )
         self.ax.add_patch(header_rect)
         
-        # Table name
+        # table name
         self.ax.text(
             x + self.table_width/2, 
             y + table_height - self.table_header_height/2,
@@ -233,11 +232,11 @@ class SchemaDiagramGenerator:
             color='white'
         )
         
-        # Draw columns
+        # draw columns
         for i, column in enumerate(table.columns):
             col_y = y + table_height - self.table_header_height - (i + 1) * self.row_height
             
-            # Column background color based on type
+            # column background color based on type
             if column.is_primary_key:
                 col_color = self.colors['primary_key']
             elif column.is_foreign_key:
@@ -245,7 +244,7 @@ class SchemaDiagramGenerator:
             else:
                 col_color = self.colors['table_body']
             
-            # Column rectangle
+            # column rectangle
             if column.is_primary_key or column.is_foreign_key:
                 col_rect = patches.Rectangle(
                     (x + 0.05, col_y + 0.02), 
@@ -254,7 +253,7 @@ class SchemaDiagramGenerator:
                 )
                 self.ax.add_patch(col_rect)
             
-            # Column text
+            # column text
             col_text = column.name
             if column.is_primary_key:
                 col_text = f"🔑 {col_text}"
@@ -269,7 +268,7 @@ class SchemaDiagramGenerator:
                 color=self.colors['text']
             )
             
-            # Column type
+            # column type
             self.ax.text(
                 x + self.table_width - 0.1, col_y + self.row_height/2,
                 column.type.split('(')[0].upper(),
@@ -279,8 +278,8 @@ class SchemaDiagramGenerator:
                 alpha=0.7
             )
     
+    # draw relationship lines between tables
     def draw_relationships(self):
-        """Draw relationship lines between tables"""
         for source_table, source_col, target_table, target_col in self.relationships:
             if source_table not in self.tables or target_table not in self.tables:
                 continue
@@ -288,13 +287,13 @@ class SchemaDiagramGenerator:
             source_pos = self.tables[source_table].position
             target_pos = self.tables[target_table].position
             
-            # Find column positions
+            # find column positions
             source_col_idx = next((i for i, col in enumerate(self.tables[source_table].columns) 
                                  if col.name == source_col), 0)
             target_col_idx = next((i for i, col in enumerate(self.tables[target_table].columns) 
                                  if col.name == target_col), 0)
             
-            # Calculate connection points
+            # calculate connection points
             source_x = source_pos[0] + self.table_width
             source_y = (source_pos[1] + 
                        max([len(t.columns) for t in self.tables.values()]) * self.row_height + 1 - 
@@ -305,7 +304,7 @@ class SchemaDiagramGenerator:
                        max([len(t.columns) for t in self.tables.values()]) * self.row_height + 1 - 
                        self.table_header_height - (target_col_idx + 0.5) * self.row_height)
             
-            # Draw connection line
+            # draw connection line
             connection = ConnectionPatch(
                 (source_x, source_y), (target_x, target_y),
                 "data", "data",
@@ -319,18 +318,18 @@ class SchemaDiagramGenerator:
             )
             self.ax.add_patch(connection)
     
+    # generate complete schema diagram
     def generate_diagram(self, output_path: str = "database_schema.png"):
-        """Generate the complete database schema diagram"""
-        # Calculate layout
+        # calculate layout
         self.calculate_layout()
         
-        # Calculate figure size
+        # calculate figure size
         max_x = max([pos[0] + self.table_width for pos in 
                     [table.position for table in self.tables.values()]])
         max_y = max([pos[1] + len(table.columns) * self.row_height + 1 for pos, table in 
                     [(table.position, table) for table in self.tables.values()]])
         
-        # Create figure
+        # create figure
         fig_width = max(12, max_x / 72 * 100)
         fig_height = max(8, max_y / 72 * 100)
         
@@ -340,21 +339,21 @@ class SchemaDiagramGenerator:
         self.ax.set_aspect('equal')
         self.ax.axis('off')
         
-        # Set background color
+        # set background color
         self.fig.patch.set_facecolor('white')
         
-        # Draw all tables
+        # draw all tables
         for table in self.tables.values():
             self.draw_table(table)
         
-        # Draw relationships
+        # draw relationships
         self.draw_relationships()
         
-        # Add title
+        # add title
         self.fig.suptitle('Database Schema - Supabase ERD', 
                          fontsize=16, fontweight='bold', y=0.95)
         
-        # Add legend
+        # add legend
         legend_elements = [
             patches.Patch(color=self.colors['primary_key'], alpha=0.3, label='Primary Key'),
             patches.Patch(color=self.colors['foreign_key'], alpha=0.3, label='Foreign Key'),
@@ -362,7 +361,7 @@ class SchemaDiagramGenerator:
         ]
         self.ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(0.98, 0.98))
         
-        # Save diagram
+        # save diagram
         plt.tight_layout()
         plt.savefig(output_path, dpi=300, bbox_inches='tight', 
                    facecolor='white', edgecolor='none')
@@ -370,13 +369,13 @@ class SchemaDiagramGenerator:
         
         return output_path
 
+# main  
 def main():
-    """Main function to generate schema diagram"""
-    # Get script directory
+    # get script directory
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
     
-    # Parse schema
+    # parse schema
     parser = DatabaseSchemaParser()
     schema_dir = project_root / "supabase" / "migrations"
     
@@ -393,7 +392,7 @@ def main():
     
     print(f"Found {len(parser.relationships)} relationships")
     
-    # Generate diagram
+    # generate diagram
     generator = SchemaDiagramGenerator(parser.tables, parser.relationships)
     output_path = project_root / "database_schema.png"
     
