@@ -1,21 +1,19 @@
-#!/bin/bash
+# Crawler shell wrapper
 
-# Crawler Shell Wrapper
-# This script provides convenient shortcuts for common crawler operations
-
-set -e  # Exit on any error
+# exit on error
+set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CRAWL_SCRIPT="$SCRIPT_DIR/crawl.py"
 
-# Color codes for output
+# color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Helper function to print colored output
+# helper functions
 print_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -32,7 +30,7 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Show usage information
+# usage info
 show_usage() {
     echo "Crawler Shell Wrapper"
     echo "Usage: $0 [COMMAND] [OPTIONS]"
@@ -76,20 +74,21 @@ show_usage() {
     echo "  $0 -- --retailer amazon --mode full --hierarchical --category \"Electronics\""
 }
 
-# Check if Python script exists
+# check if Python script exists
 if [[ ! -f "$CRAWL_SCRIPT" ]]; then
     print_error "crawl.py not found at $CRAWL_SCRIPT"
     exit 1
 fi
 
-# If no arguments, show usage
+# if no arguments, show usage
 if [[ $# -eq 0 ]]; then
     show_usage
     exit 0
 fi
 
+# remove command from arguments
 COMMAND="$1"
-shift  # Remove command from arguments
+shift
 
 case "$COMMAND" in
     quick-amazon)
@@ -143,12 +142,12 @@ case "$COMMAND" in
     from-hierarchy-amazon)
         print_info "Starting Amazon crawl from hierarchy file (full mode)"
         if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
-            # First argument is likely a file path
+            # first argument is likely a file path
             HIERARCHY_FILE="$1"
             shift
             python "$CRAWL_SCRIPT" --retailer amazon --mode full --from-hierarchy-file "$HIERARCHY_FILE" "$@"
         else
-            # Use default hierarchy file
+            # use default hierarchy file
             python "$CRAWL_SCRIPT" --retailer amazon --mode full --from-hierarchy-file "" "$@"
         fi
         print_success "Amazon hierarchy file crawl completed"
@@ -157,12 +156,12 @@ case "$COMMAND" in
     from-hierarchy-target)
         print_info "Starting Target crawl from hierarchy file (full mode)"
         if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
-            # First argument is likely a file path
+            # first argument is likely a file path
             HIERARCHY_FILE="$1"
             shift
             python "$CRAWL_SCRIPT" --retailer target --mode full --from-hierarchy-file "$HIERARCHY_FILE" "$@"
         else
-            # Use default hierarchy file
+            # use default hierarchy file
             python "$CRAWL_SCRIPT" --retailer target --mode full --from-hierarchy-file "" "$@"
         fi
         print_success "Target hierarchy file crawl completed"
@@ -171,12 +170,12 @@ case "$COMMAND" in
     from-hierarchy-urls-amazon)
         print_info "Starting Amazon crawl from hierarchy file (URLs only)"
         if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
-            # First argument is likely a file path
+            # first argument is likely a file path
             HIERARCHY_FILE="$1"
             shift
             python "$CRAWL_SCRIPT" --retailer amazon --mode urls-only --from-hierarchy-file "$HIERARCHY_FILE" "$@"
         else
-            # Use default hierarchy file
+            # use default hierarchy file
             python "$CRAWL_SCRIPT" --retailer amazon --mode urls-only --from-hierarchy-file "" "$@"
         fi
         print_success "Amazon hierarchy file URL crawl completed"
@@ -185,12 +184,12 @@ case "$COMMAND" in
     from-hierarchy-urls-target)
         print_info "Starting Target crawl from hierarchy file (URLs only)"
         if [[ $# -gt 0 && ! $1 =~ ^-- ]]; then
-            # First argument is likely a file path
+            # first argument is likely a file path
             HIERARCHY_FILE="$1"
             shift
             python "$CRAWL_SCRIPT" --retailer target --mode urls-only --from-hierarchy-file "$HIERARCHY_FILE" "$@"
         else
-            # Use default hierarchy file
+            # use default hierarchy file
             python "$CRAWL_SCRIPT" --retailer target --mode urls-only --from-hierarchy-file "" "$@"
         fi
         print_success "Target hierarchy file URL crawl completed"
@@ -210,7 +209,7 @@ case "$COMMAND" in
         ;;
     
     --)
-        # Pass through mode - run crawl.py directly with remaining arguments
+        # pass through mode - run crawl.py directly with remaining arguments
         print_info "Running crawl.py directly with arguments: $*"
         python "$CRAWL_SCRIPT" "$@"
         ;;

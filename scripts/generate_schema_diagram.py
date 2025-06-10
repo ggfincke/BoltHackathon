@@ -394,7 +394,9 @@ def main():
     
     # generate diagram
     generator = SchemaDiagramGenerator(parser.tables, parser.relationships)
-    output_path = project_root / "database_schema.png"
+    docs_dir = project_root / "docs"
+    docs_dir.mkdir(exist_ok=True) 
+    output_path = docs_dir / "database_schema.png"
     
     print("Generating schema diagram...")
     generator.generate_diagram(str(output_path))

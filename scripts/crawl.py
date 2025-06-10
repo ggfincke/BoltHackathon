@@ -25,7 +25,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Add the src directory to the Python path
+# src dir to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))
 
 from crawlers.amazon.amazon_crawler import AmazonCrawler
