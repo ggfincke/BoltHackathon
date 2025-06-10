@@ -13,3 +13,5 @@ playwright-stealth
 opencv-python
 torch
 easyocr
+matplotlib
+numpy

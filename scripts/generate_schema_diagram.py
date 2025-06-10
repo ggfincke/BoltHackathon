@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-"""
-Database Schema Diagram Generator
-
-This script generates a visual database schema diagram from Supabase database schema.
-It creates an ERD (Entity Relationship Diagram) showing tables, columns, and relationships.
-"""
-
 import os
 import sys
 from pathlib import Path
@@ -32,6 +24,7 @@ class Table:
     columns: List[Column]
     position: Tuple[float, float] = (0, 0)
 
+# parse the schema files and extract the table and relationship information
 class DatabaseSchemaParser:
     """Parse SQL schema files to extract table and relationship information"""
     
