@@ -167,7 +167,7 @@ class WalmartCrawler(BaseCrawler):
             cat_json = crawl_category(
                 start_url=node.url,
                 max_depth=MAX_DEPTH,
-                use_safari=False,  # Walmart works better with Chrome UC
+                use_safari=False,
                 proxy_manager=None,
                 logger=self.logger
             )
@@ -183,7 +183,7 @@ class WalmartCrawler(BaseCrawler):
             start_urls=[url],
             max_depth=max_pages,
             extract_urls_only=False,
-            use_safari=False,  # Walmart works better with Chrome UC
+            use_safari=False,
             proxy_manager=None,
             logger=self.logger
         )
@@ -192,7 +192,7 @@ class WalmartCrawler(BaseCrawler):
         return [
             ProductRecord(
                 retailer_id=self.retailer_id,
-                asin=item.get("wm_item_id"),  # Walmart uses wm_item_id instead of asin
+                asin=item.get("wm_item_id"),
                 title=item["title"],
                 price=item["price"],
                 url=item["url"],
@@ -208,7 +208,7 @@ class WalmartCrawler(BaseCrawler):
             start_urls=[url],
             max_depth=max_pages,
             extract_urls_only=True,
-            use_safari=False,  # Walmart works better with Chrome UC
+            use_safari=False,
             proxy_manager=None,
             logger=self.logger
         )
