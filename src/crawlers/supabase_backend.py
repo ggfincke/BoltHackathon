@@ -371,14 +371,28 @@ class SupabaseBackend(OutputBackend):
     
     # get retailer info from cache or database
     def _get_retailer_info(self, retailer_id) -> Optional[dict]:
-        if retailer_id in self._retailer_cache:
-            return self._retailer_cache[retailer_id]
+        # map string IDs to proper UUIDs first
+        retailer_uuid_map = {
+            "1": "00000000-0000-0000-0000-000000000001",  # Amazon
+            "2": "00000000-0000-0000-0000-000000000002",  # Target  
+            "3": "00000000-0000-0000-0000-000000000003",  # Walmart
+            "amazon": "00000000-0000-0000-0000-000000000001",
+            "target": "00000000-0000-0000-0000-000000000002",
+            "walmart": "00000000-0000-0000-0000-000000000003"
+        }
+        
+        # convert to string first, then map to UUID
+        retailer_key = str(retailer_id).lower()
+        uuid_value = retailer_uuid_map.get(retailer_key, retailer_id)
+        
+        if uuid_value in self._retailer_cache:
+            return self._retailer_cache[uuid_value]
         
         try:
-            result = self.supabase.table('retailers').select('*').eq('id', retailer_id).execute()
+            result = self.supabase.table('retailers').select('*').eq('id', uuid_value).execute()
             if result.data:
                 retailer_info = result.data[0]
-                self._retailer_cache[retailer_id] = retailer_info
+                self._retailer_cache[uuid_value] = retailer_info
                 return retailer_info
         except Exception as e:
             self.logger.error(f"Error getting retailer info: {e}")

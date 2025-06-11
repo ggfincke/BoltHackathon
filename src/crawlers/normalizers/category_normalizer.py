@@ -337,4 +337,17 @@ class CategoryNormalizer:
         if paths:
             # use the first path
             return ' > '.join(paths[0])
-        return category_name 
+        return category_name
+    
+    # get or create multiple categories in database
+    def get_or_create_categories(self, category_names: List[str]) -> List[str]:
+        category_ids = []
+        
+        for category_name in category_names:
+            # skip empty names
+            if category_name:
+                category_id = self.get_or_create_category(category_name)
+                if category_id:
+                    category_ids.append(category_id)
+        
+        return category_ids 
