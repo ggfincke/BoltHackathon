@@ -45,25 +45,27 @@ from crawlers.base_crawler import (
     create_supabase_backend
 )
 
+
+
 # retailer configurations
 RETAILER_CONFIG = {
     "amazon": {
         "class": AmazonCrawler,
         "retailer_id": 1,
         "description": "Amazon product crawler",
-        "default_hierarchy_file": "src/crawlers/amazon/amazon_grocery_hierarchy.json"
+        "default_hierarchy_file": "data/processed/simplified_amazon.json"
     },
     "target": {
         "class": TargetCrawler,
         "retailer_id": 2,
         "description": "Target product crawler",
-        "default_hierarchy_file": "src/crawlers/target/target_grocery_hierarchy.json"
+        "default_hierarchy_file": "data/processed/simplified_target.json"
     },
     "walmart": {
         "class": WalmartCrawler,
         "retailer_id": 3,
         "description": "Walmart product crawler",
-        "default_hierarchy_file": "src/crawlers/walmart/walmart_grocery_hierarchy.json"
+        "default_hierarchy_file": "data/processed/simplified_walmart.json"
     }
 }
 

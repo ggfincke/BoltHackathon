@@ -46,15 +46,15 @@ class CategoryNormalizer:
             self.logger.error(f"Failed to load main hierarchy: {e}")
             self.main_hierarchy = {"departments": []}
     
-    # load retailer-specific hierarchies
+    # load retailer-specific hierarchies from processed data directory
     def _load_retailer_hierarchies(self):
         self.retailer_hierarchies = {}
         
-        # files from sources
+        # updated paths to use processed hierarchy files from data directory
         hierarchy_files = {
-            'amazon': 'crawlers/amazon/amazon_grocery_hierarchy.json',
-            'target': 'crawlers/target/target_grocery_hierarchy.json', 
-            'walmart': 'crawlers/walmart/walmart_grocery_hierarchy.json'
+            'amazon': 'data/processed/amazon_grocery_hierarchy.json',
+            'target': 'data/processed/target_grocery_hierarchy.json', 
+            'walmart': 'data/processed/walmart_grocery_hierarchy.json'
         }
         
         # load hierarchies
@@ -63,12 +63,25 @@ class CategoryNormalizer:
                 if os.path.exists(file_path):
                     with open(file_path, 'r') as f:
                         self.retailer_hierarchies[retailer] = json.load(f)
-                    self.logger.info(f"Loaded {retailer} hierarchy")
+                    self.logger.info(f"Loaded {retailer} simplified hierarchy from {file_path}")
                 else:
-                    self.logger.warning(f"Hierarchy file not found: {file_path}")
+                    self.logger.warning(f"Simplified hierarchy file not found: {file_path}")
+                    self.retailer_hierarchies[retailer] = {"departments": []}
             except Exception as e:
-                self.logger.error(f"Failed to load {retailer} hierarchy: {e}")
+                self.logger.error(f"Failed to load {retailer} simplified hierarchy: {e}")
                 self.retailer_hierarchies[retailer] = {"departments": []}
+    
+    # load existing categories from database
+    def _load_existing_categories(self):
+        try:
+            result = self.supabase.table('categories').select('id, name, slug').execute()
+            if result.data:
+                for cat in result.data:
+                    self._category_cache[cat['slug']] = cat['id']
+                    self._category_slug_cache[cat['name']] = cat['slug']
+                self.logger.info(f"Loaded {len(result.data)} existing categories from database")
+        except Exception as e:
+            self.logger.error(f"Failed to load existing categories: {e}")
     
     # * Index building methods *
     
@@ -112,66 +125,20 @@ class CategoryNormalizer:
     def _build_retailer_mapping(self, retailer: str, departments: List[Dict]):
         self._map_retailer_recursive(retailer, departments)
     
-    # recursively map retailer categories to main hierarchy
+    # recursive mapping helper
     def _map_retailer_recursive(self, retailer: str, items: List[Dict]):
         for item in items:
-            retailer_category = item.get('name', '')
-            if retailer_category:
+            name = item.get('name', '')
+            if name:
                 # find best match in main hierarchy
-                best_match = self._find_best_category_match(retailer_category)
-                if best_match:
-                    self.retailer_category_map[retailer][retailer_category.lower()] = best_match
+                main_category = self._find_best_main_category_match(name)
+                if main_category:
+                    self.retailer_category_map[retailer][name.lower()] = main_category
                 
                 # recurse into sub_items
                 sub_items = item.get('sub_items', [])
                 if sub_items:
                     self._map_retailer_recursive(retailer, sub_items)
-    
-    # find the best matching category in main hierarchy
-    def _find_best_category_match(self, retailer_category: str) -> Optional[str]:
-        retailer_lower = retailer_category.lower()
-        
-        # first try exact match
-        for main_category in self.category_paths.keys():
-            if main_category.lower() == retailer_lower:
-                return main_category
-        
-        # try fuzzy matching - look for categories that contain key words
-        retailer_words = set(retailer_lower.split())
-        
-        best_match = None
-        best_score = 0
-        
-        for main_category in self.category_paths.keys():
-            main_words = set(main_category.lower().split())
-            
-            # calculate word overlap
-            overlap = len(retailer_words & main_words)
-            if overlap > 0:
-                # prefer more specific (deeper) categories
-                paths = self.category_paths[main_category]
-                max_depth = max(len(path) for path in paths) if paths else 0
-                
-                # score = word_overlap + depth_bonus
-                score = overlap + (max_depth * 0.1)
-                
-                if score > best_score:
-                    best_score = score
-                    best_match = main_category
-        
-        return best_match
-    
-    # load existing categories from database to avoid creating duplicates
-    def _load_existing_categories(self):
-        try:
-            result = self.supabase.table('categories').select('id, name, slug').execute()
-            if result.data:
-                for cat in result.data:
-                    self._category_cache[cat['slug']] = cat['id']
-                    self._category_slug_cache[cat['name']] = cat['slug']
-                self.logger.info(f"Loaded {len(result.data)} existing categories from database")
-        except Exception as e:
-            self.logger.error(f"Failed to load existing categories: {e}")
     
     # * Main normalization methods *
     
@@ -260,52 +227,114 @@ class CategoryNormalizer:
         for category_name in self.category_paths.keys():
             category_words = category_name.lower().split()
             
-            # check if all words from category are in product name
+            # check if all words in category name appear in product name
             if all(word in product_name_lower for word in category_words):
                 matched_categories.append(category_name)
         
-        # sort by specificity (deeper categories first)
-        matched_categories.sort(key=lambda cat: max(len(path) for path in self.category_paths[cat]), reverse=True)
+        # rank by specificity (more words = more specific)
+        matched_categories.sort(key=lambda x: len(x.split()), reverse=True)
         
-        return matched_categories
+        return matched_categories[:5]  # return top 5 matches
     
-    # find the nearest parent category that exists in database
+    # find best matching category in main hierarchy
+    def _find_best_main_category_match(self, retailer_category: str) -> Optional[str]:
+        retailer_category_lower = retailer_category.lower()
+        
+        # exact match first
+        for main_category in self.category_paths.keys():
+            if main_category.lower() == retailer_category_lower:
+                return main_category
+        
+        # partial match
+        best_match = None
+        best_score = 0
+        
+        for main_category in self.category_paths.keys():
+            main_category_lower = main_category.lower()
+            
+            # calculate similarity score
+            score = 0
+            retailer_words = set(retailer_category_lower.split())
+            main_words = set(main_category_lower.split())
+            
+            # jaccard similarity
+            intersection = retailer_words.intersection(main_words)
+            union = retailer_words.union(main_words)
+            
+            if union:
+                score = len(intersection) / len(union)
+            
+            if score > best_score and score > 0.3:  # threshold for similarity
+                best_score = score
+                best_match = main_category
+        
+        return best_match
+    
+    # find existing parent category in database
     def _find_existing_parent_category(self, category_name: str) -> Optional[str]:
-        if category_name not in self.category_paths:
-            return None
+        category_paths = self.category_paths.get(category_name, [])
         
-        # get all paths for this category
-        paths = self.category_paths[category_name]
-        
-        # for each path, walk up the hierarchy to find existing parent
-        for path in paths:
-            for i in range(len(path) - 1, 0, -1):  # walk backwards up the path
-                parent_name = path[i - 1]
+        for path in category_paths:
+            # traverse path from specific to general
+            for i in range(len(path) - 1, -1, -1):
+                parent_name = path[i]
                 parent_slug = self.category_slugs.get(parent_name)
                 if parent_slug and parent_slug in self._category_cache:
                     return parent_name
         
         return None
     
-    # get category IDs for existing categories only - never create new ones
-    def get_or_create_categories(self, category_names: List[str]) -> List[str]:
-        category_ids = []
-        
-        for category_name in category_names:
-            slug = self.category_slugs.get(category_name)
-            if slug and slug in self._category_cache:
-                category_ids.append(self._category_cache[slug])
-            else:
-                self.logger.warning(f"Category not found in database: {category_name}")
-        
-        return category_ids
-    
-    # create URL-friendly slug from name
+    # create slug from category name
     def _create_slug(self, name: str) -> str:
-        # convert to lowercase and replace spaces/special chars with hyphens
-        slug = re.sub(r'[^\w\s-]', '', name.lower())
-        slug = re.sub(r'[\s_-]+', '-', slug)
-        slug = slug.strip('-')
+        # convert to lowercase and replace spaces/special chars w/ hyphens
+        slug = re.sub(r'[^a-zA-Z0-9\s]', '', name.lower())
+        slug = re.sub(r'\s+', '-', slug.strip())
+        return slug
+    
+    # * Database operations *
+    
+    # get or create category in database
+    def get_or_create_category(self, category_name: str) -> Optional[int]:
+        slug = self.category_slugs.get(category_name)
+        if not slug:
+            slug = self._create_slug(category_name)
         
-        # truncate if too long
-        return slug[:255] 
+        # check cache first
+        if slug in self._category_cache:
+            return self._category_cache[slug]
+        
+        try:
+            # try to get from database
+            result = self.supabase.table('categories').select('id').eq('slug', slug).execute()
+            
+            if result.data:
+                category_id = result.data[0]['id']
+                self._category_cache[slug] = category_id
+                return category_id
+            
+            # create new category
+            category_data = {
+                'name': category_name,
+                'slug': slug,
+                'path': self._get_category_path_string(category_name)
+            }
+            
+            result = self.supabase.table('categories').insert(category_data).execute()
+            if result.data:
+                category_id = result.data[0]['id']
+                self._category_cache[slug] = category_id
+                self.logger.info(f"Created new category: {category_name}")
+                return category_id
+        
+        except Exception as e:
+            self.logger.error(f"Failed to get/create category {category_name}: {e}")
+        
+        return None
+    
+    # get category path as string
+    def _get_category_path_string(self, category_name: str) -> str:
+        paths = self.category_paths.get(category_name, [])
+        if paths:
+            # use the first path
+            return ' > '.join(paths[0])
+        return category_name 

@@ -33,17 +33,24 @@ class TargetCrawler(BaseCrawler):
         # reuse one loop
         self.loop = asyncio.get_event_loop()
 
-    # * Configuration and utility methods *
+    # * Config & util methods *
     # load category config from json file
     def _load_category_config(self):
-        config_path = os.getenv("TARGET_CATEGORY_CONFIG") or Path(__file__).parent / "target_grocery_hierarchy.json"
+        config_path = os.getenv("TARGET_CATEGORY_CONFIG") or "data/processed/simplified_target.json"
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 self.category_config = json.load(f)
-            self.logger.info("Successfully loaded category configuration")
+            self.logger.info("Successfully loaded Target category configuration from processed hierarchy")
         except Exception as e:
-            self.logger.error(f"Failed to load category configuration: {e}")
-            self.category_config = {"departments": []}
+            # fallback - old location (if processed file doesn't exist)
+            fallback_path = Path(__file__).parent / "target_grocery_hierarchy.json"
+            try:
+                with open(fallback_path, 'r', encoding='utf-8') as f:
+                    self.category_config = json.load(f)
+                self.logger.warning(f"Using fallback hierarchy file: {fallback_path}")
+            except Exception as e2:
+                self.logger.error(f"Failed to load Target category configuration: {e}, fallback: {e2}")
+                self.category_config = {"departments": []}
 
     # find a category in the config
     def _find_category_in_config(self, category_name):

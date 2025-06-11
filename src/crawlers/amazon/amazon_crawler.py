@@ -23,9 +23,27 @@ class AmazonCrawler(BaseCrawler):
     def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
         super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
         self.base_url = "https://www.amazon.com"
+        self._load_category_config()
         self.logger.info("AmazonCrawler initialized. Playwright will be launched as needed.")
     
-    # * Configuration and utility methods *
+    # * Config & util methods *
+    # load category config from json file
+    def _load_category_config(self):
+        config_path = os.getenv("AMZ_CATEGORY_CONFIG") or "data/processed/simplified_amazon.json"
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                self.category_config = json.load(f)
+            self.logger.info("Successfully loaded Amazon category configuration from processed hierarchy")
+        except Exception as e:
+            # fallbcack - old location (if processed file doesn't exist)
+            fallback_path = Path(__file__).parent / "amazon_grocery_hierarchy.json"
+            try:
+                with open(fallback_path, 'r', encoding='utf-8') as f:
+                    self.category_config = json.load(f)
+                self.logger.warning(f"Using fallback hierarchy file: {fallback_path}")
+            except Exception as e2:
+                self.logger.error(f"Failed to load Amazon category configuration: {e}, fallback: {e2}")
+                self.category_config = {"departments": []}
     
     # map category name to amazon URL
     def _get_category_url(self, category: str) -> str:
