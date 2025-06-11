@@ -69,24 +69,51 @@ class SupabaseBackend(OutputBackend):
         
         # process different types of records
         success_count = 0
-        for record in records:
+        for i, record in enumerate(records):
             try:
+                self.logger.debug(f"Processing record {i+1}/{len(records)}, type: {type(record)}")
+                
                 if isinstance(record, ProductRecord):
                     self._process_product_record(record)
                     success_count += 1
                 elif isinstance(record, dict):
-                    self._process_raw_dict(record)
-                    success_count += 1
+                    # validate as dict w/ expected fields
+                    if self._validate_dict_record(record):
+                        self._process_raw_dict(record)
+                        success_count += 1
+                    else:
+                        self.logger.warning(f"Invalid dict record at index {i}: {record}")
                 elif isinstance(record, str):
-                    self._process_url_record(record)
-                    success_count += 1
+                    # Handle URL strings
+                    if record.startswith('http'):
+                        self._process_url_record(record)
+                        success_count += 1
+                    else:
+                        self.logger.warning(f"Invalid string record at index {i}: {record}")
                 else:
-                    self.logger.warning(f"Unknown record type: {type(record)}")
+                    self.logger.error(f"Unknown record type at index {i}: {type(record)} - {record}")
+                    
             except Exception as e:
-                self.logger.error(f"Error processing record: {e}")
+                self.logger.error(f"Error processing record {i+1}: {e}")
+                self.logger.debug(f"Problematic record: {record}")
                 continue
         
         self.logger.info(f"Successfully processed {success_count}/{len(records)} records")
+
+    # validate dict record has required fields
+    def _validate_dict_record(self, record):
+        if not isinstance(record, dict):
+            return False
+        
+        # check at least one of the required fields
+        required_fields = ['title', 'name', 'url', 'asin', 'tcin', 'wm_item_id']
+        has_required_field = any(field in record for field in required_fields)
+        
+        if not has_required_field:
+            self.logger.warning(f"Dict record missing required fields. Has: {list(record.keys())}")
+            return False
+        
+        return True
     
     # * Record processing methods *
     
@@ -167,19 +194,31 @@ class SupabaseBackend(OutputBackend):
     # process a raw dictionary w/ category normalization
     def _process_raw_dict(self, record: dict) -> None:
         try:
+            # validate input
+            if not isinstance(record, dict):
+                raise ValueError(f"Expected dict, got {type(record)}: {record}")        
+            
+            # log record structure for debugging
+            self.logger.debug(f"Processing dict record with keys: {list(record.keys())}")
+            
             # determine retailer
             retailer_id = self._determine_retailer_from_dict(record)
             if not retailer_id:
-                self.logger.warning(f"Could not determine retailer for record: {record}")
+                self.logger.warning(f"Could not determine retailer for record with keys: {list(record.keys())}")
                 return
             
+            # Get retailer info
             retailer_info = self._get_retailer_info(retailer_id)
             retailer_name = retailer_info.get('name', 'unknown') if retailer_info else 'unknown'
             
+            # Use safe getter methods for all record access
+            product_title = record.get('title') or record.get('name') or 'Unknown Product'
+            product_url = record.get('url', '')
+            
             # normalize categories using hierarchy
             category_names = self.category_normalizer.normalize_category(
-                product_name=record.get('title', 'Unknown Product'),
-                product_url=record.get('url', ''),
+                product_name=product_title,
+                product_url=product_url,
                 retailer_name=retailer_name,
                 raw_category=record.get('category')
             )
@@ -188,32 +227,32 @@ class SupabaseBackend(OutputBackend):
             category_ids = self.category_normalizer.get_or_create_categories(category_names)
             
             # extract brand
-            brand_id = self._extract_and_create_brand(record.get('title', ''))
+            brand_id = self._extract_and_create_brand(product_title)
+            
+            # create rest of product data
+            product_data = {
+                'name': product_title,
+                'slug': self._create_slug(product_title),
+                'description': record.get('description'),
+                'brand_id': brand_id,
+                'is_active': True
+            }
             
             # lookup UPC if enabled
             upc = None
             if self.enable_upc_lookup and self.upc_manager:
                 try:
                     upc_result = self.upc_manager.lookup_upc(
-                        product_name=record.get('title', 'Unknown Product'),
+                        product_name=product_title,
                         retailer_source=retailer_name,
-                        original_url=record.get('url', '')
+                        original_url=product_url
                     )
                     if upc_result and upc_result.upc:
                         upc = upc_result.upc
-                        self.logger.info(f"Found UPC {upc} for product: {record.get('title')}")
+                        product_data['upc'] = upc
+                        self.logger.info(f"Found UPC {upc} for product: {product_title}")
                 except Exception as e:
-                    self.logger.error(f"UPC lookup failed for {record.get('title')}: {e}")
-            
-            # create product
-            product_data = {
-                'name': record.get('title', 'Unknown Product'),
-                'slug': self._create_slug(record.get('title', 'Unknown Product')),
-                'description': record.get('description'),
-                'brand_id': brand_id,
-                'upc': upc,
-                'is_active': True
-            }
+                    self.logger.error(f"UPC lookup failed for {product_title}: {e}")
             
             product_id = self._get_or_create_product_from_dict(product_data, record)
             
@@ -236,10 +275,11 @@ class SupabaseBackend(OutputBackend):
             
             self._upsert_listing(listing_data)
             
-            self.logger.debug(f"Processed dict product: {record.get('title')} -> Categories: {category_names}")
+            self.logger.debug(f"Processed dict product: {product_title} -> Categories: {category_names}")
             
         except Exception as e:
             self.logger.error(f"Error processing raw dict: {e}")
+            self.logger.debug(f"Record that caused error: {record}")
             raise
     
     # assign categories to a product
@@ -347,45 +387,31 @@ class SupabaseBackend(OutputBackend):
     
     # get or create retailer in database
     def _get_or_create_retailer(self, retailer_identifier) -> str:
-        # check cache first
-        if retailer_identifier in self._retailer_cache:
-            return self._retailer_cache[retailer_identifier]
-        
-        # map retailer IDs to names (based on crawler config)
-        retailer_map = {
-            1: {'name': 'Amazon', 'slug': 'amazon', 'website_url': 'https://www.amazon.com'},
-            2: {'name': 'Target', 'slug': 'target', 'website_url': 'https://www.target.com'},
-            3: {'name': 'Walmart', 'slug': 'walmart', 'website_url': 'https://www.walmart.com'}
+        # map string IDs to proper UUIDs
+        retailer_uuid_map = {
+            "1": "00000000-0000-0000-0000-000000000001",  # Amazon
+            "2": "00000000-0000-0000-0000-000000000002",  # Target  
+            "3": "00000000-0000-0000-0000-000000000003",  # Walmart
+            "amazon": "00000000-0000-0000-0000-000000000001",
+            "target": "00000000-0000-0000-0000-000000000002",
+            "walmart": "00000000-0000-0000-0000-000000000003"
         }
         
-        if isinstance(retailer_identifier, int) and retailer_identifier in retailer_map:
-            retailer_info = retailer_map[retailer_identifier]
-        else:
-            # handle string identifiers or create generic retailer
-            retailer_info = {
-                'name': str(retailer_identifier),
-                'slug': self._create_slug(str(retailer_identifier)),
-                'website_url': None
-            }
+        # convert to string first, then map to UUID
+        retailer_key = str(retailer_identifier).lower()
+        uuid_value = retailer_uuid_map.get(retailer_key, retailer_identifier)
         
         try:
-            # try to get existing retailer
-            result = self.supabase.table('retailers').select('id').eq('slug', retailer_info['slug']).execute()
-            
+            # verify retailer exists
+            result = self.supabase.table('retailers').select('id').eq('id', uuid_value).execute()
             if result.data:
-                retailer_id = result.data[0]['id']
+                return uuid_value
             else:
-                # create new retailer
-                result = self.supabase.table('retailers').insert(retailer_info).execute()
-                retailer_id = result.data[0]['id']
-            
-            # cache result
-            self._retailer_cache[retailer_identifier] = retailer_id
-            return retailer_id
-            
+                self.logger.error(f"Retailer with UUID {uuid_value} not found in database")
+                return None
         except Exception as e:
-            self.logger.error(f"Error getting/creating retailer: {e}")
-            raise
+            self.logger.error(f"Error getting retailer info: {e}")
+            return None
     
     # * Product management methods *
     
@@ -451,10 +477,14 @@ class SupabaseBackend(OutputBackend):
     # upsert listing
     def _upsert_listing(self, listing_data: dict) -> None:
         try:
-            # use upsert to handle duplicates
+            # ensure location_id is included for the constraint
+            if 'location_id' not in listing_data:
+                listing_data['location_id'] = None
+            
+            # use correct constraint fields that match the database schema
             result = self.supabase.table('listings').upsert(
                 listing_data,
-                on_conflict='product_id,retailer_id'
+                on_conflict='product_id,retailer_id,location_id'  # added location_id
             ).execute()
             
             # add price history if price exists
@@ -463,8 +493,8 @@ class SupabaseBackend(OutputBackend):
                 price_history_data = {
                     'listing_id': listing_id,
                     'price': listing_data['price'],
-                    'currency': listing_data['currency'],
-                    'timestamp': listing_data['last_checked']
+                    'currency': listing_data.get('currency', 'USD'),
+                    'timestamp': listing_data.get('last_checked')
                 }
                 
                 self.supabase.table('price_histories').insert(price_history_data).execute()
@@ -511,7 +541,7 @@ class SupabaseBackend(OutputBackend):
     def _create_slug(self, name: str) -> str:
         import re
         
-        # convert to lowercase and replace spaces/special chars with hyphens
+        # convert to lowercase and replace spaces/special chars w/ hyphens
         slug = re.sub(r'[^\w\s-]', '', name.lower())
         slug = re.sub(r'[\s_-]+', '-', slug)
         slug = slug.strip('-')

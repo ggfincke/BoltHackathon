@@ -39,7 +39,7 @@ class UPCManager:
             barcode_service = BarcodeLookupService(
                 max_pages=3,
                 similarity_threshold=0.45,
-                headless=True,
+                headless=False,
                 logger=self.logger
             )
             self.add_service(barcode_service)
