@@ -1,0 +1,529 @@
+{
+    "departments": [
+      {
+        "department_name": "Amazon Grocery",
+        "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310101&ref_=eemb_redirect_grocery",
+        "sub_items": [
+          {
+            "name": "Beverages",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310231",
+            "sub_items": [
+              {
+                "name": "Coffee",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16318031",
+                "sub_items": [
+                  {
+                    "name": "Ground Coffee",
+                    "link_url": "https://www.amazon.com/s?node=2251593011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Single-Serve Coffee Capsules & Pods",
+                    "link_url": "https://www.amazon.com/s?node=14978414011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Instant Coffee",
+                    "link_url": "https://www.amazon.com/s?node=2251594011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Whole Coffee Beans",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=23783759011",
+                    "sub_items": [
+                      {
+                        "name": "Roasted Coffee Beans",
+                        "link_url": "https://www.amazon.com/s?node=2251592011",
+                        "sub_items": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Soda & Soft Drinks",
+                "link_url": "https://www.amazon.com/s?node=16318231",
+                "sub_items": []
+              },
+              {
+                "name": "Energy Drinks",
+                "link_url": "https://www.amazon.com/s?node=16318341",
+                "sub_items": []
+              },
+              {
+                "name": "Juices",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16318171",
+                "sub_items": [
+                  {
+                    "name": "Fruit Juice Beverages",
+                    "link_url": "https://www.amazon.com/s?node=2255111011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Drinking Water",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16318651",
+                "sub_items": [
+                  {
+                    "name": "Flavored Drinking Water",
+                    "link_url": "https://www.amazon.com/s?node=5782439011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Carbonated Drinking Water",
+                    "link_url": "https://www.amazon.com/s?node=5782442011",
+                    "sub_items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Pantry Staples",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=18787303011",
+            "sub_items": [
+              {
+                "name": "Pasta & Noodles",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6502933011",
+                "sub_items": [
+                  {
+                    "name": "Italian Pasta",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16322171",
+                    "sub_items": [
+                      {
+                        "name": "Spaghetti Pasta",
+                        "link_url": "https://www.amazon.com/s?node=16322381",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Penne Pasta",
+                        "link_url": "https://www.amazon.com/s?node=16322341",
+                        "sub_items": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Dried Grains & Rice",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6464122011",
+                "sub_items": [
+                  {
+                    "name": "Dried White Rice",
+                    "link_url": "https://www.amazon.com/s?node=6464133011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Dried Brown Rice",
+                    "link_url": "https://www.amazon.com/s?node=6464125011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Canned Foods",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6464939011",
+                "sub_items": [
+                  {
+                    "name": "Canned Beans",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6464940011",
+                    "sub_items": [
+                      {
+                        "name": "Canned Black Beans",
+                        "link_url": "https://www.amazon.com/s?node=6464942011",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Canned Kidney Beans",
+                        "link_url": "https://www.amazon.com/s?node=6464944011",
+                        "sub_items": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Canned & Jarred Tomatoes",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6465022011",
+                    "sub_items": [
+                      {
+                        "name": "Canned & Jarred Diced Tomatoes",
+                        "link_url": "https://www.amazon.com/s?node=6465024011",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Canned & Jarred Tomato Sauces",
+                        "link_url": "https://www.amazon.com/s?node=6465030011",
+                        "sub_items": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Condiments & Salad Dressings",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16320321",
+                "sub_items": [
+                  {
+                    "name": "Ketchup",
+                    "link_url": "https://www.amazon.com/s?node=16319851",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Mustard",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16319891",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Mayonnaise",
+                    "link_url": "https://www.amazon.com/s?node=16319881",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Salad Dressings",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16320901",
+                    "sub_items": [
+                      {
+                        "name": "Ranch Salad Dressings",
+                        "link_url": "https://www.amazon.com/s?node=16320961",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Italian Salad Dressing",
+                        "link_url": "https://www.amazon.com/s?node=16320941",
+                        "sub_items": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Nut & Seed Butters",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=345830011",
+                "sub_items": [
+                  {
+                    "name": "Peanut Butter",
+                    "link_url": "https://www.amazon.com/s?node=16320591",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Jams, Jellies & Sweet Spreads",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16320071",
+                "sub_items": [
+                  {
+                    "name": "Jams, Jellies & Preserves",
+                    "link_url": "https://www.amazon.com/s?node=6493999011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Cooking Oils & Vinegars",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6485890011",
+                "sub_items": [
+                  {
+                    "name": "Cooking & Baking Oils",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16320331",
+                    "sub_items": [
+                      {
+                        "name": "Olive Oils",
+                        "link_url": "https://www.amazon.com/s?node=16320381",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Vegetable Oils",
+                        "link_url": "https://www.amazon.com/s?node=6485898011",
+                        "sub_items": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Cooking & Baking Vinegars",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16320491",
+                    "sub_items": [
+                      {
+                        "name": "White Vinegars",
+                        "link_url": "https://www.amazon.com/s?node=6485904011",
+                        "sub_items": []
+                      },
+                      {
+                        "name": "Balsamic Vinegars",
+                        "link_url": "https://www.amazon.com/s?node=16320501",
+                        "sub_items": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Cooking & Baking Supplies",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310221",
+            "sub_items": [
+              {
+                "name": "Baking Mixes",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16317231",
+                "sub_items": [
+                  {
+                    "name": "Pancake & Waffle Mixes",
+                    "link_url": "https://www.amazon.com/s?node=16317311",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Cake Mixes",
+                    "link_url": "https://www.amazon.com/s?node=16317271",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Bread Mixes",
+                    "link_url": "https://www.amazon.com/s?node=16317251",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Baking Flours & Meals",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16317621",
+                "sub_items": [
+                  {
+                    "name": "Wheat Flours & Meals",
+                    "link_url": "https://www.amazon.com/s?node=16317731",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Baking Syrups, Sugars & Sweeteners",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=6492319011",
+                "sub_items": [
+                  {
+                    "name": "Sugars",
+                    "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16317911",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Maple Syrup",
+                    "link_url": "https://www.amazon.com/s?node=16318001",
+                    "sub_items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Herbs, Spices & Seasonings",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310281",
+            "sub_items": [
+              {
+                "name": "Salt & Salt Substitutes",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16321861",
+                "sub_items": [
+                  {
+                    "name": "Table Salts",
+                    "link_url": "https://www.amazon.com/s?node=6493928011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Sea Salts",
+                    "link_url": "https://www.amazon.com/s?node=16321901",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Pepper & Peppercorns",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16321781",
+                "sub_items": [
+                  {
+                    "name": "Ground Pepper",
+                    "link_url": "https://www.amazon.com/s?node=16321791",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Single Herbs & Spices",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=724803011",
+                "sub_items": [
+                  {
+                    "name": "Sweet Basil Leaf",
+                    "link_url": "https://www.amazon.com/s?node=16321941",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Cinnamon",
+                    "link_url": "https://www.amazon.com/s?node=16321551",
+                    "sub_items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Breakfast & Cereal",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16310251",
+            "sub_items": [
+              {
+                "name": "Cereal",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16318891",
+                "sub_items": [
+                  {
+                    "name": "Cold Breakfast Cereals",
+                    "link_url": "https://www.amazon.com/s?node=6524561011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Oatmeal",
+                "link_url": "https://www.amazon.com/s?node=16318941",
+                "sub_items": []
+              },
+              {
+                "name": "Syrups & Toppings",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=11713214011",
+                "sub_items": [
+                  {
+                    "name": "Maple Syrup",
+                    "link_url": "https://www.amazon.com/s?node=16318001",
+                    "sub_items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Snacks",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16322721",
+            "sub_items": [
+              {
+                "name": "Chips & Pretzels",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16322741",
+                "sub_items": [
+                  {
+                    "name": "Potato Chips & Crisps",
+                    "link_url": "https://www.amazon.com/s?node=16322761",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Tortilla Chips & Crisps",
+                    "link_url": "https://www.amazon.com/s?node=16322771",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Snack Crackers",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16322781",
+                "sub_items": [
+                  {
+                    "name": "Graham Crackers",
+                    "link_url": "https://www.amazon.com/s?node=16322821",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Saltine Crackers",
+                    "link_url": "https://www.amazon.com/s?node=16322841",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Grocery Cookies",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=18774312011",
+                "sub_items": [
+                  {
+                    "name": "Chocolate-Chip Cookies",
+                    "link_url": "https://www.amazon.com/s?node=18774317011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Sandwich Cookies",
+                    "link_url": "https://www.amazon.com/s?node=18774332011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Nuts & Seeds",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=11437481011",
+                "sub_items": [
+                  {
+                    "name": "Peanuts",
+                    "link_url": "https://www.amazon.com/s?node=16322941",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Mixed Nuts",
+                    "link_url": "https://www.amazon.com/s?node=16322931",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Almonds",
+                    "link_url": "https://www.amazon.com/s?node=16322891",
+                    "sub_items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Candy & Chocolate",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=23759923011",
+            "sub_items": [
+              {
+                "name": "Chocolate",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=23759922011",
+                "sub_items": [
+                  {
+                    "name": "Chocolate Candy & Bars",
+                    "link_url": "https://www.amazon.com/s?node=6558923011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Gummy Candies",
+                "link_url": "https://www.amazon.com/s?node=16322481",
+                "sub_items": []
+              },
+              {
+                "name": "Hard Candy",
+                "link_url": "https://www.amazon.com/s?node=16322491",
+                "sub_items": []
+              }
+            ]
+          },
+          {
+            "name": "Baby Food",
+            "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16323111",
+            "sub_items": [
+              {
+                "name": "Baby & Toddler Formula",
+                "link_url": "https://www.amazon.com/fmc/everyday-essentials-category?node=16323121",
+                "sub_items": [
+                  {
+                    "name": "Powder Baby Formula",
+                    "link_url": "https://www.amazon.com/s?node=21401508011",
+                    "sub_items": []
+                  },
+                  {
+                    "name": "Liquid Baby Formula",
+                    "link_url": "https://www.amazon.com/s?node=21401509011",
+                    "sub_items": []
+                  }
+                ]
+              },
+              {
+                "name": "Baby Food",
+                "link_url": "https://www.amazon.com/s?node=14804133011",
+                "sub_items": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }

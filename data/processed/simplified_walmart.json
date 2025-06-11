@@ -1,0 +1,307 @@
+{
+    "name": "Walmart Grocery",
+    "link_url": "https://www.walmart.com/cp/food/976759?povid=GlobalNav_rWeb_Grocery_GroceryShopAll",
+    "sub_items": [
+      {
+        "name": "Produce",
+        "link_url": "https://www.walmart.com/cp/fresh-produce/976793?povid=976759_hubspoke_976759_Shopbycategory_Produce_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "All fruits",
+            "link_url": "https://www.walmart.com/browse/food/fresh-fruits/976759_976793_9756351?povid=976759_hubspoke_976793_Shopbycategory_Allfruit_Rweb_Apr_01",
+            "sub_items": []
+          },
+          {
+            "name": "All vegetables",
+            "link_url": "https://www.walmart.com/browse/food/fresh-vegetables/976759_976793_8910423?povid=976759_hubspoke_976793_Shopbycategory_Allvegetables_Rweb_Apr_01",
+            "sub_items": []
+          },
+          {
+            "name": "Berries",
+            "link_url": "https://www.walmart.com/browse/food/berries/976759_976793_9756351_1643058?povid=976759_hubspoke_976793_Shopbycategory_Berries_Rweb_Apr_01",
+            "sub_items": []
+          },
+          {
+            "name": "Organic produce",
+            "link_url": "https://www.walmart.com/browse/food/organic-produce/976759_976793_1913529?povid=976759_hubspoke_976793_Shopbycategory_OrganicProduce_Rweb_Apr_01",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Meat & seafood",
+        "link_url": "https://www.walmart.com/cp/meat-seafood/9569500?povid=976759_hubspoke_976759_Shopbycategory_Meatandseafood_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Turkey",
+            "link_url": "https://www.walmart.com/browse/food/turkey/976759_9569500_3765252?povid=976759_hubspoke_9569500_Shopbycategory_Turkey_Rweb_Oct_24",
+            "sub_items": []
+          },
+          {
+            "name": "Steaks",
+            "link_url": "https://www.walmart.com/browse/food/beef-steaks/976759_9569500_1730435_3846672?povid=976759_hubspoke_9569500_Shopbycategory_Steaks_Rweb_May_06",
+            "sub_items": []
+          },
+          {
+            "name": "Ground beef",
+            "link_url": "https://www.walmart.com/browse/food/ground-beef/976759_9569500_1730435_8361185?povid=976759_hubspoke_9569500_Shopbycategory_GroundBeef_Rweb_May_06",
+            "sub_items": []
+          },
+          {
+            "name": "Fresh seafood",
+            "link_url": "https://www.walmart.com/browse/food/fresh-fish/976759_9569500_1001442_5915873?povid=976759_hubspoke_9569500_Shopbycategory_FreshSeafood_Rweb_Apr_30",
+            "sub_items": []
+          },
+          {
+            "name": "Bacon",
+            "link_url": "https://www.walmart.com/browse/food/bacon/976759_9569500_2941132_4344925?povid=976759_hubspoke_9569500_Shopbycategory_Bacon_Rweb_Mar_25",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Dairy & eggs",
+        "link_url": "https://www.walmart.com/cp/dairy-eggs/9176907?povid=976759_hubspoke_976759_Shopbycategory_Dairyandeggs_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Milk",
+            "link_url": "https://www.walmart.com/browse/food/milk/976759_9176907_4405816?povid=976759_hubspoke_9176907_ShopByCategory_Milk_Rweb_Jun_01_25",
+            "sub_items": []
+          },
+          {
+            "name": "Cheese",
+            "link_url": "https://www.walmart.com/browse/food/cheese/976759_9176907_1001468?povid=976759_hubspoke_9176907_ShopByCategory_Cheese_Rweb_Jun_01_25",
+            "sub_items": []
+          },
+          {
+            "name": "Eggs",
+            "link_url": "https://www.walmart.com/browse/food/eggs/976759_9176907_1001469?povid=976759_hubspoke_9176907_ShopByCategory_Eggs_Rweb_Jun_01_25",
+            "sub_items": []
+          },
+          {
+            "name": "Yogurt",
+            "link_url": "https://www.walmart.com/browse/food/yogurt/976759_9176907_1001470?povid=976759_hubspoke_9176907_ShopByCategory_Yogurt_Rweb_Jun_01_25",
+            "sub_items": []
+          },
+          {
+            "name": "Butter & margarine",
+            "link_url": "https://www.walmart.com/browse/food/butter-margarine/976759_9176907_1001467?povid=976759_hubspoke_9176907_ShopByCategory_ButterAndMargarine_Rweb_Jun_01_25",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Frozen",
+        "link_url": "https://www.walmart.com/cp/frozen-foods/976791?povid=976759_hubspoke_976759_Shopbycategory_Frozen_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Ice cream",
+            "link_url": "https://www.walmart.com/browse/food/ice-cream-novelties/976759_976791_1518625?povid=976759_hubspoke_976791_Shopbycategory_Icecream_Rweb_June_01",
+            "sub_items": []
+          },
+          {
+            "name": "pizza",
+            "link_url": "https://www.walmart.com/browse/food/frozen-pizza/976759_976791_2072073?povid=976759_hubspoke_976791_Shopbycategory_Frozenpizza_Rweb_June_01",
+            "sub_items": []
+          },
+          {
+            "name": "Individual meals",
+            "link_url": "https://www.walmart.com/browse/frozen-meals/frozen-individual-meals/976759_976791_6259087_7801454?povid=976759_hubspoke_976791_Shopbycategory_Individualmeals_Rweb_June_01",
+            "sub_items": []
+          },
+          {
+            "name": "vegetables",
+            "link_url": "https://www.walmart.com/browse/frozen-fruits-vegetables/frozen-vegetables/976759_976791_5624760_1001424?povid=976759_hubspoke_976791_Shopbycategory_Frozenvegetables_Rweb_June_01",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Bread & bakery",
+        "link_url": "https://www.walmart.com/cp/bakery-bread/976779?povid=976759_hubspoke_976759_Shopbycategory_Breadandbakery_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Breads",
+            "link_url": "https://www.walmart.com/browse/food/breakfast-breads/976759_976779_1044115?povid=976759_hubspoke_976783_Shopbycategory_Breads_Rweb_May_23",
+            "sub_items": []
+          },
+          {
+            "name": "Bagels",
+            "link_url": "https://www.walmart.com/browse/food/bagels/976759_976779_1044115_4162625?povid=976759_hubspoke_976779_Shopbycategory_Bagels_Rweb_Apr_25",
+            "sub_items": []
+          },
+          {
+            "name": "Muffins",
+            "link_url": "https://www.walmart.com/browse/food/muffins/976759_976779_1001456_6843143?povid=976759_hubspoke_976779_Shopbycategory_Muffins_Rweb_Apr_25",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Beverages",
+        "link_url": "https://www.walmart.com/cp/beverages/976782?povid=976759_hubspoke_976759_Shopbycategory_Beverages_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Coffee",
+            "link_url": "https://www.walmart.com/cp/coffee/1086446?povid=976759_hubspoke_976782_Shopbycategory_Coffee_Rweb_may_19",
+            "sub_items": []
+          },
+          {
+            "name": "Soda",
+            "link_url": "https://www.walmart.com/cp/soda-pop/1001680?povid=976759_hubspoke_976782_Shopbycategory_Soda_Rweb_Mar_13",
+            "sub_items": []
+          },
+          {
+            "name": "Juices",
+            "link_url": "https://www.walmart.com/cp/juices/1001321?povid=976759_hubspoke_976782_Shopbycategory_Juices_Rweb_sept_05",
+            "sub_items": []
+          },
+          {
+            "name": "Water",
+            "link_url": "https://www.walmart.com/cp/water/1001659?povid=976759_hubspoke_976782_Shopbycategory_Water_Rweb_may_19",
+            "sub_items": []
+          },
+          {
+            "name": "Energy Drinks",
+            "link_url": "https://www.walmart.com/browse/food/energy-drinks/976759_976782_9357528?povid=976759_hubspoke_976782_Shopbycategory_EnergyDrinks_Rweb_may_19",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Pantry",
+        "link_url": "https://www.walmart.com/cp/pantry/976794?povid=976759_hubspoke_976759_Shopbycategory_Pantry_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Rice, grains and dried beans",
+            "link_url": "https://www.walmart.com/browse/food/rice-grains-dried-beans/976759_976794_4879140?povid=976759_hubspoke_976794_Shopbycategory_Ricegrainsanddriedbeans_Rweb_feb_24",
+            "sub_items": []
+          },
+          {
+            "name": "Pasta",
+            "link_url": "https://www.walmart.com/browse/food/pasta/976759_976794_3246797?povid=976759_hubspoke_976794_ShopbyCategory_Pasta_Rweb_feb_24",
+            "sub_items": []
+          },
+          {
+            "name": "Canned goods",
+            "link_url": "https://www.walmart.com/browse/food/canned-goods/976759_976794_7433209?povid=976759_hubspoke_976794_ShopbyCategory_Cannedgoods_Rweb_feb_24",
+            "sub_items": []
+          },
+          {
+            "name": "Condiments",
+            "link_url": "https://www.walmart.com/browse/food/condiments/976759_976794_7981173?povid=976759_hubspoke_976794_Shopbycategory_Condiments_Rweb_Aug_03",
+            "sub_items": []
+          },
+          {
+            "name": "Peanut butter & spreads",
+            "link_url": "https://www.walmart.com/browse/food/peanut-butter/976759_976794_3642122_6347787?povid=976759_hubspoke_976794_Shopbycategory_Peanutbutterandspreads_Rweb_feb_24",
+            "sub_items": []
+          },
+          {
+            "name": "Cooking oils & vinegars",
+            "link_url": "https://www.walmart.com/browse/food/shop-all-cooking-oils-vinegars/976759_976794_4649724_4110919?povid=976759_hubspoke_976794_ShopbyCategory_Cookingoilsandvinegars_Rweb_feb_24",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Baking",
+        "link_url": "https://www.walmart.com/cp/baking/976780?povid=976759_hubspoke_976759_Shopbycategory_Baking_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Flours",
+            "link_url": "https://www.walmart.com/browse/food/flours-meals/976759_976780_9959366_9084673?povid=976759_hubspoke_976780_Combinethedry_Flours_Rweb_Jul_31",
+            "sub_items": []
+          },
+          {
+            "name": "Sugars",
+            "link_url": "https://www.walmart.com/browse/food/all-sugars/976759_976780_9959366_3219393_9649007?povid=976759_hubspoke_976780_Combinethedry_Sugars_Rweb_Jul_31",
+            "sub_items": []
+          },
+          {
+            "name": "Cake mixes",
+            "link_url": "https://www.walmart.com/browse/food/cake-mixes/976759_976780_6314071_6730317?povid=976759_hubspoke_976780_Shopbycategory_Cakemixes_Rweb_May_21",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Herbs, spices & seasonings",
+        "link_url": "https://www.walmart.com/browse/food/herbs-spices-seasoning-mixes/976759_976794_3029941?povid=976759_hubspoke_976794_Shopbycategory_Herbsspicesandseasonings_Rweb_Feb_24",
+        "sub_items": []
+      },
+      {
+        "name": "Breakfast",
+        "link_url": "https://www.walmart.com/cp/breakfast-cereal/976783?povid=976759_hubspoke_976759_Shopbycategory_Breakfast_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Cereal",
+            "link_url": "https://www.walmart.com/browse/food/cereal/976759_976783_8102529_4007132?povid=976759_hubspoke_976783_Shopbycategory_Cereal_Rweb_May_23",
+            "sub_items": []
+          },
+          {
+            "name": "Oatmeal & grits",
+            "link_url": "https://www.walmart.com/browse/food/oatmeal-grits/976759_976783_7830606?povid=976759_hubspoke_976783_Shopbycategory_OatmealAndGrits_Rweb_May_23",
+            "sub_items": []
+          },
+          {
+            "name": "Pancake & waffle mix",
+            "link_url": "https://www.walmart.com/browse/food/pancake-waffle-mixes/976759_976783_2228922_4240323?povid=976759_hubspoke_976783_Shopbycategory_Pancakeandwafflemix_Rweb_May_23",
+            "sub_items": []
+          },
+          {
+            "name": "Syrup",
+            "link_url": "https://www.walmart.com/browse/food/syrups/976759_976783_2228922_1592810?povid=976759_hubspoke_976783_Shopbycategory_Syrup_Rweb_May_23",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Snacks",
+        "link_url": "https://www.walmart.com/cp/snacks-cookies-chips/976787?povid=976759_hubspoke_976759_Shopbycategory_Snacks_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Chips",
+            "link_url": "https://www.walmart.com/cp/chips/1001390?povid=976759_hubspoke_976787_Shopbycategory_Chips_Rweb_May_02",
+            "sub_items": []
+          },
+          {
+            "name": "Crackers",
+            "link_url": "https://www.walmart.com/browse/food/crackers/976759_976787_1001392?povid=976759_hubspoke_976787_Shopbycategory_Crackers_Rweb_May_02",
+            "sub_items": []
+          },
+          {
+            "name": "Cookies",
+            "link_url": "https://www.walmart.com/cp/cookies/1001391?povid=976759_hubspoke_976787_Shopbycategory_Cookies_Rweb_May_02",
+            "sub_items": []
+          },
+          {
+            "name": "Snack nuts",
+            "link_url": "https://www.walmart.com/browse/food/mixed-nuts/976759_976787_1001406_9012417?povid=976759_hubspoke_976787_Shopbycategory_SnackNuts_Rweb_May_02",
+            "sub_items": []
+          }
+        ]
+      },
+      {
+        "name": "Candy",
+        "link_url": "https://www.walmart.com/cp/candy/1096070?povid=976759_hubspoke_976759_Shopbycategory_Candy_Rweb_May_06",
+        "sub_items": [
+          {
+            "name": "Assorted chocolate boxes",
+            "link_url": "https://www.walmart.com/browse/food/chocolate-boxes/976759_1096070_1224976_6286434?povid=976759_hubspoke_1096070_Shopbycategory_Assortedchocolateboxes_Rweb_Aug_31",
+            "sub_items": []
+          },
+          {
+            "name": "Chewy candy",
+            "link_url": "https://www.walmart.com/browse/food/chewy-gummy-candy/976759_1096070_1224975_1637000?povid=976759_hubspoke_1096070_Shopbycategory_Chewycandy_Rweb_Aug_31",
+            "sub_items": []
+          },
+          {
+            "name": "Gummy candy",
+            "link_url": "https://www.walmart.com/browse/food/gummy-candy/976759_1096070_1224975_6909059?povid=976759_hubspoke_1096070_Shopbycategory_Gummycandy_Rweb_Aug_31",
+            "sub_items": []
+          }
+        ]
+      }
+    ]
+  }
