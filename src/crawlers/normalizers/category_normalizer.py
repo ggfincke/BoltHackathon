@@ -31,6 +31,9 @@ class CategoryNormalizer:
         self._load_retailer_hierarchies()
         self._build_category_index()
         
+        # load retailer specific -> main category mappings from JSON
+        self._load_retailer_mappings()
+        
         # load existing categories from database
         self._load_existing_categories()
     
@@ -92,13 +95,6 @@ class CategoryNormalizer:
         
         # build index for main hierarchy
         self._index_hierarchy_recursive(self.main_hierarchy.get('departments', []), [])
-        
-        # build mapping from retailer categories to main hierarchy
-        self.retailer_category_map = {}
-        for retailer in ['amazon', 'target', 'walmart']:
-            self.retailer_category_map[retailer] = {}
-            retailer_hierarchy = self.retailer_hierarchies.get(retailer, {})
-            self._build_retailer_mapping(retailer, retailer_hierarchy.get('departments', []))
     
     # recursively index the hierarchy to build category paths
     def _index_hierarchy_recursive(self, items: List[Dict], current_path: List[str]):
@@ -121,24 +117,7 @@ class CategoryNormalizer:
                 if sub_items:
                     self._index_hierarchy_recursive(sub_items, full_path)
     
-    # build mapping from retailer categories to main hierarchy categories
-    def _build_retailer_mapping(self, retailer: str, departments: List[Dict]):
-        self._map_retailer_recursive(retailer, departments)
-    
-    # recursive mapping helper
-    def _map_retailer_recursive(self, retailer: str, items: List[Dict]):
-        for item in items:
-            name = item.get('name', '')
-            if name:
-                # find best match in main hierarchy
-                main_category = self._find_best_main_category_match(name)
-                if main_category:
-                    self.retailer_category_map[retailer][name.lower()] = main_category
-                
-                # recurse into sub_items
-                sub_items = item.get('sub_items', [])
-                if sub_items:
-                    self._map_retailer_recursive(retailer, sub_items)
+
     
     # * Main normalization methods *
     
@@ -192,15 +171,15 @@ class CategoryNormalizer:
         retailer_name = retailer_name.lower()
         raw_category_lower = raw_category.lower().strip()
         
-        # use pre-built mapping
-        retailer_map = self.retailer_category_map.get(retailer_name, {})
+        # use direct mappings from mappings.py
+        retailer_mappings = self.retailer_mappings.get(retailer_name, {})
         
-        # direct mapping
-        if raw_category_lower in retailer_map:
-            return retailer_map[raw_category_lower]
+        # direct exact mapping
+        if raw_category_lower in retailer_mappings:
+            return retailer_mappings[raw_category_lower]
         
-        # fuzzy matching within retailer map
-        for retailer_cat, main_cat in retailer_map.items():
+        # fuzzy matching within retailer mappings
+        for retailer_cat, main_cat in retailer_mappings.items():
             if retailer_cat in raw_category_lower or raw_category_lower in retailer_cat:
                 return main_cat
         
@@ -245,17 +224,20 @@ class CategoryNormalizer:
             if main_category.lower() == retailer_category_lower:
                 return main_category
         
-        # partial match
+        # enhanced partial matching with better text normalization
         best_match = None
         best_score = 0
         
         for main_category in self.category_paths.keys():
             main_category_lower = main_category.lower()
             
+            # normalize text for better matching
+            retailer_normalized = self._normalize_category_text(retailer_category_lower)
+            main_normalized = self._normalize_category_text(main_category_lower)
+            
             # calculate similarity score
-            score = 0
-            retailer_words = set(retailer_category_lower.split())
-            main_words = set(main_category_lower.split())
+            retailer_words = set(retailer_normalized.split())
+            main_words = set(main_normalized.split())
             
             # jaccard similarity
             intersection = retailer_words.intersection(main_words)
@@ -263,12 +245,34 @@ class CategoryNormalizer:
             
             if union:
                 score = len(intersection) / len(union)
+                
+                # bonus for key word matches
+                key_words = {"gummy", "chewy", "candy", "candies", "chocolate", "snack", "beverage"}
+                key_matches = intersection.intersection(key_words)
+                if key_matches:
+                    score += 0.2 * len(key_matches)  # boost score for key matches
             
-            if score > best_score and score > 0.3:  # threshold for similarity
+            # lowered threshold and added special cases
+            if score > best_score and score > 0.2:  # lowered from 0.3 to 0.2
                 best_score = score
                 best_match = main_category
         
         return best_match
+
+    # normalize category text for better matching
+    def _normalize_category_text(self, text: str) -> str:
+        # remove special characters
+        text = re.sub(r'[&+\-/\\]', ' ', text)
+        
+        # handle plural/singular forms
+        text = re.sub(r'\bcandies\b', 'candy', text)
+        text = re.sub(r'\bbeverages\b', 'beverage', text)
+        text = re.sub(r'\bsnacks\b', 'snack', text)
+        
+        # remove extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        return text
     
     # find existing parent category in database
     def _find_existing_parent_category(self, category_name: str) -> Optional[str]:
@@ -351,3 +355,18 @@ class CategoryNormalizer:
                     category_ids.append(category_id)
         
         return category_ids 
+
+    # load retailer mappings from JSON file
+    def _load_retailer_mappings(self):
+        mappings_path = "data/processed/retailer_category_mappings.json"
+        try:
+            if os.path.exists(mappings_path):
+                with open(mappings_path, "r") as f:
+                    self.retailer_mappings = json.load(f)
+                self.logger.info(f"Loaded retailer category mappings from {mappings_path}")
+            else:
+                self.logger.warning(f"Retailer mappings file not found at {mappings_path}. Falling back to empty mappings.")
+                self.retailer_mappings = {}
+        except Exception as e:
+            self.logger.error(f"Failed to load retailer category mappings: {e}")
+            self.retailer_mappings = {} 
