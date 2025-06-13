@@ -325,8 +325,6 @@ class WalmartCrawler(BaseCrawler):
                     raw_results = crawl_grid(
                         start_urls=[url],
                         max_depth=max_pages_per_cat,
-                        # one url at a time for now 
-                        concurrency=1, 
                         extract_urls_only=False,
                         use_safari=False,
                         proxy_manager=None,
