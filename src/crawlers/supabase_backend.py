@@ -22,7 +22,7 @@ from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create
 
 # Supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
-    def __init__(self, supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True):
+    def __init__(self, supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True, crawl_category=None):
         self.logger = logging.getLogger(__name__)
         
         # use env or provided values
@@ -35,6 +35,14 @@ class SupabaseBackend(OutputBackend):
         # init supabase client
         self.supabase: Client = create_client(self.supabase_url, self.supabase_key)
         self.logger.info("Supabase backend initialized")
+        
+        # store the crawl category for use in category normalization
+        self.crawl_category = crawl_category
+        if self.crawl_category:
+            self.logger.info(f"✅ Crawl category parameter set to: '{self.crawl_category}'")
+            self.logger.info("This category will be used for ALL products instead of individual product categories")
+        else:
+            self.logger.info("No crawl category parameter set - will use individual product categories")
         
         # init category normalizer
         self.category_normalizer = CategoryNormalizer(self.supabase)
@@ -124,16 +132,34 @@ class SupabaseBackend(OutputBackend):
             retailer_info = self._get_retailer_info(record.retailer_id)
             retailer_name = retailer_info.get('name', 'unknown') if retailer_info else 'unknown'
             
+            # use crawl_category as raw_category if available
+            raw_category = self.crawl_category or getattr(record, 'category', None)
+            
+            # debug logging for category processing
+            self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (ProductRecord) ===")
+            self.logger.debug(f"Product: {record.title}")
+            self.logger.debug(f"Retailer: {retailer_name}")
+            self.logger.debug(f"Crawl category parameter: {self.crawl_category}")
+            self.logger.debug(f"Record category field: {getattr(record, 'category', None)}")
+            self.logger.debug(f"Final raw_category used: {raw_category}")
+            
             # normalize categories using hierarchy
             category_names = self.category_normalizer.normalize_category(
                 product_name=record.title,
                 product_url=str(record.url),
                 retailer_name=retailer_name,
-                raw_category=getattr(record, 'category', None)
+                raw_category=raw_category
             )
+            
+            # debug logging for normalization results
+            self.logger.debug(f"Normalized category names: {category_names}")
             
             # get category IDs for existing categories only
             category_ids = self.category_normalizer.get_or_create_categories(category_names)
+            
+            # debug logging for category IDs
+            self.logger.debug(f"Category IDs assigned: {category_ids}")
+            self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
             # extract/detect brand
             brand_id = self._extract_and_create_brand(record.title)
@@ -169,6 +195,9 @@ class SupabaseBackend(OutputBackend):
             # assign categories to product
             if category_ids:
                 self._assign_product_categories(product_id, category_ids)
+                self.logger.info(f"Assigned categories {category_names} to product: {record.title}")
+            else:
+                self.logger.warning(f"No categories assigned to product: {record.title}")
             
             # create listing - note: retailer_specific_id is NOT the same as UPC
             listing_data = {
@@ -207,24 +236,42 @@ class SupabaseBackend(OutputBackend):
                 self.logger.warning(f"Could not determine retailer for record with keys: {list(record.keys())}")
                 return
             
-            # Get retailer info
+            # get retailer info
             retailer_info = self._get_retailer_info(retailer_id)
             retailer_name = retailer_info.get('name', 'unknown') if retailer_info else 'unknown'
             
-            # Use safe getter methods for all record access
+            # use safe getter methods for all record access
             product_title = record.get('title') or record.get('name') or 'Unknown Product'
             product_url = record.get('url', '')
+            
+            # use crawl_category as raw_category if available
+            raw_category = self.crawl_category or record.get('category')
+            
+            # debug logging for category processing
+            self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (Dict Record) ===")
+            self.logger.debug(f"Product: {product_title}")
+            self.logger.debug(f"Retailer: {retailer_name}")
+            self.logger.debug(f"Crawl category parameter: {self.crawl_category}")
+            self.logger.debug(f"Record category field: {record.get('category')}")
+            self.logger.debug(f"Final raw_category used: {raw_category}")
             
             # normalize categories using hierarchy
             category_names = self.category_normalizer.normalize_category(
                 product_name=product_title,
                 product_url=product_url,
                 retailer_name=retailer_name,
-                raw_category=record.get('category')
+                raw_category=raw_category
             )
+            
+            # debug logging for normalization results
+            self.logger.debug(f"Normalized category names: {category_names}")
             
             # get category IDs for existing categories only
             category_ids = self.category_normalizer.get_or_create_categories(category_names)
+            
+            # debug logging for category IDs
+            self.logger.debug(f"Category IDs assigned: {category_ids}")
+            self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
             # extract brand
             brand_id = self._extract_and_create_brand(product_title)
@@ -259,13 +306,16 @@ class SupabaseBackend(OutputBackend):
             # assign categories
             if category_ids:
                 self._assign_product_categories(product_id, category_ids)
+                self.logger.info(f"Assigned categories {category_names} to product: {product_title}")
+            else:
+                self.logger.warning(f"No categories assigned to product: {product_title}")
             
             # create listing - note: retailer_specific_id is NOT the same as UPC
             listing_data = {
                 'product_id': product_id,
                 'retailer_id': retailer_id,
                 'retailer_specific_id': record.get('asin') or record.get('tcin') or record.get('wm_item_id'),
-                'upc': upc,  # UPC is now populated from UPC lookup service
+                'upc': upc,
                 'url': record.get('url'),
                 'price': self._parse_price(record.get('price')),
                 'currency': 'USD',
@@ -498,7 +548,7 @@ class SupabaseBackend(OutputBackend):
             # use correct constraint fields that match the database schema
             result = self.supabase.table('listings').upsert(
                 listing_data,
-                on_conflict='product_id,retailer_id,location_id'  # added location_id
+                on_conflict='product_id,retailer_id,location_id'  
             ).execute()
             
             # add price history if price exists
@@ -570,5 +620,5 @@ class SupabaseBackend(OutputBackend):
 # * Factory functions *
 
 # factory function to create supabase backend
-def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True) -> SupabaseBackend:
-    return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup)
+def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True, crawl_category=None) -> SupabaseBackend:
+    return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup, crawl_category)

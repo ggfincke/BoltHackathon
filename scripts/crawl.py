@@ -90,18 +90,15 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
     return logger
 
 # create output backend based on config
-def create_output_backend(mode: str, retailer_id: int, backend_type: str = "json", 
-                         hierarchical: bool = False, output_file: str = None,
-                         supabase_url: str = None, supabase_key: str = None,
-                         enable_upc_lookup: bool = True):
-    
+def create_backend(backend_type, mode, hierarchical, retailer_id, output_file, 
+                  supabase_url, supabase_key, enable_upc_lookup, category):    
     # supabase backend
     if backend_type == "supabase":
-        # use Supabase backend for database storage
         return create_supabase_backend(
             supabase_url=supabase_url,
             supabase_key=supabase_key,
-            enable_upc_lookup=enable_upc_lookup
+            enable_upc_lookup=enable_upc_lookup,
+            crawl_category=category
         )
     # hierarchical mode (JSON)
     elif hierarchical:
@@ -310,7 +307,8 @@ Examples:
             supabase_backend = create_supabase_backend(
                 supabase_url=args.supabase_url,
                 supabase_key=args.supabase_key,
-                enable_upc_lookup=False  # Skip UPC lookup for connection test
+                enable_upc_lookup=False,  
+                crawl_category=None  
             )
             print("✅ Supabase connection successful")
         except Exception as e:
@@ -347,15 +345,16 @@ Examples:
         retailer_id = retailer_config["retailer_id"]
         
         # create output backend
-        backend = create_output_backend(
-            mode=args.mode,
-            retailer_id=retailer_id,
+        backend = create_backend(
             backend_type=args.backend,
+            mode=args.mode,
             hierarchical=args.hierarchical,
+            retailer_id=retailer_id,
             output_file=args.output,
             supabase_url=args.supabase_url,
             supabase_key=args.supabase_key,
-            enable_upc_lookup=enable_upc_lookup
+            enable_upc_lookup=enable_upc_lookup,
+            category=args.category
         )
         
         # log backend info

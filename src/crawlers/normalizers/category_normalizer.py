@@ -126,13 +126,19 @@ class CategoryNormalizer:
                           raw_category: str = None) -> List[str]:        
         categories = []
         
+        self.logger.info(f"🔍 CATEGORY DEBUG - normalize_category called:")
+        self.logger.info(f"  product_name: {product_name}")
+        self.logger.info(f"  raw_category: {raw_category}")
+        self.logger.info(f"  retailer_name: {retailer_name}")
+        
         # 1. try to map raw category if provided
         if raw_category:
             mapped_category = self._map_retailer_category(raw_category, retailer_name)
+            self.logger.info(f"  mapped_category result: {mapped_category}")
             if mapped_category:
                 categories.append(mapped_category)
         
-        # 2. extract category from url (if we can parse retailer-specific info)
+        # 2. extract category from url
         url_category = self._extract_category_from_url(product_url, retailer_name)
         if url_category and url_category not in categories:
             categories.append(url_category)
@@ -143,26 +149,19 @@ class CategoryNormalizer:
             if cat not in categories:
                 categories.append(cat)
         
-        # 4. find the most specific (lowest level) categories that exist in database
-        existing_categories = []
-        for category_name in categories:
-            slug = self.category_slugs.get(category_name)
-            if slug and slug in self._category_cache:
-                existing_categories.append(category_name)
+        # 4. if categories (mapped ones), return them
+        # get_or_create_categories handles creating (if they don't exist)
+        if categories:
+            self.logger.info(f"  final categories list: {categories[:3]}")
+            return categories[:3]
         
-        # 5. if no existing categories found, crawl up hierarchy to find parent
-        if not existing_categories:
-            for category_name in categories:
-                parent_category = self._find_existing_parent_category(category_name)
-                if parent_category and parent_category not in existing_categories:
-                    existing_categories.append(parent_category)
-        
-        # 6. fallback to groceries if it exists in database
-        if not existing_categories:
-            if 'groceries' in self._category_cache:
-                existing_categories.append('Groceries')
-        
-        return existing_categories[:3]  # limit to top 3
+        # 5. fallback to groceries only if no categories found
+        if 'groceries' in self._category_cache:
+            self.logger.info(f"  final categories list: ['Groceries']")
+            return ['Groceries']
+            
+        self.logger.info(f"  final categories list: []")
+        return []
     
     # * Helper methods *
     
@@ -176,7 +175,8 @@ class CategoryNormalizer:
         
         # direct exact mapping
         if raw_category_lower in retailer_mappings:
-            return retailer_mappings[raw_category_lower]
+            result = retailer_mappings[raw_category_lower]
+            return result
         
         # fuzzy matching within retailer mappings
         for retailer_cat, main_cat in retailer_mappings.items():
