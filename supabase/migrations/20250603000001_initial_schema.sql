@@ -220,12 +220,10 @@ CREATE TABLE baskets (
     description TEXT,
     is_public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    users JSONB DEFAULT '[]', -- Many-to-many relationship
-    products JSONB DEFAULT '[]' -- Many-to-many relationship
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Add foreign key to basket_users now that baskets exists
+-- Add foreign key to basket_users (now that baskets exists)
 ALTER TABLE basket_users 
 ADD CONSTRAINT fk_basket_users_basket 
 FOREIGN KEY (basket_id) REFERENCES baskets(id) ON DELETE CASCADE;
