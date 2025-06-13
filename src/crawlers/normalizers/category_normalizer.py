@@ -42,7 +42,7 @@ class CategoryNormalizer:
     # load main category hierarchy
     def _load_main_hierarchy(self):
         try:
-            with open('categories.json', 'r') as f:
+            with open('data/processed/categories.json', 'r') as f:
                 self.main_hierarchy = json.load(f)
             self.logger.info("Loaded main category hierarchy")
         except Exception as e:
@@ -55,9 +55,9 @@ class CategoryNormalizer:
         
         # updated paths to use processed hierarchy files from data directory
         hierarchy_files = {
-            'amazon': 'data/processed/amazon_grocery_hierarchy.json',
-            'target': 'data/processed/target_grocery_hierarchy.json', 
-            'walmart': 'data/processed/walmart_grocery_hierarchy.json'
+            'amazon': 'data/processed/simplified_amazon.json',
+            'target': 'data/processed/simplified_target.json', 
+            'walmart': 'data/processed/simplified_walmart.json'
         }
         
         # load hierarchies

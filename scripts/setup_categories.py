@@ -34,9 +34,9 @@ def setup_logging():
 # load hierarchy file for the given retailer
 def load_hierarchy_file(retailer: str) -> dict:    
     hierarchy_files = {
-        'amazon': 'data/processed/amazon_grocery_hierarchy.json',
-        'target': 'data/processed/target_grocery_hierarchy.json', 
-        'walmart': 'data/processed/walmart_grocery_hierarchy.json'
+        'amazon': 'data/processed/simplified_amazon.json',
+        'target': 'data/processed/simplified_target.json', 
+        'walmart': 'data/processed/simplified_walmart.json'
     }
     
     file_path = hierarchy_files.get(retailer.lower())
