@@ -360,13 +360,13 @@ class SupabaseBackend(OutputBackend):
     
     # * Brand management methods *
     
-    # extract brand from record if provided, otherwise return default brand
+    # extract brand from record if provided, otherwise return NULL
     def _extract_and_create_brand(self, product_name: str, brand_name: str = None) -> Optional[str]:
         if brand_name:
             return self._get_or_create_brand(brand_name)
         
-        # TODO: remove once scrapers provide brand information
-        return self._get_or_create_brand("Unknown")
+        # default to NULL
+        return None
     
     # get or create brand in database
     def _get_or_create_brand(self, brand_name: str) -> str:
