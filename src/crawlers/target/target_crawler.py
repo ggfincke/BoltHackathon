@@ -11,7 +11,7 @@ import os
 import asyncio
 import concurrent.futures
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
 from .subcrawlers.category_crawler import crawl_category
@@ -189,7 +189,7 @@ class TargetCrawler(BaseCrawler):
             logger=self.logger
         )
         
-        # convert raw product data to ProductRecord objects
+        # convert to ProductRecord objects w/o subcategory (legacy method)
         return [
             ProductRecord(
                 retailer_id=self.retailer_id,
@@ -213,6 +213,31 @@ class TargetCrawler(BaseCrawler):
         )
         self.logger.info(f"Found {len(urls)} URLs to send to Redis")
         return urls
+
+    # scrape products from a category URL w/ specified subcategory
+    def _scrape_category_with_subcategory(self, url: str, subcategory: str, max_pages: int) -> List[ProductRecord]:
+        self.logger.info(f"Crawling products from {url} (subcategory: {subcategory})")
+        
+        # crawl the grid
+        raw_products = crawl_grid(
+            start_urls=[url],
+            max_depth=max_pages,
+            extract_urls_only=False,
+            logger=self.logger
+        )
+        
+        # convert to ProductRecord objects w/ provided subcategory
+        return [
+            ProductRecord(
+                retailer_id=self.retailer_id,
+                tcin=item["tcin"],
+                title=item["title"],
+                price=item["price"],
+                url=item["url"],
+                category=subcategory,
+            )
+            for item in raw_products
+        ]
 
     # * Concurrent crawling methods *
 
@@ -298,6 +323,94 @@ class TargetCrawler(BaseCrawler):
             self.logger.error(f"Target Batch {batch_num} failed: {e}")
             return []
 
+    # crawl multiple grid URLs concurrently w/ category information (new hierarchy-based method)
+    def _crawl_grids_concurrent_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, concurrency: int) -> None:
+        self.logger.info(f"Starting concurrent grid crawling w/ categories for {len(url_category_pairs)} Target categories with concurrency={concurrency}")
+        
+        # split URL-category pairs into batches for concurrent processing
+        batch_size = max(1, len(url_category_pairs) // concurrency)
+        batches = [url_category_pairs[i:i + batch_size] for i in range(0, len(url_category_pairs), batch_size)]
+        
+        self.logger.info(f"Processing {len(url_category_pairs)} Target URL-category pairs in {len(batches)} batches")
+        
+        # use ThreadPoolExecutor for concurrent processing
+        all_results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=min(concurrency, len(batches))) as executor:
+            # submit all batches
+            future_to_batch = {
+                executor.submit(self._crawl_batch_with_categories, batch, max_pages_per_cat, i + 1): i + 1 
+                for i, batch in enumerate(batches)
+            }
+            
+            # collect results as they complete
+            for future in concurrent.futures.as_completed(future_to_batch):
+                batch_num = future_to_batch[future]
+                try:
+                    batch_results = future.result()
+                    all_results.extend(batch_results)
+                    self.logger.info(f"Target Batch {batch_num} completed with {len(batch_results)} items")
+                except Exception as e:
+                    self.logger.error(f"Target Batch {batch_num} failed: {e}")
+        
+        # send results to output backend
+        if all_results:
+            self.logger.info(f"Collected {len(all_results)} total items from Target concurrent crawling w/ categories")
+            self._out.send(all_results)
+        else:
+            self.logger.warning("No results collected from Target concurrent crawling w/ categories")
+
+    # process a batch of URL-category pairs (new method for hierarchy-based approach)
+    def _crawl_batch_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, batch_num: int):
+        self.logger.info(f"Target Batch {batch_num}: Processing {len(url_category_pairs)} URL-category pairs")
+        
+        all_results = []
+        for pair in url_category_pairs:
+            url = pair['url']
+            category = pair['category']
+            
+            try:
+                self.logger.info(f"Target Batch {batch_num}: Crawling '{category}' from {url}")
+                
+                if self.urls_only:
+                    # urls-only mode - use existing grid crawler
+                    raw_results = crawl_grid(
+                        start_urls=[url],
+                        max_depth=max_pages_per_cat,
+                        extract_urls_only=True,
+                        use_safari=True,
+                        proxy_manager=None,
+                        logger=self.logger
+                    )
+                    all_results.extend(raw_results)
+                else:
+                    # full mode - crawl products with category context
+                    raw_results = crawl_grid(
+                        start_urls=[url],
+                        max_depth=max_pages_per_cat,
+                        # one url at a time for now 
+                        concurrency=1, 
+                        extract_urls_only=False,
+                        logger=self.logger
+                    )
+                    
+                    # convert to ProductRecord objects w/ subcategory from hierarchy
+                    for item in raw_results:
+                        product_record = ProductRecord(
+                            retailer_id=self.retailer_id,
+                            tcin=item.get("tcin"),
+                            title=item.get("title", "Unknown Title"),
+                            price=item.get("price", "Unknown Price"),
+                            url=item.get("url", ""),
+                            category=category,
+                        )
+                        all_results.append(product_record)
+                        
+            except Exception as e:
+                self.logger.error(f"Target Batch {batch_num}: Error crawling '{category}' from {url}: {e}")
+        
+        self.logger.info(f"Target Batch {batch_num}: Found {len(all_results)} total items")
+        return all_results
+
     # * Hierarchical crawling methods *
 
     # scrape hierarchical structure with products attached to leaf nodes
@@ -349,15 +462,21 @@ class TargetCrawler(BaseCrawler):
                 hierarchy = filtered_hierarchy
                 self.logger.info("Successfully applied hierarchy filter")
         
-        # extract leaf URLs
-        leaf_urls = self._extract_leaf_urls(hierarchy)
+        # extract leaf URLs w/ categories (new approach)
+        leaf_data = self._extract_leaf_urls_with_categories(hierarchy)
         
         if category_filter or department_filter:
-            self.logger.info(f"After filtering to '{category_filter or department_filter}': found {len(leaf_urls)} leaf categories to crawl")
+            self.logger.info(f"After filtering to '{category_filter or department_filter}': found {len(leaf_data)} leaf categories to crawl")
         else:
-            self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
+            self.logger.info(f"Found {len(leaf_data)} leaf categories to crawl")
         
-        if not leaf_urls:
+        # log specific categories being crawled
+        for item in leaf_data[:5]:
+            self.logger.info(f"  - '{item['category']}' → {item['url']}")
+        if len(leaf_data) > 5:
+            self.logger.info(f"  ... and {len(leaf_data) - 5} more categories")
+        
+        if not leaf_data:
             self.logger.warning("No leaf categories found to crawl")
             return
         
@@ -372,14 +491,34 @@ class TargetCrawler(BaseCrawler):
             # use base crawler's common hierarchical collection methods
             original_backend, collector = self._setup_hierarchical_collection()
             
-            # crawl w/ the collector backend
-            self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+            # crawl w/ the collector backend using new method
+            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, concurrency)
             
             # restore backend and send hierarchical results
             self._restore_backend_and_send_hierarchical(original_backend, collector, hierarchy, category_filter, department_filter)
         else:
-            # non-hierarchical mode - crawl normally
-            self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+            # non-hierarchical mode - crawl w/ categories
+            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, concurrency)
+
+    # populate leaf nodes w/ products (override to include subcategory)
+    def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int) -> None:
+        if isinstance(node, dict):
+            if "sub_items" in node and node["sub_items"]:
+                # has children, recurse
+                for child in node["sub_items"]:
+                    self._populate_leaf_nodes_with_products(child, max_pages)
+            else:
+                # leaf node - populate with products if it has a URL
+                if "link_url" in node:
+                    url = self._normalize_url(node["link_url"])
+                    
+                    # crawl products w/ subcategory context
+                    products = self._scrape_category(url, max_pages)
+                    if products:
+                        node["products"] = [p.__dict__ for p in products]
+                        self.logger.info(f"Added {len(products)} products to leaf node: {node.get('name', 'Unknown')}")
+                    else:
+                        self.logger.warning(f"No products found for leaf node: {node.get('name', 'Unknown')}")
 
     # * Main interface methods *
 
