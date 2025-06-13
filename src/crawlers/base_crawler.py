@@ -109,7 +109,12 @@ class BaseCrawler(ABC):
     
     # extract all leaf node URLs from hierarchy
     def _extract_leaf_urls(self, hierarchy: dict) -> List[str]:
-        leaf_urls = []
+        leaf_data = self._extract_leaf_urls_with_categories(hierarchy)
+        return [item['url'] for item in leaf_data]
+    
+    # extract all leaf node URLs w/ their category information from hierarchy
+    def _extract_leaf_urls_with_categories(self, hierarchy: dict) -> List[Dict[str, str]]:
+        leaf_data = []
         
         def walk_hierarchy(node):
             # handle root level w/ "departments"
@@ -125,18 +130,21 @@ class BaseCrawler(ABC):
                     for child in sub_items:
                         walk_hierarchy(child)
                 else:
-                    # leaf node - collect the URL
+                    # leaf node - collect the URL & category
                     if "link_url" in node:
                         url = self._normalize_url(node["link_url"])
-                        leaf_urls.append(url)
                         category_name = node.get('name', 'Unknown')
+                        leaf_data.append({
+                            'url': url,
+                            'category': category_name
+                        })
                         self.logger.debug(f"Found leaf URL: {url} (category: {category_name})")
             elif isinstance(node, list):
                 for item in node:
                     walk_hierarchy(item)
         
         walk_hierarchy(hierarchy)
-        return leaf_urls
+        return leaf_data
     
     # normalize URL to full URL
     def _normalize_url(self, url: str) -> str:

@@ -132,8 +132,8 @@ class SupabaseBackend(OutputBackend):
             retailer_info = self._get_retailer_info(record.retailer_id)
             retailer_name = retailer_info.get('name', 'unknown') if retailer_info else 'unknown'
             
-            # use crawl_category as raw_category if available
-            raw_category = self.crawl_category or getattr(record, 'category', None)
+            # prioritize record's category field over command-line category parameter
+            raw_category = getattr(record, 'category', None) or self.crawl_category
             
             # debug logging for category processing
             self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (ProductRecord) ===")
@@ -244,8 +244,8 @@ class SupabaseBackend(OutputBackend):
             product_title = record.get('title') or record.get('name') or 'Unknown Product'
             product_url = record.get('url', '')
             
-            # use crawl_category as raw_category if available
-            raw_category = self.crawl_category or record.get('category')
+            # prioritize record's category field over command-line category parameter
+            raw_category = record.get('category') or self.crawl_category
             
             # debug logging for category processing
             self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (Dict Record) ===")

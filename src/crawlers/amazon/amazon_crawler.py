@@ -10,7 +10,7 @@ import json
 import os
 import asyncio
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 from ..base_crawler import BaseCrawler, ProductRecord, Target, create_redis_client, create_redis_backend, MAX_DEPTH, CONCURRENCY
 from .subcrawlers.category_crawler import crawl_category
@@ -69,7 +69,35 @@ class AmazonCrawler(BaseCrawler):
     
     # * Category scraping methods *
     
-    # scrape products from a category URL
+    # scrape products from a category URL w/ specified subcategory
+    def _scrape_category_with_subcategory(self, url: str, subcategory: str, max_pages: int) -> List[ProductRecord]:
+        self.logger.info(f"Crawling products from {url} (subcategory: {subcategory})")
+        
+        # use grid crawler to get product data
+        raw_products = self.loop.run_until_complete(
+            crawl_grid(
+                start_urls=[url],
+                max_depth=max_pages,
+                concurrency=CONCURRENCY,
+                extract_urls_only=False,
+                logger=self.logger
+            )
+        )
+        
+        # convert to ProductRecord objects w/ provided subcategory
+        return [
+            ProductRecord(
+                retailer_id=self.retailer_id,
+                asin=item.get("asin"),
+                title=item["title"],
+                price=item["price"],
+                url=item["url"],
+                category=subcategory,
+            )
+            for item in raw_products
+        ]
+    
+    # scrape products from a category URL (legacy method for backward compatibility)
     def _scrape_category(self, url: str, max_pages: int) -> List[ProductRecord]:
         self.logger.info(f"Crawling products from {url}")
         
@@ -84,7 +112,7 @@ class AmazonCrawler(BaseCrawler):
             )
         )
         
-        # convert to ProductRecord objects
+        # convert to ProductRecord objects w/o subcategory (legacy method)
         return [
             ProductRecord(
                 retailer_id=self.retailer_id,
@@ -115,13 +143,13 @@ class AmazonCrawler(BaseCrawler):
     
     # * Concurrent crawling methods *
     
-    # crawl multiple grid URLs concurrently
-    def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
-        self.logger.info(f"Starting concurrent grid crawling for {len(grid_urls)} categories with concurrency={concurrency}")
+    # crawl multiple grid URLs concurrently with category information
+    def _crawl_grids_concurrent_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, concurrency: int) -> None:
+        self.logger.info(f"Starting concurrent grid crawling for {len(url_category_pairs)} categories with concurrency={concurrency}")
         
         # run async concurrent crawl
         results = self.loop.run_until_complete(
-            self._async_crawl_grids_concurrent(grid_urls, max_pages_per_cat, concurrency)
+            self._async_crawl_grids_concurrent_with_categories(url_category_pairs, max_pages_per_cat, concurrency)
         )
         
         # send results to output backend
@@ -131,19 +159,19 @@ class AmazonCrawler(BaseCrawler):
         else:
             self.logger.warning("No results collected from concurrent crawling")
     
-    # async method to crawl multiple grids concurrently
-    async def _async_crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int):
-        # split URLs into batches for processing
-        batch_size = max(1, len(grid_urls) // concurrency)
-        batches = [grid_urls[i:i + batch_size] for i in range(0, len(grid_urls), batch_size)]
+    # async method to crawl multiple grids concurrently with category information
+    async def _async_crawl_grids_concurrent_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, concurrency: int):
+        # split URL-category pairs into batches for processing
+        batch_size = max(1, len(url_category_pairs) // concurrency)
+        batches = [url_category_pairs[i:i + batch_size] for i in range(0, len(url_category_pairs), batch_size)]
         
-        self.logger.info(f"Split {len(grid_urls)} URLs into {len(batches)} batches")
+        self.logger.info(f"Split {len(url_category_pairs)} URL-category pairs into {len(batches)} batches")
         
         # create tasks for each batch
         tasks = []
         for i, batch in enumerate(batches):
             task = asyncio.create_task(
-                self._crawl_batch(batch, max_pages_per_cat, f"batch_{i}")
+                self._crawl_batch_with_categories(batch, max_pages_per_cat, f"batch_{i}")
             )
             tasks.append(task)
         
@@ -160,13 +188,14 @@ class AmazonCrawler(BaseCrawler):
         
         return all_results
     
-    # crawl a batch of URLs
-    async def _crawl_batch(self, urls: List[str], max_pages: int, batch_name: str):
-        self.logger.info(f"Processing {batch_name} with {len(urls)} URLs")
+    # crawl a batch of URL-category pairs
+    async def _crawl_batch_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages: int, batch_name: str):
+        self.logger.info(f"Processing {batch_name} with {len(url_category_pairs)} URL-category pairs")
         
         try:
             if self.urls_only:
                 # extract URLs only
+                urls = [pair['url'] for pair in url_category_pairs]
                 results = await crawl_grid(
                     start_urls=urls,
                     max_depth=max_pages,
@@ -176,25 +205,35 @@ class AmazonCrawler(BaseCrawler):
                 )
             else:
                 # extract full product data
-                raw_results = await crawl_grid(
-                    start_urls=urls,
-                    max_depth=max_pages,
-                    concurrency=min(CONCURRENCY, len(urls)),
-                    extract_urls_only=False,
-                    logger=self.logger
-                )
-                
-                # convert to ProductRecord objects
-                results = [
-                    ProductRecord(
-                        retailer_id=self.retailer_id,
-                        asin=item.get("asin"),
-                        title=item["title"],
-                        price=item["price"],
-                        url=item["url"],
+                all_results = []
+                for pair in url_category_pairs:
+                    url = pair['url']
+                    category = pair['category']
+                    
+                    self.logger.info(f"Crawling {url} for category: {category}")
+                    
+                    raw_results = await crawl_grid(
+                        start_urls=[url],
+                        max_depth=max_pages,
+                        # one url at a time for now 
+                        concurrency=1, 
+                        extract_urls_only=False,
+                        logger=self.logger
                     )
-                    for item in raw_results
-                ]
+                    
+                    # convert to ProductRecord objects w/ subcategory from hierarchy
+                    for item in raw_results:
+                        product_record = ProductRecord(
+                            retailer_id=self.retailer_id,
+                            asin=item.get("asin"),
+                            title=item["title"],
+                            price=item["price"],
+                            url=item["url"],
+                            category=category,
+                        )
+                        all_results.append(product_record)
+                
+                results = all_results
             
             self.logger.info(f"Batch {batch_name} completed: {len(results)} items")
             return results
@@ -202,6 +241,16 @@ class AmazonCrawler(BaseCrawler):
         except Exception as e:
             self.logger.error(f"Error in batch {batch_name}: {e}")
             return []
+    
+    # legacy method for backward compatibility
+    def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
+        self.logger.info(f"Starting concurrent grid crawling for {len(grid_urls)} categories with concurrency={concurrency}")
+        
+        # convert URLs to URL-category pairs with unknown categories
+        url_category_pairs = [{'url': url, 'category': None} for url in grid_urls]
+        
+        # use the new method
+        self._crawl_grids_concurrent_with_categories(url_category_pairs, max_pages_per_cat, concurrency)
     
     # * Hierarchical crawling methods *
     
@@ -223,6 +272,28 @@ class AmazonCrawler(BaseCrawler):
         # output hierarchy
         self.logger.info("Sending hierarchy to output backend...")
         self.output_backend.send(hierarchy)
+    
+    # populate leaf nodes w/ products (override to include subcategory)
+    def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int) -> None:
+        if isinstance(node, dict):
+            if node.get("sub_items"):
+                # has children - recurse
+                for child in node["sub_items"]:
+                    self._populate_leaf_nodes_with_products(child, max_pages)
+            else:
+                # Leaf node - add products
+                if "link_url" in node:
+                    category_name = node.get('name')
+                    self.logger.info(f"Crawling products for leaf node: {category_name}")
+                    url = self._normalize_url(node["link_url"])
+                    
+                    # crawl products w/ subcategory context
+                    products = self._scrape_category(url, max_pages)
+                    if products:
+                        node["products"] = [p.model_dump() for p in products]
+        elif isinstance(node, list):
+            for item in node:
+                self._populate_leaf_nodes_with_products(item, max_pages)
     
     # crawl a single category
     def _crawl_single_category(self, max_pages: int) -> None:
@@ -272,13 +343,17 @@ class AmazonCrawler(BaseCrawler):
             self.logger.info(f"Applying filters: category='{category_filter}', department='{department_filter}'")
             hierarchy = self._filter_hierarchy(hierarchy, category_filter, department_filter)
         
-        # extract leaf URLs for crawling
-        leaf_urls = self._extract_leaf_urls(hierarchy)
-        self.logger.info(f"Found {len(leaf_urls)} leaf categories to crawl")
+        # extract leaf URLs with their category information
+        leaf_url_category_pairs = self._extract_leaf_urls_with_categories(hierarchy)
+        self.logger.info(f"Found {len(leaf_url_category_pairs)} leaf categories to crawl")
         
-        if not leaf_urls:
+        if not leaf_url_category_pairs:
             self.logger.warning("No leaf categories found to crawl")
             return
         
-        # crawl all URLs concurrently
-        self._crawl_grids_concurrent(leaf_urls, max_pages_per_cat, concurrency)
+        # log the categories that will be crawled
+        for pair in leaf_url_category_pairs:
+            self.logger.info(f"Will crawl category '{pair['category']}' from URL: {pair['url']}")
+        
+        # crawl all URL-category pairs concurrently
+        self._crawl_grids_concurrent_with_categories(leaf_url_category_pairs, max_pages_per_cat, concurrency)
