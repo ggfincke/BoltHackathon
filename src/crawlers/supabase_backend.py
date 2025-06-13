@@ -213,9 +213,15 @@ class SupabaseBackend(OutputBackend):
                 'last_checked': datetime.utcnow().isoformat()
             }
             
-            self._upsert_listing(listing_data)
-            
-            self.logger.debug(f"Processed product: {record.title} -> Categories: {category_names}")
+            try:
+                self._upsert_listing(listing_data)
+                self.logger.debug(f"Processed product: {record.title} -> Categories: {category_names}")
+            except ValueError as e:
+                if "Duplicate listing" in str(e):
+                    self.logger.info(f"Skipping duplicate listing for product: {record.title}")
+                    return  
+                else:
+                    raise
             
         except Exception as e:
             self.logger.error(f"Error processing ProductRecord: {e}")
@@ -325,9 +331,15 @@ class SupabaseBackend(OutputBackend):
                 'last_checked': datetime.utcnow().isoformat()
             }
             
-            self._upsert_listing(listing_data)
-            
-            self.logger.debug(f"Processed dict product: {product_title} -> Categories: {category_names}")
+            try:
+                self._upsert_listing(listing_data)
+                self.logger.debug(f"Processed dict product: {product_title} -> Categories: {category_names}")
+            except ValueError as e:
+                if "Duplicate listing" in str(e):
+                    self.logger.info(f"Skipping duplicate listing for product: {product_title}")
+                    return 
+                else:
+                    raise
             
         except Exception as e:
             self.logger.error(f"Error processing raw dict: {e}")
@@ -524,12 +536,52 @@ class SupabaseBackend(OutputBackend):
     
     # * Listing management methods *
     
+    # check if retailer already has a listing for this product (prevents duplicate listings)
+    def _check_retailer_duplicate_listing(self, product_id: str, retailer_id: str) -> None:
+        try:
+            existing_listings = self.supabase.table('listings')\
+                .select('id, url, location_id')\
+                .eq('product_id', product_id)\
+                .eq('retailer_id', retailer_id)\
+                .execute()
+            
+            if existing_listings.data:
+                # get retailer & product names for better error messages
+                retailer_info = self._get_retailer_info(retailer_id)
+                retailer_name = retailer_info.get('name', 'Unknown') if retailer_info else 'Unknown'
+                
+                product_result = self.supabase.table('products')\
+                    .select('name')\
+                    .eq('id', product_id)\
+                    .execute()
+                product_name = product_result.data[0]['name'] if product_result.data else 'Unknown Product'
+                
+                existing_listing = existing_listings.data[0]
+                existing_url = existing_listing.get('url', 'Unknown URL')
+                
+                self.logger.warning(f"Retailer '{retailer_name}' already has a listing for product '{product_name}'. "
+                                  f"Existing listing URL: {existing_url}. "
+                                  f"Skipping duplicate listing creation.")
+                
+                # log a warning and skip
+                raise ValueError(f"Duplicate listing: {retailer_name} already has a listing for '{product_name}'")
+                
+        except Exception as e:
+            if "Duplicate listing" in str(e):
+                raise 
+            else:
+                self.logger.error(f"Error checking for duplicate listings: {e}")
+                # continue processing
+    
     # upsert listing
     def _upsert_listing(self, listing_data: dict) -> None:
         try:
             # ensure location_id is included for the constraint
             if 'location_id' not in listing_data:
                 listing_data['location_id'] = None
+            
+            # check if retailer already has a listing for this product (business rule)
+            self._check_retailer_duplicate_listing(listing_data['product_id'], listing_data['retailer_id'])
             
             # use correct constraint fields that match the database schema
             result = self.supabase.table('listings').upsert(
