@@ -162,7 +162,8 @@ class SupabaseBackend(OutputBackend):
             self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
             # extract/detect brand
-            brand_id = self._extract_and_create_brand(record.title)
+            brand_name = getattr(record, 'brand_name', None) or getattr(record, 'brand', None)
+            brand_id = self._extract_and_create_brand(record.title, brand_name)
             
             # lookup UPC if enabled
             upc = None
@@ -274,7 +275,8 @@ class SupabaseBackend(OutputBackend):
             self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
             # extract brand
-            brand_id = self._extract_and_create_brand(product_title)
+            brand_name = record.get('brand_name') or record.get('brand')
+            brand_id = self._extract_and_create_brand(product_title, brand_name)
             
             # create rest of product data
             product_data = {
@@ -358,29 +360,13 @@ class SupabaseBackend(OutputBackend):
     
     # * Brand management methods *
     
-    # extract brand from product name and create if needed
-    def _extract_and_create_brand(self, product_name: str) -> Optional[str]:
-        if not product_name:
-            return None
+    # extract brand from record if provided, otherwise return default brand
+    def _extract_and_create_brand(self, product_name: str, brand_name: str = None) -> Optional[str]:
+        if brand_name:
+            return self._get_or_create_brand(brand_name)
         
-        # simple brand extraction - common brand patterns
-        brand_patterns = [
-            # capitalized words at start
-            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)', 
-            # all caps words
-            r'\b([A-Z]{2,})\b',  
-        ]
-        
-        # try each pattern
-        for pattern in brand_patterns:
-            match = re.search(pattern, product_name)
-            if match:
-                brand_name = match.group(1).strip()
-                # if brand name is valid, get or create brand
-                if len(brand_name) > 1 and brand_name not in ['THE', 'AND', 'OR']:
-                    return self._get_or_create_brand(brand_name)
-        
-        return None
+        # TODO: remove once scrapers provide brand information
+        return self._get_or_create_brand("Unknown")
     
     # get or create brand in database
     def _get_or_create_brand(self, brand_name: str) -> str:
