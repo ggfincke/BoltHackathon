@@ -31,6 +31,10 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv
+
+# load from .env
+load_dotenv()
 
 # src dir to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))

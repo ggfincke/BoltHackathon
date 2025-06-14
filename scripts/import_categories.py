@@ -20,6 +20,10 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 from supabase import create_client
 import re
+from dotenv import load_dotenv
+
+# load from .env
+load_dotenv()
 
 # add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src'))
