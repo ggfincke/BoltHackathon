@@ -27,7 +27,7 @@ class SupabaseBackend(OutputBackend):
         
         # use env or provided values
         self.supabase_url = supabase_url or os.getenv('SUPABASE_URL')
-        self.supabase_key = supabase_key or os.getenv('SUPABASE_ANON_KEY')
+        self.supabase_key = supabase_key or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
         
         if not self.supabase_url or not self.supabase_key:
             raise ValueError("Supabase URL and key must be provided via parameters or environment variables")
