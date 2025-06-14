@@ -4,14 +4,17 @@ BarcodeLookup.com UPC lookup service implementation.
 This module provides the BarcodeLookupService class that implements the
 BaseUPCLookup interface for looking up UPC codes using the BarcodeLookup.com
 website. Uses Selenium with undetected Chrome driver for web scraping.
+Capable of concurrent processing for batch operations.
 """
 
 import re
 import random
 import time
 import string
-from typing import Optional
+import asyncio
+from typing import Optional, List
 from difflib import SequenceMatcher
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -26,13 +29,16 @@ from .base_upc_lookup import BaseUPCLookup, UPCResult
 # barcodeLookup.com UPC lookup service implementation
 class BarcodeLookupService(BaseUPCLookup):
     def __init__(self, max_pages: int = 4, similarity_threshold: float = 0.45, 
-                 headless: bool = True, logger=None):
+                 headless: bool = True, max_workers: int = 4, logger=None):
         super().__init__(logger)
         self.max_pages = max_pages
         self.similarity_threshold = similarity_threshold
         self.headless = headless
+        self.max_workers = max_workers
         self.driver = None
         self.wait = None
+        self.driver_pool = []
+        self.pool_lock = None
         
     # * Driver management methods *
         
@@ -216,3 +222,210 @@ class BarcodeLookupService(BaseUPCLookup):
             finally:
                 self.driver = None
                 self.wait = None
+        
+        # clean up driver pool
+        self._cleanup_driver_pool()
+    
+    # * Enhanced concurrent processing methods *
+    
+    # process multiple products using concurrent browser instances
+    def batch_lookup_concurrent(self, products: List[str]) -> List[UPCResult]:
+        if not products:
+            return []
+        
+        try:
+            # split products across available workers
+            chunks = [products[i::self.max_workers] for i in range(self.max_workers)]
+            chunks = [chunk for chunk in chunks if chunk]
+            
+            # process chunks concurrently
+            results = []
+            with ThreadPoolExecutor(max_workers=len(chunks)) as executor:
+                # submit tasks
+                future_to_chunk = {
+                    executor.submit(self._process_chunk_sync, chunk, worker_id): chunk 
+                    for worker_id, chunk in enumerate(chunks)
+                }
+                
+                # collect results
+                for future in as_completed(future_to_chunk):
+                    chunk = future_to_chunk[future]
+                    try:
+                        chunk_results = future.result()
+                        results.extend(chunk_results)
+                    except Exception as e:
+                        self.logger.error(f"Error processing chunk {chunk}: {e}")
+                        # add empty results for failed chunk
+                        results.extend([UPCResult(
+                            upc=None,
+                            confidence_score=0.0,
+                            source_service=self.service_name,
+                            product_title=product,
+                            metadata={"error": str(e)}
+                        ) for product in chunk])
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in concurrent batch lookup: {e}")
+            # return empty results for all products
+            return [UPCResult(
+                upc=None,
+                confidence_score=0.0,
+                source_service=self.service_name,
+                product_title=product,
+                metadata={"error": str(e)}
+            ) for product in products]
+    
+    # process a chunk of products w/ dedicated browser instance (synchronous)
+    def _process_chunk_sync(self, products: List[str], worker_id: int) -> List[UPCResult]:
+        driver = None
+        try:
+            # create dedicated driver for this worker
+            driver = self._create_worker_driver(worker_id)
+            if not driver:
+                raise Exception("Failed to create worker driver")
+            
+            results = []
+            for product in products:
+                try:
+                    result = self._perform_lookup_with_driver(driver, product)
+                    results.append(result)
+                    # small delay between lookups to avoid overwhelming the service
+                    time.sleep(random.uniform(0.5, 1.0))
+                except Exception as e:
+                    self.logger.error(f"Error looking up UPC for '{product}' in worker {worker_id}: {e}")
+                    results.append(UPCResult(
+                        upc=None,
+                        confidence_score=0.0,
+                        source_service=self.service_name,
+                        product_title=product,
+                        metadata={"error": str(e), "worker_id": worker_id}
+                    ))
+            
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Error in worker {worker_id}: {e}")
+            return [UPCResult(
+                upc=None,
+                confidence_score=0.0,
+                source_service=self.service_name,
+                product_title=product,
+                metadata={"error": str(e), "worker_id": worker_id}
+            ) for product in products]
+        finally:
+            if driver:
+                try:
+                    driver.quit()
+                    self.logger.debug(f"Worker {worker_id} driver closed")
+                except Exception as e:
+                    self.logger.error(f"Error closing worker {worker_id} driver: {e}")
+    
+    # create a dedicated driver for a worker
+    def _create_worker_driver(self, worker_id: int):
+        try:
+            opts = uc.ChromeOptions()
+            if self.headless:
+                opts.add_argument("--headless=new")
+            opts.add_argument("--no-sandbox")
+            opts.add_argument("--disable-dev-shm-usage")
+            opts.add_argument("--disable-gpu")
+            opts.add_argument(f"--user-data-dir=/tmp/chrome_worker_{worker_id}")
+            
+            driver = uc.Chrome(options=opts)
+            self.logger.debug(f"Worker {worker_id} driver initialized")
+            return driver
+        except Exception as e:
+            self.logger.error(f"Failed to initialize worker {worker_id} driver: {e}")
+            return None
+    
+    # perform UPC lookup w/ a specific driver instance
+    def _perform_lookup_with_driver(self, driver, product_name: str) -> UPCResult:
+        wait = WebDriverWait(driver, 10)
+        
+        # search page
+        driver.get("https://www.barcodelookup.com/")
+        time.sleep(random.uniform(2.0, 3.0))
+        
+        # submit search
+        try:
+            search_box = driver.find_element(By.NAME, "search-input")
+            search_box.clear()
+            search_box.send_keys(product_name)
+            
+            submit_btn = driver.find_element(By.CSS_SELECTOR, "form.search-bar button.btn-search")
+            submit_btn.click()
+        except Exception as e:
+            raise Exception(f"Failed to submit search: {e}")
+        
+        current_page = 1
+        best_upc, best_score, best_title = None, 0.0, ""
+        
+        # search through pages
+        while current_page <= self.max_pages:
+            try:
+                # wait for results
+                wait.until(EC.presence_of_element_located((By.ID, "product-search-results")))
+                items = driver.find_elements(By.CSS_SELECTOR, "#product-search-results li")
+                
+                for item in items:
+                    try:
+                        title_el = item.find_element(By.CSS_SELECTOR, ".product-search-item-text p")
+                        title = title_el.text.strip()
+                        
+                        # extract UPC
+                        upc_match = re.search(r"Barcode:\s*(\d+)", item.text)
+                        if not upc_match:
+                            continue
+                        
+                        upc = upc_match.group(1)
+                        score = self._calculate_similarity(product_name, title)
+                        
+                        if score > best_score:
+                            best_score, best_upc, best_title = score, upc, title
+                        
+                    except Exception as e:
+                        self.logger.debug(f"Error processing search result item: {e}")
+                        continue
+                
+                # early break
+                if best_score >= self.similarity_threshold:
+                    break
+                
+                # go to next page
+                try:
+                    next_btn = driver.find_element(
+                        By.CSS_SELECTOR, "ul.pagination a[aria-label='Next']"
+                    )
+                    next_btn.click()
+                    current_page += 1
+                    time.sleep(random.uniform(1.5, 2.5))
+                except Exception:
+                    # no more pages
+                    break
+                    
+            except TimeoutException:
+                self.logger.warning(f"Timeout waiting for search results on page {current_page}")
+                break
+        
+        # return    
+        return UPCResult(
+            upc=best_upc if best_score >= self.similarity_threshold else None,
+            confidence_score=best_score,
+            source_service=self.service_name,
+            product_title=best_title or product_name,
+            metadata={
+                "pages_searched": current_page,
+                "threshold": self.similarity_threshold
+            }
+        )
+    
+    # clean up all drivers in the pool
+    def _cleanup_driver_pool(self):
+        for driver in self.driver_pool:
+            try:
+                driver.quit()
+            except Exception as e:
+                self.logger.error(f"Error closing pooled driver: {e}")
+        self.driver_pool.clear()

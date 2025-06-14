@@ -34,6 +34,22 @@ PRODUCT_TCIN_ATTRIBUTE = 'data-focusid'
 TCIN_PATTERN = r'(\d+)_product_card'
 
 # * helper funcs
+# check if URL already exists in listings
+def _url_exists_in_database(url: str, supabase_client = None) -> bool:
+    if not supabase_client:
+        return False
+    
+    try:
+        result = supabase_client.table('listings')\
+            .select('id')\
+            .eq('url', url)\
+            .limit(1)\
+            .execute()
+        return len(result.data) > 0
+    except Exception as e:
+        logging.error(f"Error checking URL existence: {e}")
+        return False
+
 # setup driver; either Chrome or Safari (safari seems better at avoiding detection)
 def _setup_driver(use_safari: bool = False, proxy_manager = None) -> webdriver.Remote:
     # setup Safari driver
@@ -244,7 +260,7 @@ def _extract_urls(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
     return all_urls
 
 # extract full product data from pages (for JSON output)
-def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger) -> List[Dict[str, Any]]:
+def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger, supabase_client = None) -> List[Dict[str, Any]]:
     # logger
     logger.info(f"Extracting full product data from {url}")
     all_products = []
@@ -283,8 +299,15 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
                 if not tcin or tcin in SEEN_TCINS:
                     continue
                 
-                product_url = _extract_product_url(driver, card)
+                product_url = _extract_product_url(driver, card)  
                 if not product_url:
+                    continue
+                
+                # check if URL exists in database before processing
+                if supabase_client and _url_exists_in_database(product_url, supabase_client):
+                    logger.info(f"Skipping existing product: {product_url}")
+                    # mark as seen to avoid reprocessing
+                    SEEN_TCINS.add(tcin)
                     continue
                 
                 product_data = {
@@ -334,7 +357,7 @@ def _shorten_target_url(url: str) -> str:
 
 # * main - crawl product grids from a list of starting URLs and return the products found
 def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: bool = False,
-               use_safari: bool = False, proxy_manager = None, logger = None) -> List:
+               use_safari: bool = False, proxy_manager = None, logger = None, supabase_client = None) -> List:
     # logger
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -350,7 +373,13 @@ def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: boo
         try:
             logger.info(f"Processing URL: {url}")
             driver = _setup_driver(use_safari=use_safari, proxy_manager=proxy_manager)
-            url_results = extract_fn(driver, url, max_depth, logger)
+            
+            # call extract function
+            if extract_urls_only:
+                url_results = extract_fn(driver, url, max_depth, logger)
+            else:
+                url_results = extract_fn(driver, url, max_depth, logger, supabase_client)
+            
             results.extend(url_results)
             logger.info(f"Completed URL: {url}, extracted {len(url_results)} items")
         except Exception as e:

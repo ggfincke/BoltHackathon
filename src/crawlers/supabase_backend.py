@@ -165,28 +165,12 @@ class SupabaseBackend(OutputBackend):
             brand_name = getattr(record, 'brand_name', None) or getattr(record, 'brand', None)
             brand_id = self._extract_and_create_brand(record.title, brand_name)
             
-            # lookup UPC if enabled
-            upc = None
-            if self.enable_upc_lookup and self.upc_manager:
-                try:
-                    upc_result = self.upc_manager.lookup_upc(
-                        product_name=record.title,
-                        retailer_source=retailer_name,
-                        original_url=str(record.url)
-                    )
-                    if upc_result and upc_result.upc:
-                        upc = upc_result.upc
-                        self.logger.info(f"Found UPC {upc} for product: {record.title}")
-                except Exception as e:
-                    self.logger.error(f"UPC lookup failed for {record.title}: {e}")
-            
-            # create product w/ data
+            # create product w/ data (no UPC lookup)
             product_data = {
                 'name': record.title,
                 'slug': self._create_slug(record.title),
                 'description': getattr(record, 'description', None),
                 'brand_id': brand_id,
-                'upc': upc, 
                 'is_active': True
             }
             
@@ -205,7 +189,6 @@ class SupabaseBackend(OutputBackend):
                 'product_id': product_id,
                 'retailer_id': self._get_or_create_retailer(record.retailer_id),
                 'retailer_specific_id': getattr(record, 'asin', None) or getattr(record, 'tcin', None) or getattr(record, 'wm_item_id', None),
-                'upc': upc, 
                 'url': str(record.url),
                 'price': self._parse_price(record.price),
                 'currency': 'USD',
@@ -214,8 +197,13 @@ class SupabaseBackend(OutputBackend):
             }
             
             try:
-                self._upsert_listing(listing_data)
+                listing_id = self._upsert_listing(listing_data)
                 self.logger.debug(f"Processed product: {record.title} -> Categories: {category_names}")
+                
+                # UPC lookup (only for new listings)
+                if self.enable_upc_lookup and self.upc_manager and listing_id:
+                    self._perform_delayed_upc_lookup(product_id, listing_id, record.title, str(record.url), retailer_name)
+                    
             except ValueError as e:
                 if "Duplicate listing" in str(e):
                     self.logger.info(f"Skipping duplicate listing for product: {record.title}")
@@ -284,7 +272,7 @@ class SupabaseBackend(OutputBackend):
             brand_name = record.get('brand_name') or record.get('brand')
             brand_id = self._extract_and_create_brand(product_title, brand_name)
             
-            # create rest of product data
+            # create rest of product data 
             product_data = {
                 'name': product_title,
                 'slug': self._create_slug(product_title),
@@ -292,22 +280,6 @@ class SupabaseBackend(OutputBackend):
                 'brand_id': brand_id,
                 'is_active': True
             }
-            
-            # lookup UPC if enabled
-            upc = None
-            if self.enable_upc_lookup and self.upc_manager:
-                try:
-                    upc_result = self.upc_manager.lookup_upc(
-                        product_name=product_title,
-                        retailer_source=retailer_name,
-                        original_url=product_url
-                    )
-                    if upc_result and upc_result.upc:
-                        upc = upc_result.upc
-                        product_data['upc'] = upc
-                        self.logger.info(f"Found UPC {upc} for product: {product_title}")
-                except Exception as e:
-                    self.logger.error(f"UPC lookup failed for {product_title}: {e}")
             
             product_id = self._get_or_create_product_from_dict(product_data, record)
             
@@ -323,7 +295,6 @@ class SupabaseBackend(OutputBackend):
                 'product_id': product_id,
                 'retailer_id': retailer_id,
                 'retailer_specific_id': record.get('asin') or record.get('tcin') or record.get('wm_item_id'),
-                'upc': upc,
                 'url': record.get('url'),
                 'price': self._parse_price(record.get('price')),
                 'currency': 'USD',
@@ -332,8 +303,13 @@ class SupabaseBackend(OutputBackend):
             }
             
             try:
-                self._upsert_listing(listing_data)
+                listing_id = self._upsert_listing(listing_data)
                 self.logger.debug(f"Processed dict product: {product_title} -> Categories: {category_names}")
+                
+                # UPC lookup (only for new listings)
+                if self.enable_upc_lookup and self.upc_manager and listing_id:
+                    self._perform_delayed_upc_lookup(product_id, listing_id, product_title, product_url, retailer_name)
+                    
             except ValueError as e:
                 if "Duplicate listing" in str(e):
                     self.logger.info(f"Skipping duplicate listing for product: {product_title}")
@@ -362,7 +338,8 @@ class SupabaseBackend(OutputBackend):
                     assignment = {
                         'product_id': product_id,
                         'category_id': category_id,
-                        'is_primary': (i == 0)  # First category is primary
+                        # first category is primary
+                        'is_primary': (i == 0)
                     }
                     
                     self.supabase.table('product_categories').insert(assignment).execute()
@@ -573,8 +550,8 @@ class SupabaseBackend(OutputBackend):
                 self.logger.error(f"Error checking for duplicate listings: {e}")
                 # continue processing
     
-    # upsert listing
-    def _upsert_listing(self, listing_data: dict) -> None:
+    # upsert listing & return listing ID if successful
+    def _upsert_listing(self, listing_data: dict) -> Optional[str]:
         try:
             # ensure location_id is included for the constraint
             if 'location_id' not in listing_data:
@@ -589,21 +566,92 @@ class SupabaseBackend(OutputBackend):
                 on_conflict='product_id,retailer_id,location_id'  
             ).execute()
             
-            # add price history if price exists
-            if listing_data.get('price') and result.data:
+            listing_id = None
+            if result.data:
                 listing_id = result.data[0]['id']
-                price_history_data = {
-                    'listing_id': listing_id,
-                    'price': listing_data['price'],
-                    'currency': listing_data.get('currency', 'USD'),
-                    'timestamp': listing_data.get('last_checked')
-                }
                 
-                self.supabase.table('price_histories').insert(price_history_data).execute()
+                # add price history if price exists
+                if listing_data.get('price'):
+                    price_history_data = {
+                        'listing_id': listing_id,
+                        'price': listing_data['price'],
+                        'currency': listing_data.get('currency', 'USD'),
+                        'timestamp': listing_data.get('last_checked')
+                    }
+                    
+                    self.supabase.table('price_histories').insert(price_history_data).execute()
+            
+            return listing_id
                 
         except Exception as e:
             self.logger.error(f"Error upserting listing: {e}")
             raise
+    
+    # * Delayed UPC lookup methods *
+    
+    # perform delayed UPC lookup after listing creation
+    def _perform_delayed_upc_lookup(self, product_id: str, listing_id: str, product_name: str, 
+                                   product_url: str, retailer_name: str) -> None:
+        try:
+            # check if new listing
+            if self._listing_exists_with_url(product_url, listing_id):
+                self.logger.info(f"Skipping UPC lookup for existing product URL: {product_url}")
+                return
+            
+            # perform UPC lookup only for new products
+            upc_result = self.upc_manager.lookup_upc(
+                product_name=product_name,
+                retailer_source=retailer_name,
+                original_url=product_url
+            )
+            
+            if upc_result and upc_result.upc:
+                # update both product & listing w/ UPC
+                self._update_product_upc(product_id, upc_result.upc)
+                self._update_listing_upc(listing_id, upc_result.upc)
+                self.logger.info(f"✓ Added UPC {upc_result.upc} to product after listing creation: {product_name}")
+            else:
+                self.logger.debug(f"No UPC found for new product: {product_name}")
+                
+        except Exception as e:
+            self.logger.error(f"Error in delayed UPC lookup for {product_name}: {e}")
+    
+    # check if listing already exists w/ URL
+    def _listing_exists_with_url(self, url: str, exclude_listing_id: str = None) -> bool:
+        try:
+            query = self.supabase.table('listings').select('id').eq('url', url)
+            
+            # exclude current listing from check
+            if exclude_listing_id:
+                query = query.neq('id', exclude_listing_id)
+            
+            result = query.limit(1).execute()
+            return len(result.data) > 0
+        except Exception as e:
+            self.logger.error(f"Error checking existing URL: {e}")
+            return False
+    
+    # update product w/ UPC
+    def _update_product_upc(self, product_id: str, upc: str) -> None:
+        try:
+            self.supabase.table('products')\
+                .update({'upc': upc})\
+                .eq('id', product_id)\
+                .execute()
+            self.logger.debug(f"Updated product {product_id} with UPC: {upc}")
+        except Exception as e:
+            self.logger.error(f"Error updating product UPC: {e}")
+    
+    # update listing w/ UPC
+    def _update_listing_upc(self, listing_id: str, upc: str) -> None:
+        try:
+            self.supabase.table('listings')\
+                .update({'upc': upc})\
+                .eq('id', listing_id)\
+                .execute()
+            self.logger.debug(f"Updated listing {listing_id} with UPC: {upc}")
+        except Exception as e:
+            self.logger.error(f"Error updating listing UPC: {e}")
     
     # * Utility methods *
     
@@ -633,7 +681,7 @@ class SupabaseBackend(OutputBackend):
             return None
         
         try:
-            # remove currency symbols and commas
+            # remove currency symbols & commas
             clean_price = str(price_str).replace('$', '').replace(',', '').strip()
             return float(clean_price)
         except (ValueError, TypeError):
@@ -643,7 +691,7 @@ class SupabaseBackend(OutputBackend):
     def _create_slug(self, name: str) -> str:
         import re
         
-        # convert to lowercase and replace spaces/special chars w/ hyphens
+        # convert to lowercase & replace spaces/special chars w/ hyphens
         slug = re.sub(r'[^\w\s-]', '', name.lower())
         slug = re.sub(r'[\s_-]+', '-', slug)
         slug = slug.strip('-')

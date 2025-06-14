@@ -293,6 +293,119 @@ class UPCManager:
         except Exception as e:
             self.logger.error(f"Failed to store failed UPC lookup: {e}")
     
+    # * Batch processing methods *
+    
+    def batch_lookup_upcs_concurrent(self, products: list, batch_size: int = 20) -> list:
+        """Enhanced batch processing with concurrent execution"""
+        if not products:
+            return []
+        
+        results = []
+        
+        # process in batches to avoid overwhelming services
+        for i in range(0, len(products), batch_size):
+            batch = products[i:i + batch_size]
+            
+            self.logger.info(f"Processing UPC batch {i//batch_size + 1} of {(len(products)-1)//batch_size + 1} "
+                           f"({len(batch)} products)")
+            
+            # use concurrent processing for batch if available
+            batch_results = []
+            for service in self.services:
+                if hasattr(service, 'batch_lookup_concurrent'):
+                    try:
+                        batch_results = service.batch_lookup_concurrent(batch)
+                        self.logger.info(f"✓ Completed concurrent batch lookup using {service.service_name}")
+                        break
+                    except Exception as e:
+                        self.logger.error(f"Concurrent batch lookup failed with {service.service_name}: {e}")
+                        continue
+            
+            # fallback to individual lookups if no concurrent service available
+            if not batch_results:
+                self.logger.info("No concurrent service available, falling back to individual lookups")
+                for product in batch:
+                    result = self.lookup_upc(product)
+                    batch_results.append(result)
+            
+            # filter out None results and add to final results
+            valid_results = [r for r in batch_results if r is not None]
+            results.extend(valid_results)
+            
+            # rate limiting between batches
+            if i + batch_size < len(products):
+                import time
+                time.sleep(1.0)
+                self.logger.debug(f"Rate limiting: paused 1 second between batches")
+        
+        self.logger.info(f"Completed concurrent batch processing: {len(results)} successful UPC lookups "
+                        f"out of {len(products)} products")
+        return results
+    
+    # collect products needing UPC lookup & process in batches
+    def collect_and_process_missing_upcs(self, max_products: int = 100) -> Dict[str, Any]:
+        if not self.supabase:
+            return {"success": False, "error": "No Supabase client available"}
+        
+        try:
+            # get products w/o UPCs
+            response = self.supabase.table('products')\
+                .select('id, name')\
+                .is_('upc', 'null')\
+                .limit(max_products)\
+                .execute()
+            
+            if not response.data:
+                return {
+                    "success": True,
+                    "message": "No products found missing UPC codes",
+                    "processed": 0,
+                    "successful": 0
+                }
+            
+            products_to_process = [(p['id'], p['name']) for p in response.data]
+            product_names = [p[1] for p in products_to_process]
+            
+            self.logger.info(f"Found {len(products_to_process)} products missing UPC codes")
+            
+            # process using concurrent batch lookup (20 products per batch)
+            results = self.batch_lookup_upcs_concurrent(product_names, batch_size=20)
+            
+            # update products w/ found UPCs
+            successful_updates = 0
+            for i, result in enumerate(results):
+                if result and result.upc:
+                    product_id, product_name = products_to_process[i]
+                    try:
+                        # update product w/ UPC
+                        self.supabase.table('products')\
+                            .update({'upc': result.upc})\
+                            .eq('id', product_id)\
+                            .execute()
+                        
+                        # update any listings for this product (if any)
+                        self.supabase.table('listings')\
+                            .update({'upc': result.upc})\
+                            .eq('product_id', product_id)\
+                            .execute()
+                        
+                        successful_updates += 1
+                        self.logger.info(f"✓ Updated product '{product_name}' with UPC {result.upc}")
+                        
+                    except Exception as e:
+                        self.logger.error(f"Error updating product {product_id} with UPC: {e}")
+            
+            return {
+                "success": True,
+                "processed": len(products_to_process),
+                "successful": successful_updates,
+                "failed": len(products_to_process) - successful_updates
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error in collect_and_process_missing_upcs: {e}")
+            return {"success": False, "error": str(e)}
+    
     # * Utility methods *
     
     # get cache stats
