@@ -1,3 +1,6 @@
+-- Migration: supabase/migrations/20250603000001_initial_schema.sql
+-- Initial schema for the Supabase database
+
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 

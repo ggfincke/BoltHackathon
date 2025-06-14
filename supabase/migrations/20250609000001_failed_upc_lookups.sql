@@ -1,4 +1,5 @@
--- Migration: failed_upc_lookups table
+-- Migration: supabase/migrations/20250609000001_failed_upc_lookups.sql
+-- failed_upc_lookups table
 -- stores UPC lookup failures for manual review
 
 CREATE TABLE failed_upc_lookups (

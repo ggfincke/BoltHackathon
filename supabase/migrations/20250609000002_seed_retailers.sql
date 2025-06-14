@@ -1,4 +1,6 @@
+-- Migration: supabase/migrations/20250609000002_seed_retailers.sql
 -- seed data for retailers table
+
 INSERT INTO retailers (id, name, slug, description, logo_url, website_url, is_active, created_at, updated_at) 
 VALUES 
     -- Amazon (crawler expects retailer_id = 1)

@@ -1,5 +1,5 @@
+-- Migration: supabase/migrations/20250604000001_add_upc_to_products.sql
 -- Add UPC field to products table
--- Migration: 20250604000001_add_upc_to_products.sql
 
 -- Add UPC column to products table
 ALTER TABLE products 
