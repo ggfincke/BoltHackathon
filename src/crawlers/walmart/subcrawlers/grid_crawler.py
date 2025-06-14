@@ -204,6 +204,26 @@ def _extract_walmart_id_from_url(url: str) -> Optional[str]:
     
     return None
 
+# shorten the URL to the product
+def _shorten_walmart_url(url: str) -> str:
+    if not url:
+        return url
+        
+    import re
+    
+    # match Walmart product URLs with item ID
+    pattern = r'(https://www\.walmart\.com/ip/)([^/]+/)(\d+)(?:\?.*)?$'
+    match = re.search(pattern, url)
+    
+    if match:
+        base_url = match.group(1)  # https://www.walmart.com/ip/
+        item_id = match.group(3)   # the item ID number
+        # construct minimal product URL
+        return f"{base_url}{item_id}"
+    
+    # fallback to original
+    return url 
+
 # extract product URL from a product card element
 def _extract_product_url(driver, card) -> Optional[str]:
     try:
@@ -216,7 +236,8 @@ def _extract_product_url(driver, card) -> Optional[str]:
         return None
 
     parsed = urlparse(href)
-    return f'{parsed.scheme}://{parsed.netloc}{parsed.path}'
+    full_url = f'{parsed.scheme}://{parsed.netloc}{parsed.path}'
+    return _shorten_walmart_url(full_url)
 
 # extract product title from a product card element
 def _extract_product_title(card) -> str:

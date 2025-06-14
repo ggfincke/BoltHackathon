@@ -5,7 +5,8 @@ import time
 import json
 from pathlib import Path
 from typing import List, Dict, Set, Optional, Callable, Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+import re
 
 import undetected_chromedriver as uc
 from selenium import webdriver
@@ -92,7 +93,8 @@ def _extract_product_url(driver, card) -> Optional[str]:
         )
         # get href
         href = link.get_attribute("href")
-        return urljoin("https://www.target.com", href)  # normalise relative links
+        full_url = urljoin("https://www.target.com", href)
+        return _shorten_target_url(full_url)
     except (TimeoutException, NoSuchElementException, StaleElementReferenceException):
         return None
 
@@ -311,6 +313,24 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger) ->
         logger.error(f"Error extracting product data: {e}")
                 
     return all_products
+
+# shorten the URL to the product
+def _shorten_target_url(url: str) -> str:
+    if not url:
+        return url
+        
+    # match Target product URLs w/ TCIN (A-numbers)
+    pattern = r'(https://www\.target\.com/p/)[^/]+/(-/A-\d+)(?:\?.*)?$'
+    match = re.search(pattern, url)
+    
+    if match:
+        base_url = match.group(1)  # https://www.target.com/p/
+        tcin_part = match.group(2)  # -/A-number
+        # construct minimal product URL
+        return f"{base_url}{tcin_part}"
+    
+    # fallback to original
+    return url 
 
 # * main - crawl product grids from a list of starting URLs and return the products found
 def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: bool = False,
