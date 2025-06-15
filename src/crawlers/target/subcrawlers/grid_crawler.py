@@ -1,4 +1,4 @@
-# TODO: add proxy support
+# TODO: add proxy support, concurrency
 import logging
 import random
 import time
@@ -96,17 +96,36 @@ def _get_tcin_from_card(card_element) -> Optional[str]:
         logging.error(f"Error extracting TCIN: {e}")
     return None
 
-# build canonical Target URL from TCIN
-def _build_target_url_from_tcin(tcin: str) -> str:
-    return f"https://www.target.com/p/-/A-{tcin}"
-
 # extract product URL from a product card
 def _extract_product_url(driver, card) -> Optional[str]:
+    # CRITICAL: ensure card is fully loaded before ANY extraction
+    try:
+        driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});", card
+        )
+        # wait for elements to be present
+        WebDriverWait(card, 2).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR))
+        )
+    except (TimeoutException, NoSuchElementException):
+        pass
+    
+    # method 1: build URL directly from TCIN (most reliable)
     tcin = _get_tcin_from_card(card)
-    if not tcin:
-        return None
-
-    return _build_target_url_from_tcin(tcin)
+    if tcin:
+        return _build_target_url_from_tcin(tcin)
+    
+    # method 2: extract from href and normalize (fallback)
+    try:
+        link = card.find_element(By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR)
+        href = link.get_attribute('href')
+        if href:
+            full_url = urljoin("https://www.target.com", href)
+            return _shorten_target_url(full_url)
+    except NoSuchElementException:
+        pass
+    
+    return None
 
 # extract product title from a card element
 def _extract_product_title(card_element) -> str:
