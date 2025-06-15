@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from typing import List, Dict, Set, Optional, Callable, Any, Tuple
 from urllib.parse import urljoin, urlparse
+from decimal import Decimal, InvalidOperation
 
 import undetected_chromedriver as uc
 from selenium import webdriver
@@ -227,17 +228,28 @@ def _shorten_walmart_url(url: str) -> str:
 # extract product URL from a product card element
 def _extract_product_url(driver, card) -> Optional[str]:
     try:
-        link = card.find_element(By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR)
+        # there can be more than one matching anchor – collect them all
+        anchors = card.find_elements(By.CSS_SELECTOR, 'a[link-identifier]')
+        if not anchors:
+            return None
+
+        # prefer the one whose href already contains '/ip/'
+        for a in anchors:
+            href = a.get_attribute('href') or ''
+            if '/ip/' in href:
+                return _shorten_walmart_url(
+                    urljoin("https://www.walmart.com", href)
+                )
+
+        # o/w build from link-identifier
+        item_id = anchors[0].get_attribute('link-identifier')
+        if item_id:
+            return f"https://www.walmart.com/ip/{item_id}"
+
     except NoSuchElementException:
-        return None
+        pass
 
-    href = link.get_attribute('href')
-    if not href:
-        return None
-
-    parsed = urlparse(href)
-    full_url = f'{parsed.scheme}://{parsed.netloc}{parsed.path}'
-    return _shorten_walmart_url(full_url)
+    return None
 
 # extract product title from a product card element
 def _extract_product_title(card) -> str:
@@ -251,7 +263,23 @@ def _extract_product_price(card) -> str:
     try:
         # first try the main price element
         price_element = card.find_element(By.CSS_SELECTOR, PRODUCT_PRICE_SELECTOR)
-        price_text = price_element.text.strip()
+        
+        # 1) easiest-path: aria-label or data-price
+        for attr in ("aria-label", "data-price"):
+            attr_val = price_element.get_attribute(attr)
+            if attr_val and "$" in attr_val:
+                m = re.search(r"\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?", attr_val)
+                if m:
+                    return m.group(0)
+        
+        # 2) fall back to innerText
+        raw_text = price_element.text or price_element.get_attribute("innerText")
+        clean = _reconstruct_split_price(raw_text)
+        if clean:
+            return clean
+        
+        # 3) original logic for text parsing
+        price_text = raw_text.strip() if raw_text else ""
         
         # clean up the price text
         if price_text:
@@ -316,43 +344,58 @@ def _extract_product_price(card) -> str:
     except NoSuchElementException:
         return "Unknown Price"
 
-# Additional helper function to validate and clean extracted prices
+# reconstruct split price
+def _reconstruct_split_price(raw: str) -> Optional[str]:
+    if not raw:
+        return None
+
+    # strip everything except digits
+    digits = re.sub(r"\D", "", raw)
+    if not digits:
+        return None
+
+    # guard against already-formatted values like '$1.97'
+    if "." in raw:
+        return None
+
+    # last two digits are cents
+    if len(digits) >= 3:
+        dollars, cents = digits[:-2], digits[-2:]
+    else:
+        dollars, cents = "0", digits.zfill(2)
+
+    return f"${int(dollars)}.{cents}"
+
 def _validate_and_clean_price(price_str: str) -> str:
-    """
-    Validate that the extracted price makes sense and clean it if needed.
-    This helps catch cases where price extraction goes wrong.
-    """
-    if not price_str or price_str == "Unknown Price":
+    if not price_str or price_str.lower() == "unknown price":
         return "Unknown Price"
-    
-    # Remove $ sign for validation
-    clean_price = price_str.replace('$', '').replace(',', '')
-    
+
+    # strip whitespace & non-price words early
+    price_str = price_str.strip()
+    # common "from $4.99" or "current price $1.97"
+    m = re.search(r"\$[\d,\.]+", price_str)
+    if m:
+        price_str = m.group(0)
+
+    # remove $ and commas
+    digits = price_str.replace("$", "").replace(",", "")
+
+    # if it already has a dot, we're done
+    if "." in digits:
+        try:
+            return f"${Decimal(digits):.2f}"
+        except InvalidOperation:
+            return "Unknown Price"
+
+    # handle pure-integer cases
+    # heuristic: only auto-insert a decimal when the integer has 3-4 digits (ex: 197 → 1.97, 1299 → 12.99)
+    if 3 <= len(digits) <= 4:
+        dollars, cents = digits[:-2], digits[-2:]
+        return f"${int(dollars)}.{cents}"
+
+    # o/w treat as whole dollars
     try:
-        price_float = float(clean_price)
-        
-        # Basic validation - grocery items shouldn't be over $500 or under $0.01
-        if price_float > 500.00:
-            # Likely a formatting error like $4998 instead of $49.98
-            # Try to fix common patterns
-            price_str_digits = clean_price.replace('.', '')
-            if len(price_str_digits) >= 3:
-                # Insert decimal point before last 2 digits
-                fixed_price = price_str_digits[:-2] + '.' + price_str_digits[-2:]
-                fixed_float = float(fixed_price)
-                if 0.01 <= fixed_float <= 500.00:
-                    return f"${fixed_float:.2f}"
-            
-            # If we can't fix it, mark as unknown
-            return "Unknown Price"
-        
-        elif price_float < 0.01:
-            return "Unknown Price"
-        
-        else:
-            # Price seems reasonable, format it properly
-            return f"${price_float:.2f}"
-            
+        return f"${int(digits):.2f}"
     except ValueError:
         return "Unknown Price"
 
