@@ -16,15 +16,25 @@ from .barcode_lookup import BarcodeLookupService
 
 # UPCManager class - manages multiple UPC lookup services w/ fallback & caching
 class UPCManager:    
-    def __init__(self, logger: logging.Logger = None, enable_caching: bool = True, supabase_client=None):
+    def __init__(self, logger: logging.Logger = None, enable_caching: bool = True, supabase_client=None, max_workers: int = 4):
         self.logger = logger or logging.getLogger(__name__)
         self.services: List[BaseUPCLookup] = []
         self.enable_caching = enable_caching
         self._cache: Dict[str, UPCResult] = {}
         self.supabase = supabase_client
         
+        # store concurrency setting
+        self.max_workers = max_workers
+        self.logger.info(f"🔍 UPC Manager initialized with {self.max_workers} workers")
+        
         # init default services
         self._initialize_default_services()
+        
+        # configure services with the concurrency setting
+        for service in self.services:
+            if hasattr(service, 'max_workers'):
+                service.max_workers = self.max_workers
+                self.logger.info(f"🔧 Configured {service.service_name} with {self.max_workers} workers")
     
     # * Service initialization methods *
     
@@ -295,10 +305,17 @@ class UPCManager:
     
     # * Batch processing methods *
     
-    def batch_lookup_upcs_concurrent(self, products: list, batch_size: int = 20) -> list:
-        """Enhanced batch processing with concurrent execution"""
+    # batch lookup UPCs concurrently
+    def batch_lookup_upcs_concurrent(self, products: list, batch_size: int = None) -> list:
         if not products:
             return []
+        
+        # use adaptive batch size based on concurrency
+        if batch_size is None:
+            batch_size = max(10, min(50, len(products) // self.max_workers))
+        
+        self.logger.info(f"🔍 Processing {len(products)} products with UPC concurrency={self.max_workers}, "
+                        f"batch_size={batch_size}")
         
         results = []
         
@@ -466,6 +483,6 @@ class UPCManager:
 # * Factory functions *
 
 # factory function for easy initialization
-def create_upc_manager(logger: logging.Logger = None, supabase_client=None) -> UPCManager:
+def create_upc_manager(logger: logging.Logger = None, supabase_client=None, max_workers: int = 4) -> UPCManager:
     # create & return a configured UPC manager
-    return UPCManager(logger=logger, supabase_client=supabase_client)
+    return UPCManager(logger=logger, supabase_client=supabase_client, max_workers=max_workers)

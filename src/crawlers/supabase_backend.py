@@ -22,7 +22,9 @@ from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create
 
 # Supabase backend for storing crawler data directly to db
 class SupabaseBackend(OutputBackend):    
-    def __init__(self, supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True, crawl_category=None):
+    def __init__(self, supabase_url: str = None, supabase_key: str = None, 
+                 enable_upc_lookup: bool = True, crawl_category=None,
+                 upc_concurrency: int = 4):
         self.logger = logging.getLogger(__name__)
         
         # use env or provided values
@@ -47,10 +49,17 @@ class SupabaseBackend(OutputBackend):
         # init category normalizer
         self.category_normalizer = CategoryNormalizer(self.supabase)
         
+        # store UPC concurrency setting
+        self.upc_concurrency = upc_concurrency
+        
         # init UPC manager w/ supabase client for failed lookup storage
         self.enable_upc_lookup = enable_upc_lookup
         if self.enable_upc_lookup:
-            self.upc_manager = create_upc_manager(logger=self.logger, supabase_client=self.supabase)
+            self.upc_manager = create_upc_manager(
+                logger=self.logger, 
+                supabase_client=self.supabase,
+                max_workers=self.upc_concurrency
+            )
             self.failed_upc_manager = create_failed_upc_manager(supabase_client=self.supabase, logger=self.logger)
             self.logger.info("UPC lookup enabled with failed lookup storage")
         else:
@@ -706,5 +715,5 @@ class SupabaseBackend(OutputBackend):
 # * Factory functions *
 
 # factory function to create supabase backend
-def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True, crawl_category=None) -> SupabaseBackend:
-    return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup, crawl_category)
+def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, enable_upc_lookup: bool = True, crawl_category=None, upc_concurrency: int = 4) -> SupabaseBackend:
+    return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup, crawl_category, upc_concurrency)

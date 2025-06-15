@@ -64,7 +64,7 @@ class BaseCrawler(ABC):
     def __init__(self, retailer_id: int, output_backend: OutputBackend = None, 
                  logger: logging.Logger = None, urls_only: bool = False, 
                  hierarchical: bool = False, department: str = None, 
-                 category: str = None):
+                 category: str = None, crawler_concurrency: int = 5, upc_concurrency: int = 4):
         self.retailer_id = retailer_id
         self.output_backend = output_backend
         self._out = output_backend 
@@ -74,7 +74,14 @@ class BaseCrawler(ABC):
         self.department = department
         self.category = category
         self.max_pages = 5
-        self.concurrency = CONCURRENCY
+        
+        # store both concurrency settings
+        self.crawler_concurrency = crawler_concurrency
+        self.upc_concurrency = upc_concurrency
+        
+        # log the settings
+        self.logger.info(f"🕸️  Crawler concurrency set to: {self.crawler_concurrency}")
+        self.logger.info(f"🔍 UPC concurrency set to: {self.upc_concurrency}")
         
         # init event loop for async operations
         try:
@@ -441,10 +448,10 @@ def create_redis_backend(retailer_id: int) -> RedisBackend:
 
 # create supabase backend w/ optional UPC lookup
 def create_supabase_backend(supabase_url: str = None, supabase_key: str = None, 
-                           enable_upc_lookup: bool = True, crawl_category=None) -> OutputBackend:
+                           enable_upc_lookup: bool = True, crawl_category=None, upc_concurrency: int = 4) -> OutputBackend:
     try:
         from .supabase_backend import SupabaseBackend
-        return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup, crawl_category)
+        return SupabaseBackend(supabase_url, supabase_key, enable_upc_lookup, crawl_category, upc_concurrency)
     except ImportError as e:
         raise ImportError(f"SupabaseBackend requires additional dependencies: {e}")
 

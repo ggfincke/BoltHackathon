@@ -20,8 +20,8 @@ from .subcrawlers.grid_crawler import crawl_grid
 
 # amazon crawler
 class AmazonCrawler(BaseCrawler):
-    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
-        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
+    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False, crawler_concurrency=5, upc_concurrency=4):
+        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category, crawler_concurrency, upc_concurrency)
         self.base_url = "https://www.amazon.com"
         self._load_category_config()
         self.logger.info("AmazonCrawler initialized. Playwright will be launched as needed.")
@@ -356,4 +356,8 @@ class AmazonCrawler(BaseCrawler):
             self.logger.info(f"Will crawl category '{pair['category']}' from URL: {pair['url']}")
         
         # crawl all URL-category pairs concurrently
-        self._crawl_grids_concurrent_with_categories(leaf_url_category_pairs, max_pages_per_cat, concurrency)
+        self._crawl_grids_concurrent_with_categories(
+            leaf_url_category_pairs, 
+            max_pages_per_cat, 
+            self.crawler_concurrency
+        )

@@ -21,8 +21,8 @@ from .subcrawlers.grid_crawler import crawl_grid
 
 # target crawler
 class TargetCrawler(BaseCrawler):
-    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
-        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
+    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False, crawler_concurrency=5, upc_concurrency=4):
+        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category, crawler_concurrency, upc_concurrency)
         self.base_url = "https://www.target.com"
         self.logger.info("TargetCrawler initialized. Playwright will be launched as needed.")
         self.logger.info(f"Mode: {'Hierarchical' if hierarchical else 'URL-only' if urls_only else 'Full product data'}")
@@ -325,6 +325,7 @@ class TargetCrawler(BaseCrawler):
 
     # crawl multiple grid URLs concurrently w/ category information (new hierarchy-based method)
     def _crawl_grids_concurrent_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, concurrency: int) -> None:
+        self.logger.info(f"🎯 Starting Target concurrent crawling with {concurrency} crawler workers")
         self.logger.info(f"Starting concurrent grid crawling w/ categories for {len(url_category_pairs)} Target categories with concurrency={concurrency}")
         
         # split URL-category pairs into batches for concurrent processing
@@ -492,13 +493,13 @@ class TargetCrawler(BaseCrawler):
             original_backend, collector = self._setup_hierarchical_collection()
             
             # crawl w/ the collector backend using new method
-            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, concurrency)
+            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, self.crawler_concurrency)
             
             # restore backend and send hierarchical results
             self._restore_backend_and_send_hierarchical(original_backend, collector, hierarchy, category_filter, department_filter)
         else:
             # non-hierarchical mode - crawl w/ categories
-            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, concurrency)
+            self._crawl_grids_concurrent_with_categories(leaf_data, max_pages_per_cat, self.crawler_concurrency)
 
     # populate leaf nodes w/ products (override to include subcategory)
     def _populate_leaf_nodes_with_products(self, node: dict, max_pages: int) -> None:

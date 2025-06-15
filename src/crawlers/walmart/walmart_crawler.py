@@ -21,8 +21,8 @@ from .subcrawlers.grid_crawler import crawl_grid
 
 # walmart crawler
 class WalmartCrawler(BaseCrawler):
-    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False):
-        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category)
+    def __init__(self, retailer_id, logger=None, category=None, department=None, output_backend=None, urls_only=False, hierarchical=False, crawler_concurrency=5, upc_concurrency=4):
+        super().__init__(retailer_id, output_backend, logger, urls_only, hierarchical, department, category, crawler_concurrency, upc_concurrency)
         self.base_url = "https://www.walmart.com"
         self.logger.info("WalmartCrawler initialized. Selenium will be launched as needed.")
         self.logger.info(f"Mode: {'Hierarchical' if hierarchical else 'URL-only' if urls_only else 'Full product data'}")

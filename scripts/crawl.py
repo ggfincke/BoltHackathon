@@ -95,14 +95,15 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
 
 # create output backend based on config
 def create_backend(backend_type, mode, hierarchical, retailer_id, output_file, 
-                  supabase_url, supabase_key, enable_upc_lookup, category):    
+                  supabase_url, supabase_key, enable_upc_lookup, category, upc_concurrency=4):    
     # supabase backend
     if backend_type == "supabase":
         return create_supabase_backend(
             supabase_url=supabase_url,
             supabase_key=supabase_key,
             enable_upc_lookup=enable_upc_lookup,
-            crawl_category=category
+            crawl_category=category,
+            upc_concurrency=upc_concurrency
         )
     # hierarchical mode (JSON)
     elif hierarchical:
@@ -152,6 +153,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  %(prog)s --retailer amazon --crawler-concurrency 8 --upc-concurrency 4
+  %(prog)s --retailer target --mode urls-only --crawler-concurrency 15 --upc-concurrency 6
+  %(prog)s --retailer walmart --crawler-concurrency 3 --upc-concurrency 12
   %(prog)s --retailer amazon --mode full
   %(prog)s --retailer target --mode urls-only --category "Beverages"
   %(prog)s --retailer walmart --mode full --category "Snacks"
@@ -161,7 +165,6 @@ Examples:
   %(prog)s --retailer amazon --department "Amazon Grocery" --mode full
   %(prog)s --retailer target --department "Target Grocery" --hierarchical
   %(prog)s --retailer target --from-hierarchy-file hierarchy.json --mode urls-only --max-pages 3
-  %(prog)s --retailer amazon --from-hierarchy-file --mode full --concurrency 10
   %(prog)s --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
   %(prog)s --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
   %(prog)s --retailer target --backend supabase --mode full --category "Snacks"
@@ -225,10 +228,26 @@ Examples:
     )
     
     parser.add_argument(
+        "--crawler-concurrency",
+        type=int,
+        default=1,
+        help="Number of concurrent web scrapers for product extraction (default: 5, "
+             "applies to hierarchy file mode and grid crawling)"
+    )
+    
+    parser.add_argument(
+        "--upc-concurrency", 
+        type=int,
+        default=4,
+        help="Number of concurrent workers for UPC lookup operations (default: 4, "
+             "affects UPC API calls and browser instances)"
+    )
+    
+    parser.add_argument(
         "--concurrency",
         type=int,
-        default=5,
-        help="Number of concurrent grid crawlers (default: 5, only applies to hierarchy file mode)"
+        help="[DEPRECATED] Use --crawler-concurrency and --upc-concurrency instead. "
+             "If specified, sets both crawler and UPC concurrency to the same value."
     )
     
     parser.add_argument(
@@ -333,11 +352,25 @@ Examples:
             parser.error("Supabase backend requires --supabase-url and --supabase-key or "
                         "SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
     
+    # handle backward compatibility
+    if args.concurrency is not None:
+        print(f"⚠️  WARNING: --concurrency is deprecated. "
+              f"Using --crawler-concurrency={args.concurrency} and --upc-concurrency={args.concurrency}")
+        crawler_concurrency = args.concurrency
+        upc_concurrency = args.concurrency
+    else:
+        crawler_concurrency = args.crawler_concurrency
+        upc_concurrency = args.upc_concurrency
+    
     # determine UPC lookup setting
     enable_upc_lookup = args.enable_upc_lookup and not args.disable_upc_lookup
     
     # set up logging
     logger = setup_logging(args.log_level)
+    
+    # log the concurrency settings
+    logger.info(f"🕸️  Crawler concurrency: {crawler_concurrency}")
+    logger.info(f"🔍 UPC lookup concurrency: {upc_concurrency}")
     
     try:
         # validate retailer
@@ -358,7 +391,8 @@ Examples:
             supabase_url=args.supabase_url,
             supabase_key=args.supabase_key,
             enable_upc_lookup=enable_upc_lookup,
-            category=args.category
+            category=args.category,
+            upc_concurrency=upc_concurrency
         )
         
         # log backend info
@@ -376,10 +410,11 @@ Examples:
             department=args.department,
             urls_only=(args.mode == "urls-only"),
             hierarchical=args.hierarchical,
-            output_backend=backend
+            output_backend=backend,
+            crawler_concurrency=crawler_concurrency,
+            upc_concurrency=upc_concurrency
         )
         crawler.max_pages = args.max_pages
-        crawler.concurrency = args.concurrency
         
         # handle hierarchy file mode
         if args.from_hierarchy_file is not None:
@@ -395,7 +430,7 @@ Examples:
             hierarchy_file = validate_hierarchy_file(hierarchy_file)
             
             # hierarchy file mode - use the specialized method with filters
-            logger.info(f"Starting hierarchy file crawl with {args.concurrency} concurrent workers")
+            logger.info(f"Starting hierarchy file crawl with {crawler_concurrency} concurrent workers")
             if args.category:
                 logger.info(f"Filtering to category: {args.category}")
             if args.department:
@@ -406,7 +441,7 @@ Examples:
                 max_pages_per_cat=args.max_pages,
                 category_filter=args.category,
                 department_filter=args.department,
-                concurrency=args.concurrency
+                concurrency=crawler_concurrency
             )
         else:
             # regular mode (category/department based)
