@@ -567,13 +567,13 @@ class SupabaseBackend(OutputBackend):
     # unified product creation with better deduplication
     def _get_or_create_product_unified(self, product_data: dict, retailer_specific_id: str = None) -> str:
         try:
-            # try to find existing product by slug first
+            # 1. EXACT slug match
             result = self.supabase.table('products').select('id').eq('slug', product_data['slug']).execute()
-            
             if result.data:
+                self.logger.debug(f"Found existing product by slug: {product_data['slug']}")
                 return result.data[0]['id']
             
-            # try retailer-specific ID matching if available (for dict records)
+            # 2. EXACT retailer-specific ID match (ASIN, TCIN, etc.)
             if retailer_specific_id:
                 existing_listing = self.supabase.table('listings')\
                     .select('product_id')\
@@ -581,22 +581,12 @@ class SupabaseBackend(OutputBackend):
                     .execute()
                 
                 if existing_listing.data:
+                    self.logger.debug(f"Found existing product by retailer ID: {retailer_specific_id}")
                     return existing_listing.data[0]['product_id']
             
-            # try to find by similar name (simple fuzzy matching)
-            similar_products = self.supabase.table('products')\
-                .select('id, name')\
-                .ilike('name', f"%{product_data['name'][:20]}%")\
-                .execute()
-            
-            # if similar product is found, return id
-            if similar_products.data:
-                # more sophisticated matching here
-                self.logger.debug(f"Found similar product for: {product_data['name']}")
-                return similar_products.data[0]['id']
-            
-            # create new product
+            # 3. create new product if no exact matches found
             result = self.supabase.table('products').insert(product_data).execute()
+            self.logger.debug(f"Created new product: {product_data['name']}")
             return result.data[0]['id']
                 
         except Exception as e:
@@ -605,33 +595,34 @@ class SupabaseBackend(OutputBackend):
     
     # * Listing management methods *
     
-    # check if retailer already has a listing for this product
-    def _has_retailer_duplicate_listing(self, product_id: str, retailer_id: str) -> Tuple[bool, Optional[dict]]:
+    def _has_retailer_duplicate_listing(self, product_id: str, retailer_id: str, retailer_specific_id: str = None) -> Tuple[bool, Optional[dict]]:
         try:
-            existing_listings = self.supabase.table('listings')\
-                .select('id, url, location_id')\
-                .eq('product_id', product_id)\
-                .eq('retailer_id', retailer_id)\
-                .execute()
-            
-            if existing_listings.data:
-                # get retailer & product names for context
-                retailer_info = self._get_retailer_info(retailer_id)
-                retailer_name = retailer_info.get('name', 'Unknown') if retailer_info else 'Unknown'
-                
-                product_result = self.supabase.table('products')\
-                    .select('name')\
-                    .eq('id', product_id)\
+            # check for EXACT retailer_specific_id match (like ASIN)
+            if retailer_specific_id:
+                existing_by_retailer_id = self.supabase.table('listings')\
+                    .select('id, url, location_id, product_id')\
+                    .eq('retailer_id', retailer_id)\
+                    .eq('retailer_specific_id', retailer_specific_id)\
                     .execute()
-                product_name = product_result.data[0]['name'] if product_result.data else 'Unknown Product'
                 
-                existing_listing = existing_listings.data[0]
-                
-                return True, {
-                    'retailer_name': retailer_name,
-                    'product_name': product_name,
-                    'existing_url': existing_listing.get('url', 'Unknown URL')
-                }
+                if existing_by_retailer_id.data:
+                    existing_listing = existing_by_retailer_id.data[0]
+                    
+                    # Get context for logging
+                    retailer_info = self._get_retailer_info(retailer_id)
+                    retailer_name = retailer_info.get('name', 'Unknown') if retailer_info else 'Unknown'
+                    
+                    product_result = self.supabase.table('products')\
+                        .select('name')\
+                        .eq('id', existing_listing['product_id'])\
+                        .execute()
+                    product_name = product_result.data[0]['name'] if product_result.data else 'Unknown Product'
+                    
+                    return True, {
+                        'retailer_name': retailer_name,
+                        'product_name': product_name,
+                        'existing_url': existing_listing.get('url', 'Unknown URL')
+                    }
             
             return False, None
                 
@@ -649,11 +640,13 @@ class SupabaseBackend(OutputBackend):
             # check if retailer already has a listing for this product (business rule)
             has_duplicate, duplicate_info = self._has_retailer_duplicate_listing(
                 listing_data['product_id'], 
-                listing_data['retailer_id']
+                listing_data['retailer_id'],
+                listing_data.get('retailer_specific_id')
             )
             
             if has_duplicate and duplicate_info:
-                self.logger.warning(f"Retailer '{duplicate_info['retailer_name']}' already has a listing for product '{duplicate_info['product_name']}'. "
+                self.logger.warning(f"Retailer '{duplicate_info['retailer_name']}' already has a listing "
+                                  f"with same retailer_specific_id for product '{duplicate_info['product_name']}'. "
                                   f"Existing listing URL: {duplicate_info['existing_url']}. "
                                   f"Skipping duplicate listing creation.")
                 raise ValueError(f"Duplicate listing: {duplicate_info['retailer_name']} already has a listing for '{duplicate_info['product_name']}'")
