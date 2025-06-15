@@ -18,6 +18,77 @@ from .base_crawler import OutputBackend, ProductRecord
 from .normalizers.category_normalizer import CategoryNormalizer
 from .upc_lookup import create_upc_manager, UPCManager, FailedUPCManager, create_failed_upc_manager
 
+# * Module-level constants *
+
+# retailer UUID mapping
+RETAILER_UUID_MAP = {
+    "1": "00000000-0000-0000-0000-000000000001",  # Amazon
+    "2": "00000000-0000-0000-0000-000000000002",  # Target  
+    "3": "00000000-0000-0000-0000-000000000003",  # Walmart
+    "amazon": "00000000-0000-0000-0000-000000000001",
+    "target": "00000000-0000-0000-0000-000000000002",
+    "walmart": "00000000-0000-0000-0000-000000000003"
+}
+
+# default currency
+DEFAULT_CURRENCY = "USD"
+
+# Retailer detection patterns
+RETAILER_URL_PATTERNS = {
+    'amazon.com': 1,
+    'target.com': 2, 
+    'walmart.com': 3
+}
+
+# * Module-level utility functions *
+
+# * Utility functions *
+
+# resolve retailer UUID
+def resolve_retailer_uuid(retailer_identifier) -> str:
+    retailer_key = str(retailer_identifier).lower()
+    return RETAILER_UUID_MAP.get(retailer_key, retailer_identifier)
+
+# detect retailer from record
+def detect_retailer_from_record(record: dict) -> Optional[str]:
+    # check for retailer-specific IDs first
+    if 'asin' in record:
+        return resolve_retailer_uuid(1)  # Amazon
+    elif 'tcin' in record:
+        return resolve_retailer_uuid(2)  # Target
+    elif 'wm_item_id' in record:
+        return resolve_retailer_uuid(3)  # Walmart
+    
+    # fallback to URL pattern matching
+    url = record.get('url', '')
+    for pattern, retailer_id in RETAILER_URL_PATTERNS.items():
+        if pattern in url:
+            return resolve_retailer_uuid(retailer_id)
+    
+    return None
+
+# parse price string to float
+def parse_price(price_str) -> Optional[float]:
+    if not price_str or price_str == 'Unknown Price':
+        return None
+    
+    try:
+        # remove currency symbols & commas
+        clean_price = str(price_str).replace('$', '').replace(',', '').strip()
+        return float(clean_price)
+    except (ValueError, TypeError):
+        return None
+
+# create URL-friendly slug from name
+def create_slug(name: str) -> str:
+    # convert to lowercase & replace spaces/special chars w/ hyphens
+    slug = re.sub(r'[^\w\s-]', '', name.lower())
+    slug = re.sub(r'[\s_-]+', '-', slug)
+    slug = slug.strip('-')
+    
+    # truncate if too long
+    return slug[:255]
+
 # * Supabase backend class *
 
 # Supabase backend for storing crawler data directly to db
@@ -49,17 +120,18 @@ class SupabaseBackend(OutputBackend):
         # init category normalizer
         self.category_normalizer = CategoryNormalizer(self.supabase)
         
-        # store UPC concurrency setting
+        # store UPC concurrency setting & create factory params
         self.upc_concurrency = upc_concurrency
+        self._upc_factory_params = {
+            'logger': self.logger,
+            'supabase_client': self.supabase,
+            'max_workers': self.upc_concurrency
+        }
         
         # init UPC manager w/ supabase client for failed lookup storage
         self.enable_upc_lookup = enable_upc_lookup
         if self.enable_upc_lookup:
-            self.upc_manager = create_upc_manager(
-                logger=self.logger, 
-                supabase_client=self.supabase,
-                max_workers=self.upc_concurrency
-            )
+            self.upc_manager = create_upc_manager(**self._upc_factory_params)
             self.failed_upc_manager = create_failed_upc_manager(supabase_client=self.supabase, logger=self.logger)
             self.logger.info("UPC lookup enabled with failed lookup storage")
         else:
@@ -71,6 +143,15 @@ class SupabaseBackend(OutputBackend):
         self._retailer_cache = {}
         self._brand_cache = {}
         self._product_cache = {}
+        
+        # create thread-local storage so each UPC worker thread can keep 
+        # its own UPCManager instance (and therefore its own browser driver) 
+        import threading  
+        self._thread_local = threading.local()
+
+        # keep strong refs to all thread-specific managers so the main
+        # thread can explicitly clean them up after work completes
+        self._created_upc_managers: list["UPCManager"] = []
     
     # send records to supabase
     def send(self, records) -> None:
@@ -84,24 +165,50 @@ class SupabaseBackend(OutputBackend):
         
         self.logger.info(f"Processing {len(records)} records for Supabase")
         
-        # process different types of records
+        # separate records by type for potential concurrent processing
+        product_records = []
+        other_records = []
+        for record in records:
+            if isinstance(record, ProductRecord):
+                product_records.append(record)
+            else:
+                other_records.append(record)
+
         success_count = 0
-        for i, record in enumerate(records):
+
+        # concurrent processing for ProductRecord objects if UPC lookup enabled & concurrency >1
+        if product_records:
+            if self.enable_upc_lookup and self.upc_concurrency > 1:
+                from concurrent.futures import ThreadPoolExecutor, as_completed
+                self.logger.info(f"🔍 Processing {len(product_records)} product records concurrently with {self.upc_concurrency} UPC workers")
+                with ThreadPoolExecutor(max_workers=self.upc_concurrency) as executor:
+                    future_to_record = {executor.submit(self._process_product_record, pr): pr for pr in product_records}
+                    for future in as_completed(future_to_record):
+                        pr = future_to_record[future]
+                        try:
+                            future.result()
+                            success_count += 1
+                        except Exception as e:
+                            self.logger.error(f"Error processing product record {pr.title}: {e}")
+            else:
+                # fallback to sequential processing
+                for pr in product_records:
+                    try:
+                        self._process_product_record(pr)
+                        success_count += 1
+                    except Exception as e:
+                        self.logger.error(f"Error processing product record {pr.title}: {e}")
+
+        # process other record types sequentially
+        for i, record in enumerate(other_records):
             try:
-                self.logger.debug(f"Processing record {i+1}/{len(records)}, type: {type(record)}")
-                
-                if isinstance(record, ProductRecord):
-                    self._process_product_record(record)
-                    success_count += 1
-                elif isinstance(record, dict):
-                    # validate as dict w/ expected fields
+                if isinstance(record, dict):
                     if self._validate_dict_record(record):
                         self._process_raw_dict(record)
                         success_count += 1
                     else:
                         self.logger.warning(f"Invalid dict record at index {i}: {record}")
                 elif isinstance(record, str):
-                    # Handle URL strings
                     if record.startswith('http'):
                         self._process_url_record(record)
                         success_count += 1
@@ -109,13 +216,19 @@ class SupabaseBackend(OutputBackend):
                         self.logger.warning(f"Invalid string record at index {i}: {record}")
                 else:
                     self.logger.error(f"Unknown record type at index {i}: {type(record)} - {record}")
-                    
             except Exception as e:
                 self.logger.error(f"Error processing record {i+1}: {e}")
                 self.logger.debug(f"Problematic record: {record}")
-                continue
-        
+
         self.logger.info(f"Successfully processed {success_count}/{len(records)} records")
+
+        # clean up UPC manager instances created in worker threads
+        for mgr in list(self._created_upc_managers):
+            try:
+                mgr.cleanup()
+            except Exception as e:
+                self.logger.warning(f"Error cleaning up UPC manager: {e}")
+        self._created_upc_managers.clear()
 
     # validate dict record has required fields
     def _validate_dict_record(self, record):
@@ -145,12 +258,7 @@ class SupabaseBackend(OutputBackend):
             raw_category = getattr(record, 'category', None) or self.crawl_category
             
             # debug logging for category processing
-            self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (ProductRecord) ===")
-            self.logger.debug(f"Product: {record.title}")
-            self.logger.debug(f"Retailer: {retailer_name}")
-            self.logger.debug(f"Crawl category parameter: {self.crawl_category}")
-            self.logger.debug(f"Record category field: {getattr(record, 'category', None)}")
-            self.logger.debug(f"Final raw_category used: {raw_category}")
+            self._log_category_debug(record.title, retailer_name, getattr(record, 'category', None), raw_category)
             
             # normalize categories using hierarchy
             category_names = self.category_normalizer.normalize_category(
@@ -170,21 +278,23 @@ class SupabaseBackend(OutputBackend):
             self.logger.debug(f"Category IDs assigned: {category_ids}")
             self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
-            # extract/detect brand
-            brand_name = getattr(record, 'brand_name', None) or getattr(record, 'brand', None)
-            brand_id = self._extract_and_create_brand(record.title, brand_name)
+            # get brand ID (consolidated logic)
+            brand_id = self._get_brand_id(record.title, getattr(record, 'brand_name', None) or getattr(record, 'brand', None))
             
-            # create product w/ data (no UPC lookup)
+            # create product data
             product_data = {
                 'name': record.title,
-                'slug': self._create_slug(record.title),
+                'slug': create_slug(record.title),
                 'description': getattr(record, 'description', None),
                 'brand_id': brand_id,
                 'is_active': True
             }
             
-            # get or create product
-            product_id = self._get_or_create_product(product_data, record)
+            # get retailer-specific ID for deduplication
+            retailer_specific_id = getattr(record, 'asin', None) or getattr(record, 'tcin', None) or getattr(record, 'wm_item_id', None)
+            
+            # get or create product (unified method)
+            product_id = self._get_or_create_product_unified(product_data, retailer_specific_id)
             
             # assign categories to product
             if category_ids:
@@ -194,16 +304,13 @@ class SupabaseBackend(OutputBackend):
                 self.logger.warning(f"No categories assigned to product: {record.title}")
             
             # create listing - note: retailer_specific_id is NOT the same as UPC
-            listing_data = {
-                'product_id': product_id,
-                'retailer_id': self._get_or_create_retailer(record.retailer_id),
-                'retailer_specific_id': getattr(record, 'asin', None) or getattr(record, 'tcin', None) or getattr(record, 'wm_item_id', None),
-                'url': str(record.url),
-                'price': self._parse_price(record.price),
-                'currency': 'USD',
-                'in_stock': True,
-                'last_checked': datetime.utcnow().isoformat()
-            }
+            listing_data = self._build_listing_data(
+                product_id=product_id,
+                retailer_id=self._get_or_create_retailer(record.retailer_id),
+                retailer_specific_id=retailer_specific_id,
+                url=str(record.url),
+                price=record.price
+            )
             
             try:
                 listing_id = self._upsert_listing(listing_data)
@@ -235,7 +342,7 @@ class SupabaseBackend(OutputBackend):
             self.logger.debug(f"Processing dict record with keys: {list(record.keys())}")
             
             # determine retailer
-            retailer_id = self._determine_retailer_from_dict(record)
+            retailer_id = detect_retailer_from_record(record)
             if not retailer_id:
                 self.logger.warning(f"Could not determine retailer for record with keys: {list(record.keys())}")
                 return
@@ -252,12 +359,7 @@ class SupabaseBackend(OutputBackend):
             raw_category = record.get('category') or self.crawl_category
             
             # debug logging for category processing
-            self.logger.debug(f"=== CATEGORY PROCESSING DEBUG (Dict Record) ===")
-            self.logger.debug(f"Product: {product_title}")
-            self.logger.debug(f"Retailer: {retailer_name}")
-            self.logger.debug(f"Crawl category parameter: {self.crawl_category}")
-            self.logger.debug(f"Record category field: {record.get('category')}")
-            self.logger.debug(f"Final raw_category used: {raw_category}")
+            self._log_category_debug(product_title, retailer_name, record.get('category'), raw_category)
             
             # normalize categories using hierarchy
             category_names = self.category_normalizer.normalize_category(
@@ -277,20 +379,23 @@ class SupabaseBackend(OutputBackend):
             self.logger.debug(f"Category IDs assigned: {category_ids}")
             self.logger.debug(f"=== END CATEGORY PROCESSING DEBUG ===")
             
-            # extract brand
-            brand_name = record.get('brand_name') or record.get('brand')
-            brand_id = self._extract_and_create_brand(product_title, brand_name)
+            # get brand ID
+            brand_id = self._get_brand_id(product_title, record.get('brand_name') or record.get('brand'))
             
-            # create rest of product data 
+            # create product data 
             product_data = {
                 'name': product_title,
-                'slug': self._create_slug(product_title),
+                'slug': create_slug(product_title),
                 'description': record.get('description'),
                 'brand_id': brand_id,
                 'is_active': True
             }
             
-            product_id = self._get_or_create_product_from_dict(product_data, record)
+            # get retailer-specific ID for deduplication
+            retailer_specific_id = record.get('asin') or record.get('tcin') or record.get('wm_item_id')
+            
+            # get or create product
+            product_id = self._get_or_create_product_unified(product_data, retailer_specific_id)
             
             # assign categories
             if category_ids:
@@ -300,16 +405,13 @@ class SupabaseBackend(OutputBackend):
                 self.logger.warning(f"No categories assigned to product: {product_title}")
             
             # create listing - note: retailer_specific_id is NOT the same as UPC
-            listing_data = {
-                'product_id': product_id,
-                'retailer_id': retailer_id,
-                'retailer_specific_id': record.get('asin') or record.get('tcin') or record.get('wm_item_id'),
-                'url': record.get('url'),
-                'price': self._parse_price(record.get('price')),
-                'currency': 'USD',
-                'in_stock': True,
-                'last_checked': datetime.utcnow().isoformat()
-            }
+            listing_data = self._build_listing_data(
+                product_id=product_id,
+                retailer_id=retailer_id,
+                retailer_specific_id=retailer_specific_id,
+                url=record.get('url'),
+                price=record.get('price')
+            )
             
             try:
                 listing_id = self._upsert_listing(listing_data)
@@ -330,6 +432,37 @@ class SupabaseBackend(OutputBackend):
             self.logger.error(f"Error processing raw dict: {e}")
             self.logger.debug(f"Record that caused error: {record}")
             raise
+    
+    # * Consolidated helper methods *
+    
+    # log category processing debug
+    def _log_category_debug(self, product_title: str, retailer_name: str, record_category: str, raw_category: str) -> None:
+        self.logger.debug(f"=== CATEGORY PROCESSING DEBUG ===")
+        self.logger.debug(f"Product: {product_title}")
+        self.logger.debug(f"Retailer: {retailer_name}")
+        self.logger.debug(f"Crawl category parameter: {self.crawl_category}")
+        self.logger.debug(f"Record category field: {record_category}")
+        self.logger.debug(f"Final raw_category used: {raw_category}")
+    
+    # get brand ID
+    def _get_brand_id(self, product_name: str, brand_name: str = None) -> Optional[str]:
+        if brand_name:
+            return self._get_or_create_brand(brand_name)
+        return None
+    
+    # build listing data
+    def _build_listing_data(self, product_id: str, retailer_id: str, retailer_specific_id: str, 
+                           url: str, price) -> dict:
+        return {
+            'product_id': product_id,
+            'retailer_id': retailer_id,
+            'retailer_specific_id': retailer_specific_id,
+            'url': url,
+            'price': parse_price(price),
+            'currency': DEFAULT_CURRENCY,
+            'in_stock': True,
+            'last_checked': datetime.utcnow().isoformat()
+        }
     
     # assign categories to a product
     def _assign_product_categories(self, product_id: str, category_ids: List[str]) -> None:
@@ -358,20 +491,12 @@ class SupabaseBackend(OutputBackend):
     
     # * Brand management methods *
     
-    # extract brand from record if provided, otherwise return NULL
-    def _extract_and_create_brand(self, product_name: str, brand_name: str = None) -> Optional[str]:
-        if brand_name:
-            return self._get_or_create_brand(brand_name)
-        
-        # default to NULL
-        return None
-    
     # get or create brand in database
     def _get_or_create_brand(self, brand_name: str) -> str:
         if brand_name in self._brand_cache:
             return self._brand_cache[brand_name]
         
-        brand_slug = self._create_slug(brand_name)
+        brand_slug = create_slug(brand_name)
         
         try:
             # try to find existing brand
@@ -405,19 +530,7 @@ class SupabaseBackend(OutputBackend):
     
     # get retailer info from cache or database
     def _get_retailer_info(self, retailer_id) -> Optional[dict]:
-        # map string IDs to proper UUIDs first
-        retailer_uuid_map = {
-            "1": "00000000-0000-0000-0000-000000000001",  # Amazon
-            "2": "00000000-0000-0000-0000-000000000002",  # Target  
-            "3": "00000000-0000-0000-0000-000000000003",  # Walmart
-            "amazon": "00000000-0000-0000-0000-000000000001",
-            "target": "00000000-0000-0000-0000-000000000002",
-            "walmart": "00000000-0000-0000-0000-000000000003"
-        }
-        
-        # convert to string first, then map to UUID
-        retailer_key = str(retailer_id).lower()
-        uuid_value = retailer_uuid_map.get(retailer_key, retailer_id)
+        uuid_value = resolve_retailer_uuid(retailer_id)
         
         if uuid_value in self._retailer_cache:
             return self._retailer_cache[uuid_value]
@@ -435,19 +548,7 @@ class SupabaseBackend(OutputBackend):
     
     # get or create retailer in database
     def _get_or_create_retailer(self, retailer_identifier) -> str:
-        # map string IDs to proper UUIDs
-        retailer_uuid_map = {
-            "1": "00000000-0000-0000-0000-000000000001",  # Amazon
-            "2": "00000000-0000-0000-0000-000000000002",  # Target  
-            "3": "00000000-0000-0000-0000-000000000003",  # Walmart
-            "amazon": "00000000-0000-0000-0000-000000000001",
-            "target": "00000000-0000-0000-0000-000000000002",
-            "walmart": "00000000-0000-0000-0000-000000000003"
-        }
-        
-        # convert to string first, then map to UUID
-        retailer_key = str(retailer_identifier).lower()
-        uuid_value = retailer_uuid_map.get(retailer_key, retailer_identifier)
+        uuid_value = resolve_retailer_uuid(retailer_identifier)
         
         try:
             # verify retailer exists
@@ -463,14 +564,24 @@ class SupabaseBackend(OutputBackend):
     
     # * Product management methods *
     
-    # product creation with better deduplication
-    def _get_or_create_product(self, product_data: dict, record: ProductRecord) -> str:
+    # unified product creation with better deduplication
+    def _get_or_create_product_unified(self, product_data: dict, retailer_specific_id: str = None) -> str:
         try:
             # try to find existing product by slug first
             result = self.supabase.table('products').select('id').eq('slug', product_data['slug']).execute()
             
             if result.data:
                 return result.data[0]['id']
+            
+            # try retailer-specific ID matching if available (for dict records)
+            if retailer_specific_id:
+                existing_listing = self.supabase.table('listings')\
+                    .select('product_id')\
+                    .eq('retailer_specific_id', retailer_specific_id)\
+                    .execute()
+                
+                if existing_listing.data:
+                    return existing_listing.data[0]['product_id']
             
             # try to find by similar name (simple fuzzy matching)
             similar_products = self.supabase.table('products')\
@@ -492,38 +603,10 @@ class SupabaseBackend(OutputBackend):
             self.logger.error(f"Error getting/creating product: {e}")
             raise
     
-    # product creation from dict w/ better deduplication
-    def _get_or_create_product_from_dict(self, product_data: dict, record: dict) -> str:
-        try:
-            # similar logic as above but for dict records
-            result = self.supabase.table('products').select('id').eq('slug', product_data['slug']).execute()
-            
-            if result.data:
-                return result.data[0]['id']
-            
-            # try retailer-specific ID matching if available
-            retailer_specific_id = record.get('asin') or record.get('tcin') or record.get('wm_item_id')
-            if retailer_specific_id:
-                existing_listing = self.supabase.table('listings')\
-                    .select('product_id')\
-                    .eq('retailer_specific_id', retailer_specific_id)\
-                    .execute()
-                
-                if existing_listing.data:
-                    return existing_listing.data[0]['product_id']
-            
-            # create new product
-            result = self.supabase.table('products').insert(product_data).execute()
-            return result.data[0]['id']
-                
-        except Exception as e:
-            self.logger.error(f"Error getting/creating product from dict: {e}")
-            raise
-    
     # * Listing management methods *
     
-    # check if retailer already has a listing for this product (prevents duplicate listings)
-    def _check_retailer_duplicate_listing(self, product_id: str, retailer_id: str) -> None:
+    # check if retailer already has a listing for this product
+    def _has_retailer_duplicate_listing(self, product_id: str, retailer_id: str) -> Tuple[bool, Optional[dict]]:
         try:
             existing_listings = self.supabase.table('listings')\
                 .select('id, url, location_id')\
@@ -532,7 +615,7 @@ class SupabaseBackend(OutputBackend):
                 .execute()
             
             if existing_listings.data:
-                # get retailer & product names for better error messages
+                # get retailer & product names for context
                 retailer_info = self._get_retailer_info(retailer_id)
                 retailer_name = retailer_info.get('name', 'Unknown') if retailer_info else 'Unknown'
                 
@@ -543,21 +626,18 @@ class SupabaseBackend(OutputBackend):
                 product_name = product_result.data[0]['name'] if product_result.data else 'Unknown Product'
                 
                 existing_listing = existing_listings.data[0]
-                existing_url = existing_listing.get('url', 'Unknown URL')
                 
-                self.logger.warning(f"Retailer '{retailer_name}' already has a listing for product '{product_name}'. "
-                                  f"Existing listing URL: {existing_url}. "
-                                  f"Skipping duplicate listing creation.")
-                
-                # log a warning and skip
-                raise ValueError(f"Duplicate listing: {retailer_name} already has a listing for '{product_name}'")
+                return True, {
+                    'retailer_name': retailer_name,
+                    'product_name': product_name,
+                    'existing_url': existing_listing.get('url', 'Unknown URL')
+                }
+            
+            return False, None
                 
         except Exception as e:
-            if "Duplicate listing" in str(e):
-                raise 
-            else:
-                self.logger.error(f"Error checking for duplicate listings: {e}")
-                # continue processing
+            self.logger.error(f"Error checking for duplicate listings: {e}")
+            return False, None
     
     # upsert listing & return listing ID if successful
     def _upsert_listing(self, listing_data: dict) -> Optional[str]:
@@ -567,7 +647,16 @@ class SupabaseBackend(OutputBackend):
                 listing_data['location_id'] = None
             
             # check if retailer already has a listing for this product (business rule)
-            self._check_retailer_duplicate_listing(listing_data['product_id'], listing_data['retailer_id'])
+            has_duplicate, duplicate_info = self._has_retailer_duplicate_listing(
+                listing_data['product_id'], 
+                listing_data['retailer_id']
+            )
+            
+            if has_duplicate and duplicate_info:
+                self.logger.warning(f"Retailer '{duplicate_info['retailer_name']}' already has a listing for product '{duplicate_info['product_name']}'. "
+                                  f"Existing listing URL: {duplicate_info['existing_url']}. "
+                                  f"Skipping duplicate listing creation.")
+                raise ValueError(f"Duplicate listing: {duplicate_info['retailer_name']} already has a listing for '{duplicate_info['product_name']}'")
             
             # use correct constraint fields that match the database schema
             result = self.supabase.table('listings').upsert(
@@ -584,7 +673,7 @@ class SupabaseBackend(OutputBackend):
                     price_history_data = {
                         'listing_id': listing_id,
                         'price': listing_data['price'],
-                        'currency': listing_data.get('currency', 'USD'),
+                        'currency': listing_data.get('currency', DEFAULT_CURRENCY),
                         'timestamp': listing_data.get('last_checked')
                     }
                     
@@ -607,11 +696,12 @@ class SupabaseBackend(OutputBackend):
                 self.logger.info(f"Skipping UPC lookup for existing product URL: {product_url}")
                 return
             
-            # perform UPC lookup only for new products
-            upc_result = self.upc_manager.lookup_upc(
+            # perform UPC lookup using the thread-local manager
+            upc_manager = self._get_thread_upc_manager()
+            upc_result = upc_manager.lookup_upc(
                 product_name=product_name,
                 retailer_source=retailer_name,
-                original_url=product_url
+                original_url=product_url,
             )
             
             if upc_result and upc_result.upc:
@@ -664,53 +754,24 @@ class SupabaseBackend(OutputBackend):
     
     # * Utility methods *
     
-    # determine retailer from record structure
-    def _determine_retailer_from_dict(self, record: dict) -> Optional[str]:
-        if 'asin' in record:
-            return self._get_or_create_retailer(1)  # Amazon
-        elif 'tcin' in record:
-            return self._get_or_create_retailer(2)  # Target
-        elif 'wm_item_id' in record:
-            return self._get_or_create_retailer(3)  # Walmart
-        else:
-            # try to determine from URL
-            url = record.get('url', '')
-            if 'amazon.com' in url:
-                return self._get_or_create_retailer(1)
-            elif 'target.com' in url:
-                return self._get_or_create_retailer(2)
-            elif 'walmart.com' in url:
-                return self._get_or_create_retailer(3)
-        
-        return None
-    
-    # parse price string to float
-    def _parse_price(self, price_str) -> Optional[float]:
-        if not price_str or price_str == 'Unknown Price':
-            return None
-        
-        try:
-            # remove currency symbols & commas
-            clean_price = str(price_str).replace('$', '').replace(',', '').strip()
-            return float(clean_price)
-        except (ValueError, TypeError):
-            return None
-    
-    # create URL-friendly slug from name
-    def _create_slug(self, name: str) -> str:
-        import re
-        
-        # convert to lowercase & replace spaces/special chars w/ hyphens
-        slug = re.sub(r'[^\w\s-]', '', name.lower())
-        slug = re.sub(r'[\s_-]+', '-', slug)
-        slug = slug.strip('-')
-        
-        # truncate if too long
-        return slug[:255]
-    
     # process a URL-only record (minimal processing)
     def _process_url_record(self, url: str) -> None:
         self.logger.debug(f"Processing URL record: {url}")
+
+    # get thread-local UPC manager
+    def _get_thread_upc_manager(self):
+        if not hasattr(self._thread_local, "upc_manager"):
+            # reuse factory params but with max_workers=1 for thread-local instance
+            thread_params = self._upc_factory_params.copy()
+            thread_params['max_workers'] = 1
+            
+            mgr = create_upc_manager(**thread_params)
+            self._thread_local.upc_manager = mgr
+
+            # record for later cleanup (main thread context)
+            self._created_upc_managers.append(mgr)
+
+        return self._thread_local.upc_manager
 
 # * Factory functions *
 
