@@ -98,21 +98,34 @@ def _get_tcin_from_card(card_element) -> Optional[str]:
 
 # extract product URL from a product card
 def _extract_product_url(driver, card) -> Optional[str]:
+    # CRITICAL: ensure card is fully loaded before ANY extraction
     try:
-        # verify card is in view 
         driver.execute_script(
             "arguments[0].scrollIntoView({block:'center'});", card
         )
-        # small delay for inner DOM 
-        link = WebDriverWait(card, 2).until(
+        # wait for elements to be present
+        WebDriverWait(card, 2).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR))
         )
-        # get href
-        href = link.get_attribute("href")
-        full_url = urljoin("https://www.target.com", href)
-        return _shorten_target_url(full_url)
-    except (TimeoutException, NoSuchElementException, StaleElementReferenceException):
-        return None
+    except (TimeoutException, NoSuchElementException):
+        pass
+    
+    # method 1: build URL directly from TCIN (most reliable)
+    tcin = _get_tcin_from_card(card)
+    if tcin:
+        return _build_target_url_from_tcin(tcin)
+    
+    # method 2: extract from href and normalize (fallback)
+    try:
+        link = card.find_element(By.CSS_SELECTOR, PRODUCT_LINK_SELECTOR)
+        href = link.get_attribute('href')
+        if href:
+            full_url = urljoin("https://www.target.com", href)
+            return _shorten_target_url(full_url)
+    except NoSuchElementException:
+        pass
+    
+    return None
 
 # extract product title from a card element
 def _extract_product_title(card_element) -> str:
@@ -155,36 +168,38 @@ def _scroll_page(driver):
     except Exception as e:
         logging.error(f"Error scrolling page: {e}")
 
+# navigate to the next results page
 def _go_to_next_page(driver) -> bool:
-    """Navigate to the next results page"""
     try:
-        # Wait until *any* next button is present
+        # wait until *any* next button is present
         buttons = WebDriverWait(driver, 5).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, NEXT_BUTTON_SELECTOR))
         )
 
-        # Pick the first one that is actually enabled / clickable
+        # pick the first one that is actually enabled / clickable
         btn = None
         for b in buttons:
+            # skip ghost or true-disabled arrows
             if b.get_attribute("disabled") or b.get_attribute("aria-disabled") == "true":
-                continue          # skip ghost or true-disabled arrows
+                continue
             btn = b
             break
+        # no usable arrow -> last page
         if btn is None:
-            return False         # no usable arrow -> last page
+            return False
 
         driver.execute_script("arguments[0].scrollIntoView({block:'center'});", btn)
-        time.sleep(0.4)          # tiny pause so IntersectionObserver inside the page fires
+        time.sleep(0.4)          # tiny pause so IntersectionObserver inside the page fires (to load more products)
 
         href = btn.get_attribute("href")
         if href:
-            # Link variant -> just load it
+            # link variant -> just load it
             driver.get(href)
         else:
-            # Button variant -> click via JS to avoid overlay / sticky header collisions
+            # button variant -> click via JS to avoid overlay / sticky header collisions
             driver.execute_script("arguments[0].click();", btn)
 
-        # give React a moment to swap the grid
+        # give React a moment to swap the grid (to load more products)
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, PRODUCT_GRID_SELECTOR))
         )
@@ -337,22 +352,34 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger, su
                 
     return all_products
 
-# shorten the URL to the product
+# build the URL from the TCIN
+def _build_target_url_from_tcin(tcin: str) -> str:
+    return f"https://www.target.com/p/-/A-{tcin}"
+
+# shorten the URL to the product (to avoid dupes)
 def _shorten_target_url(url: str) -> str:
     if not url:
         return url
         
-    # match Target product URLs w/ TCIN (A-numbers)
-    pattern = r'(https://www\.target\.com/p/)[^/]+/(-/A-\d+)(?:\?.*)?$'
+    # match Target product URLs with TCIN (A-numbers)
+    pattern = r'https://www\.target\.com/p/[^/]*(/\-/A-\d+)(?:[#?].*)?'
     match = re.search(pattern, url)
     
     if match:
-        base_url = match.group(1)  # https://www.target.com/p/
-        tcin_part = match.group(2)  # -/A-number
+        tcin_part = match.group(1)  # /-/A-number
         # construct minimal product URL
+        return f"https://www.target.com/p{tcin_part}"
+    
+    # fallback pattern for URLs that might not have product names
+    pattern2 = r'(https://www\.target\.com/p/).*?(/\-/A-\d+)(?:[#?].*)?'
+    match2 = re.search(pattern2, url)
+    
+    if match2:
+        base_url = match2.group(1)  # https://www.target.com/p/
+        tcin_part = match2.group(2)  # /-/A-number
         return f"{base_url}{tcin_part}"
     
-    # fallback to original
+    # fallback to original if no match
     return url 
 
 # * main - crawl product grids from a list of starting URLs and return the products found
@@ -392,26 +419,43 @@ def crawl_grid(start_urls: List[str], max_depth: int = 5, extract_urls_only: boo
 
 # testing entry point
 if __name__ == "__main__":
+    # test URL normalization first
+    test_urls = [
+        "https://www.target.com/p/kinder-bueno-minis-candy-share-pack-5-7oz/-/A-80321287#lnk=sametab",
+        "https://www.target.com/p/some-product-name/-/A-12345678?ref=target",
+        "https://www.target.com/p/-/A-87654321",
+        "https://www.target.com/p/long-product-name-here/-/A-11111111",
+    ]
+    
+    print("Target URL Normalization Test:")
+    for url in test_urls:
+        shortened = _shorten_target_url(url)
+        print(f"Original:  {url}")
+        print(f"Shortened: {shortened}")
+        print("---")
+    
+    # all should normalize to: https://www.target.com/p/-/A-{tcin}
+    
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
     logger = logging.getLogger(__name__)
     
-    # test URLs
-    test_urls = [
+    # test URLs for crawling
+    crawl_test_urls = [
         "https://www.target.com/c/frozen-single-serve-meals-foods-grocery/-/N-wdysv",
         "https://www.target.com/c/cookies-snacks-grocery/-/N-54v3e"
     ]
     
     # test w/ URL-only extraction
-    urls_only = crawl_grid(test_urls, max_depth=2, extract_urls_only=True, use_safari=True, logger=logger)
+    urls_only = crawl_grid(crawl_test_urls, max_depth=2, extract_urls_only=True, use_safari=True, logger=logger)
 
     # clear seen TCINs
     SEEN_TCINS.clear()
 
     # test w/ full extraction
-    full_data = crawl_grid(test_urls, max_depth=2, extract_urls_only=False, use_safari=True, logger=logger)
+    full_data = crawl_grid(crawl_test_urls, max_depth=2, extract_urls_only=False, use_safari=True, logger=logger)
 
     # save results
     Path("target_urls.json").write_text(json.dumps(urls_only, indent=2, ensure_ascii=False))
