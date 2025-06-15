@@ -47,10 +47,42 @@ class BaseScraper(ABC):
                 'retailer_id': retailer_id,
                 'url': scraped_data['url'],
                 'price': scraped_data['price'],
-                'is_in_stock': scraped_data['in_stock'],
-                'currency': 'USD'
+                'in_stock': scraped_data['in_stock'],
+                'currency': 'USD',
+                'image_url': scraped_data.get('image_url', None),
+                'rating': scraped_data.get('rating', None),
+                'review_count': scraped_data.get('review_count', None),
+                'availability_status': self._determine_availability_status(
+                    scraped_data.get('in_stock', True), 
+                    scraped_data.get('availability_status', None),
+                    scraped_data.get('stock_quantity', None)
+                ),
+                'stock_quantity': scraped_data.get('stock_quantity', None)
             }
         }
+    
+    # helper method to determine availability status from various inputs
+    def _determine_availability_status(self, in_stock, availability_status=None, stock_quantity=None):
+        # if explicit availability status is provided, use it (if valid)
+        valid_statuses = ['in_stock', 'out_of_stock', 'limited_stock', 'backorder', 'discontinued']
+        if availability_status and availability_status.lower() in valid_statuses:
+            return availability_status.lower()
+        
+        # o/w determine from in_stock & stock_quantity
+        if not in_stock:
+            return 'out_of_stock'
+        
+        # if in stock, check if quantity info for more granular status
+        if stock_quantity is not None:
+            if stock_quantity == 0:
+                return 'out_of_stock'
+            elif stock_quantity <= 100: 
+                return 'limited_stock'
+            else:
+                return 'in_stock'
+        
+        # default to in_stock if in_stock is True but no quantity info
+        return 'in_stock'
     
     # add random delay to avoid detection
     def random_delay(self, min_seconds=1, max_seconds=3):
