@@ -4,16 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
 import { HomeIcon, SearchIcon, CategoriesIcon, BasketsIcon, UserIcon, LogoIcon } from './Icons';
+import ProfileDropdown from './ProfileDropdown';
+import { useAuth } from '~/lib/auth';
 
 export default function NavBar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   
   const navItems = [
     { name: 'Home', href: '/', icon: HomeIcon },
     { name: 'Categories', href: '/categories', icon: CategoriesIcon },
     { name: 'Search', href: '/search', icon: SearchIcon },
     { name: 'Baskets', href: '/baskets', icon: BasketsIcon },
-    { name: 'Login', href: '/auth/login', icon: UserIcon },
   ];
 
   return (
@@ -52,6 +54,18 @@ export default function NavBar() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             
+            {user ? (
+              <ProfileDropdown />
+            ) : (
+              <Link
+                href="/auth/login"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface"
+              >
+                <UserIcon className="w-5 h-5" />
+                <span className="hidden md:inline">Login</span>
+              </Link>
+            )}
+            
             {/* Mobile menu button - only shown on small screens */}
             <div className="md:hidden">
               <button className="p-2 rounded-md hover:bg-surface">
@@ -82,6 +96,28 @@ export default function NavBar() {
               </Link>
             );
           })}
+          
+          {user ? (
+            <Link
+              href="/profile"
+              className={`flex flex-col items-center py-3 ${
+                pathname === '/profile' ? 'text-primary' : 'text-text'
+              }`}
+            >
+              <UserIcon className="w-6 h-6" />
+              <span className="text-xs mt-1">Profile</span>
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              className={`flex flex-col items-center py-3 ${
+                pathname === '/auth/login' ? 'text-primary' : 'text-text'
+              }`}
+            >
+              <UserIcon className="w-6 h-6" />
+              <span className="text-xs mt-1">Login</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>
