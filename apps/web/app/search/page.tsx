@@ -107,22 +107,29 @@ export default function Search() {
   // Get best listing for a product (lowest price in stock)
   const getBestListing = (product: Product) => {
     if (!product.listings?.length) return null;
-    
-    // First try to find in-stock listings
-    const inStockListings = product.listings.filter(l => l.in_stock);
-    
-    // If there are in-stock listings, return the lowest price one
+
+    // Filter out listings that don't have a valid numeric price
+    const validListings = product.listings.filter(
+      (l) => typeof l.price === 'number' && !Number.isNaN(l.price)
+    );
+
+    if (validListings.length === 0) return null;
+
+    // First try to find in-stock listings among the valid ones
+    const inStockListings = validListings.filter((l) => l.in_stock);
+
+    // If there are in-stock listings, return the lowest-priced one
     if (inStockListings.length > 0) {
-      return inStockListings.reduce((best, current) => 
-        current.price < best.price ? current : best, 
+      return inStockListings.reduce(
+        (best, current) => (current.price < best.price ? current : best),
         inStockListings[0]
       );
     }
-    
-    // Otherwise return the lowest price listing regardless of stock
-    return product.listings.reduce((best, current) => 
-      current.price < best.price ? current : best, 
-      product.listings[0]
+
+    // Otherwise return the overall lowest-priced listing
+    return validListings.reduce(
+      (best, current) => (current.price < best.price ? current : best),
+      validListings[0]
     );
   };
   
@@ -211,7 +218,9 @@ export default function Search() {
                     <div className="mt-2">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-lg">
-                          ${bestListing.price.toFixed(2)}
+                          {bestListing.price != null
+                            ? `$${bestListing.price.toFixed(2)}`
+                            : 'N/A'}
                         </span>
                         <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
                           {bestListing.retailer.name}
