@@ -138,3 +138,7 @@ logs/
 .env.local
 .env.development
 .env.production
+
+
+# exception for lib
+!apps/web/lib
