@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --text: #11090e;
+  --background: #ffffff;
+  --surface: #f8f9fa;
+  --primary: #85d1e7;
+  --secondary: #c65b82;
+  --accent: #6f506f;
+  --button-text: #ffffff;
+}
+
+.dark {
+  --text: #f6eef3;
+  --background: #0d1117;
+  --surface: #161b22;
+  --primary: #85d1e7;
+  --secondary: #c65b82;
+  --accent: #6f506f;
+  --button-text: #fdfdfd;
+}
+
+body {
+  color: var(--text);
+  background: var(--background);
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
