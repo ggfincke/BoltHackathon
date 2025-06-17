@@ -1,288 +1,251 @@
 # 🛒 TrackBasket
 
-A comprehensive web crawling system for extracting product data from major retail websites (Amazon, Target, Walmart) with advanced features including UPC lookup, multiple output backends (JSON files, Redis queues, Supabase database), and hierarchical category processing.
+A comprehensive price tracking and comparison web application that monitors products across major retailers (Amazon, Target, Walmart). TrackBasket helps users find the best deals by tracking price history, comparing prices across stores, and providing intelligent product recommendations.
 
-## 📁 Project Structure
+## ✨ Features
+
+### 🎯 For Users
+- **💰 Price Tracking**: Monitor price changes for your favorite products
+- **📊 Price History Charts**: Visualize price trends over time
+- **🛒 Shopping Baskets**: Organize products into custom collections
+- **🔍 Smart Search**: Find products across multiple retailers
+- **📱 Modern UI**: Responsive design with dark/light theme support
+- **👤 User Profiles**: Personalized tracking and recommendations
+- **🏷️ Category Browsing**: Explore products by category hierarchy
+- **⚡ Real-time Updates**: Live price updates and notifications
+
+### 🤖 Backend Intelligence
+- **🕷️ Automated Crawling**: Continuously monitors retailer websites
+- **🔍 UPC Lookup**: Matches products across retailers using UPC codes
+- **📊 Data Normalization**: Standardizes product information
+- **⚡ High Performance**: Concurrent processing with intelligent rate limiting
+- **🗄️ Robust Storage**: Supabase backend with real-time capabilities
+
+## 🏗️ Architecture
 
 ```
-├── src/                        # 💻 Source code
-│   ├── crawlers/              # 🕷️ Web crawlers for discovering and extracting data
-│   │   ├── base_crawler.py    # 🏗️ Base classes and interfaces
-│   │   ├── supabase_backend.py # 🗄️ Supabase database backend
-│   │   ├── upc_lookup/        # 🔍 UPC/barcode lookup functionality
-│   │   │   ├── base_upc_lookup.py    # 🎯 Base UPC lookup interface
-│   │   │   ├── barcode_lookup.py     # 📊 BarcodeLookup.com service
-│   │   │   └── upc_manager.py        # 🎛️ Multi-service UPC manager
-│   │   ├── normalizers/       # 🏷️ Category normalization utilities
-│   │   ├── amazon/            # 📦 Amazon-specific crawler implementation
-│   │   ├── target/            # 🎯 Target-specific crawler implementation
-│   │   └── walmart/           # 🏪 Walmart-specific crawler implementation
-│   ├── scrapers/              # 🧹 Direct product scrapers (alternative approach)
-│   │   ├── base_scraper.py    # 🏗️ Base scraper class
-│   │   ├── amazon/            # 📦 Amazon product scraper
-│   │   ├── target/            # 🎯 Target product scraper
-│   │   └── walmart/           # 🏪 Walmart product scraper
-│   ├── data_processing/       # ⚙️ Data processing utilities (future expansion)
-│   └── utils/                 # 🔧 Shared utilities (future expansion)
-├── scripts/                   # 🚀 Executable scripts
-│   ├── crawl.py              # 🎮 Main crawler CLI interface
-│   └── crawl.sh              # 🐚 Shell script wrapper
-├── data/                      # 💾 Data storage
-│   ├── raw/                  # 📥 Raw data files
-│   └── processed/            # 📤 Processed data outputs and hierarchy files
-│       ├── amazon_grocery_hierarchy.json    # 📦 Pre-built Amazon categories
-│       ├── target_grocery_hierarchy.json    # 🎯 Pre-built Target categories
-│       ├── walmart_grocery_hierarchy.json   # 🏪 Pre-built Walmart categories
-│       └── categories.json                  # 🏷️ General category mappings
-├── config/                    # ⚙️ Configuration files (future expansion)
-├── docs/                      # 📚 Additional documentation
-│   └── README.md             # 📖 Detailed crawler documentation
-├── supabase/                  # 🗄️ Supabase configuration
-│   ├── migrations/           # 🔄 Database migrations
-│   └── config.toml           # ⚙️ Supabase configuration
-├── temp/                      # 🗂️ Temporary files and utilities
-├── test.py                   # 🧪 Test scripts
-├── requirements.txt          # 📋 Python dependencies
-└── README.md                 # 📄 This file
+TrackBasket/
+├── apps/web/                   # 🌐 Next.js Web Application
+│   ├── app/                   # 📱 App Router Pages
+│   │   ├── auth/             # 🔐 Authentication pages
+│   │   ├── baskets/          # 🛒 Shopping basket management
+│   │   ├── categories/       # 🏷️ Product category browsing
+│   │   ├── product/          # 📦 Product detail pages
+│   │   ├── profile/          # 👤 User profile management
+│   │   ├── search/           # 🔍 Product search interface
+│   │   └── settings/         # ⚙️ User settings
+│   ├── components/           # 🧩 React Components
+│   │   ├── AuthForm.tsx      # 🔐 Authentication forms
+│   │   ├── PriceComparisonTable.tsx  # 💰 Price comparison
+│   │   ├── PriceHistoryChart.tsx     # 📊 Price trend charts
+│   │   ├── ProductCard.tsx          # 📦 Product display cards
+│   │   ├── ProductTrackingForm.tsx  # 📈 Product tracking setup
+│   │   ├── NavBar.tsx              # 🧭 Navigation
+│   │   └── ThemeProvider.tsx       # 🎨 Theme management
+│   └── lib/                  # 📚 Utilities & Configuration
+│       ├── auth.tsx          # 🔐 Authentication logic
+│       ├── database.types.ts # 📊 TypeScript database types
+│       └── supabaseClient.ts # 🗄️ Supabase client
+├── src/                       # 🔧 Backend System
+│   ├── crawlers/             # 🕷️ Web crawlers for data collection
+│   │   ├── amazon/           # 📦 Amazon crawler
+│   │   ├── target/           # 🎯 Target crawler
+│   │   ├── walmart/          # 🏪 Walmart crawler
+│   │   ├── upc_lookup/       # 🔍 UPC/barcode lookup system
+│   │   └── normalizers/      # 🏷️ Data normalization
+│   └── scrapers/             # 🧹 Direct product scrapers
+├── supabase/                 # 🗄️ Database & Backend
+│   └── migrations/           # 🔄 Database schema migrations
+├── scripts/                  # 🚀 Automation Scripts
+└── data/                     # 💾 Category hierarchies & processed data
 ```
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
-### 📥 Installation
+### 📋 Prerequisites
+- Node.js 22+ and npm/yarn
+- Python 3.12+ for backend crawlers
+- Supabase account (or local instance)
 
-1. Clone the repository:
+### 🏃‍♂️ Quick Setup
+
+1. **Clone the repository**:
 ```bash
 git clone <repository-url>
 cd trackbasket
 ```
 
-2. Install dependencies:
+2. **Set up the web application**:
 ```bash
+cd apps/web
+npm install
+```
+
+3. **Configure environment variables**:
+```bash
+# In apps/web/.env.local
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+4. **Set up the database**:
+```bash
+cd supabase
+npx supabase start  # For local development
+# Or configure your Supabase project and run migrations
+```
+
+5. **Install backend dependencies**:
+```bash
+cd ../../  # Back to project root
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables (optional):
+6. **Start the development server**:
 ```bash
-export REDIS_URL="redis://localhost:6379"
-export SUPABASE_URL="your-supabase-url"
-export SUPABASE_ANON_KEY="your-supabase-key"
+cd apps/web
+npm run dev
 ```
 
-### 🎯 Basic Usage
+Visit `http://localhost:3000` to see the application!
+
+## 🌐 Web Application Features
+
+### 🔐 Authentication
+- **Sign up/Sign in**: Secure user authentication via Supabase Auth
+- **Password Reset**: Email-based password recovery
+- **Protected Routes**: Middleware-based route protection
+
+### 🛒 Product Management
+- **Product Tracking**: Add products to track price changes
+- **Shopping Baskets**: Organize products into custom collections
+- **Price Alerts**: Get notified when prices drop
+- **Comparison Tables**: Side-by-side price comparison across retailers
+
+### 📊 Analytics & Insights
+- **Price History Charts**: Interactive charts showing price trends
+- **Best Deals**: Automatically surface the best current deals
+- **Category Analytics**: Price insights by product category
+
+### 🎨 User Experience
+- **Responsive Design**: Works seamlessly on desktop and mobile
+- **Dark/Light Themes**: Toggle between theme preferences
+- **Fast Search**: Instant product search with filters
+- **Breadcrumb Navigation**: Easy navigation through categories
+
+## 🤖 Backend Crawling System
+
+### 🕷️ Automated Data Collection
+The backend system continuously monitors retailer websites to keep product data fresh:
 
 ```bash
-# 📋 List available retailers
-python scripts/crawl.py --list-retailers
-
-# 🔌 Test connections
-python scripts/crawl.py --test-redis
-
-# 🛍️ Basic crawling examples
+# Run manual crawls for testing
 python scripts/crawl.py --retailer amazon --mode full --max-pages 3
-python scripts/crawl.py --retailer target --mode urls-only --category "Beverages"
-python scripts/crawl.py --retailer walmart --mode full --hierarchical
-python scripts/crawl.py --retailer amazon --from-hierarchy-file --concurrency 10
+python scripts/crawl.py --retailer target --category "Beverages" --hierarchical
+python scripts/crawl.py --retailer walmart --from-hierarchy-file --concurrency 10
 ```
 
-## 🔑 Key Features
+### 🔍 UPC Lookup & Matching
+- **Cross-retailer Matching**: Uses UPC codes to match products across stores
+- **Confidence Scoring**: Evaluates match reliability
+- **Fallback Services**: Multiple UPC lookup providers
+- **Intelligent Caching**: Reduces API costs and improves performance
 
-### 🕷️ Crawlers vs 🧹 Scrapers
+### 📊 Data Processing
+- **Category Normalization**: Standardizes product categories
+- **Price History Tracking**: Maintains historical price data
+- **Deduplication**: Prevents duplicate product entries
+- **Real-time Updates**: Pushes updates to web app via Supabase real-time
 
-- **🕷️ Crawlers** (`src/crawlers/`): Discover product categories and URLs, then extract product data at scale with UPC enrichment
-- **🧹 Scrapers** (`src/scrapers/`): Direct product data extraction from individual product pages
+## 🗄️ Database Schema
 
-### 🔍 UPC Lookup
-The system includes sophisticated UPC/barcode lookup capabilities:
-- **🔄 Multi-service fallback**: Automatically tries multiple UPC lookup services
-- **💾 Intelligent caching**: Reduces redundant API calls and improves performance  
-- **⭐ Confidence scoring**: Evaluates the reliability of UPC matches
-- **🎯 Product name matching**: Uses fuzzy matching to find UPCs for product names
-  
-### 📤 Output Backends
-
-1. **📄 JSON Files**: Store data in JSON format (default for full mode)
-2. **⚡ Redis**: Store URLs in Redis queues (default for urls-only mode)  
-3. **🗄️ Supabase**: Store structured data directly in database with automatic UPC lookup
-
-### 🛠️ Crawling Modes
-
-- **🔍 Full Mode**: Extract complete product data (title, price, URL, UPC when available)
-- **🔗 URLs Only**: Extract only product URLs for memory efficiency
-- **🌳 Hierarchical**: Build category structure with products at leaf nodes
-
-## 🚀 Advanced Features
-
-### 📊 Hierarchy File Mode
-Use pre-built category hierarchies for faster, more targeted crawling:
-
-```bash
-# ⚡ Use default hierarchy file with high concurrency
-python scripts/crawl.py --retailer amazon --from-hierarchy-file --mode urls-only --concurrency 15
-
-# 📁 Use custom hierarchy file
-python scripts/crawl.py --retailer target --from-hierarchy-file my_hierarchy.json --mode full
-
-# 🎯 Filter hierarchy to specific categories
-python scripts/crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
-```
-
-### 🏷️ Category Filtering
-Target specific categories or departments:
-
-```bash
-python scripts/crawl.py --retailer walmart --category "Beverages" --mode full
-python scripts/crawl.py --retailer amazon --department "Amazon Grocery" --hierarchical
-python scripts/crawl.py --retailer target --department "Target Grocery" --max-pages 10
-```
-
-### ⚡ Concurrent Processing
-Optimize performance with adjustable concurrency:
-
-```bash
-python scripts/crawl.py --retailer target --from-hierarchy-file --concurrency 20 --max-pages 5
-```
-
-### 📤 Advanced Output Options
-Control output format and destination:
-
-```bash
-# 📝 Custom output file names
-python scripts/crawl.py --retailer amazon --mode full --output custom_amazon_crawl
-
-# 🌳 Hierarchical JSON output
-python scripts/crawl.py --retailer walmart --hierarchical --output walmart_hierarchy
-```
-
-## 📊 Data Outputs
-
-### 📄 JSON Files
-- **📍 Location**: Project root directory
-- **📋 Format**: ND-JSON (one object per line) or hierarchical JSON
-- **🏷️ Naming**: `{prefix}_{timestamp}.json`
-- **📦 Content**: Product data with UPC codes when available
-
-### ⚡ Redis Queues
-- **🔑 Keys**: `product_urls:{retailer_id}`
-- **📋 Format**: Plain URLs as strings
-- **🎯 Use case**: URL collection for batch processing
-
-### 🗄️ Supabase Database
-- **📊 Tables**: products, listings, categories, brands, price_histories, upcs
-- **✨ Features**: Automatic deduplication, category normalization, price tracking, UPC enrichment
-
-## ⚙️ Configuration
-
-### 🌍 Environment Variables
-- `CRAWLER_MAX_DEPTH`: Maximum crawling depth (default: 10)
-- `CRAWLER_CONCURRENCY`: Number of concurrent workers (default: 5)
-- `REDIS_URL`: Redis connection URL
-- `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_ANON_KEY`: Supabase anonymous key
-
-### 📊 Pre-built Category Hierarchies
-Each retailer has optimized category hierarchy files in `data/processed/`:
-- 📦 Amazon: `amazon_grocery_hierarchy.json` (7,335 lines)
-- 🎯 Target: `target_grocery_hierarchy.json` (1,017 lines)  
-- 🏪 Walmart: `walmart_grocery_hierarchy.json` (3,329 lines)
-
-### 🔍 UPC Lookup Configuration
-- **📊 BarcodeLookup.com**: Primary UPC lookup service with fuzzy matching
-- **💾 Caching**: Intelligent caching of both positive and negative results
-- **🔄 Fallback**: Automatic fallback to additional services when available
-
-## 🎮 CLI Reference
-
-### 🔧 Main Arguments
-- `--retailer, -r`: Choose retailer (amazon, target, walmart)
-- `--mode, -m`: Crawling mode (full, urls-only)
-- `--hierarchical`: Build/output hierarchical structure
-- `--from-hierarchy-file [FILE]`: Use pre-built hierarchy (much faster)
-
-### 🎯 Filtering Options
-- `--department, -d`: Target specific department
-- `--category, -c`: Target specific category  
-- `--max-pages, -p`: Limit pages per category (default: 5)
-
-### ⚡ Performance Options
-- `--concurrency`: Concurrent workers (default: 5, recommended: 10-20 for hierarchy mode)
-- `--output, -o`: Custom output file prefix
-- `--log-level, -l`: Logging verbosity (DEBUG, INFO, WARNING, ERROR)
-
-### 🔧 Utility Commands
-- `--list-retailers`: Show available retailers and their configurations
-- `--test-redis`: Test Redis connectivity
-
-## 📦 Dependencies
-
-Key Python packages required:
-- `redis` - ⚡ Redis queue backend
-- `pydantic` - ✅ Data validation and serialization
-- `requests` - 🌐 HTTP client for web requests
-- `beautifulsoup4` - 🍜 HTML parsing
-- `selenium` - 🤖 Browser automation
-- `playwright` - 🎭 Modern browser automation
-- `undetected-chromedriver` - 🕵️ Anti-detection browser driver
-- `easyocr` - 👁️ OCR for image-based UPC extraction
-- `torch`, `opencv-python` - 🤖 Computer vision dependencies
+The application uses Supabase with the following core tables:
+- **users**: User profiles and preferences
+- **products**: Core product information with UPC codes
+- **listings**: Retailer-specific product listings and prices
+- **categories**: Hierarchical category structure
+- **price_histories**: Historical price tracking
+- **user_baskets**: User shopping basket collections
 
 ## 🛠️ Development
 
-### 🏗️ Project Structure Benefits
-- **🎯 Clear separation of concerns**: Crawlers, scrapers, and utilities are organized separately
-- **🧩 Modular design**: Easy to add new retailers or UPC lookup services
-- **📈 Scalable architecture**: Supports multiple output backends and processing modes
-- **🔄 No circular dependencies**: Clean import structure
-
-### 🆕 Adding New Retailers
-1. Create retailer directory in `src/crawlers/`
-2. Implement crawler class inheriting from `BaseCrawler`
-3. Add configuration to `scripts/crawl.py` `RETAILER_CONFIG`
-4. Create category hierarchy file in `data/processed/`
-
-### 🔍 Adding UPC Lookup Services
-1. Implement service class inheriting from `BaseUPCLookup`
-2. Add to `UPCManager._initialize_default_services()`
-3. Configure fallback priority and caching behavior
-
-### 🧪 Testing
+### 🧪 Running Tests
 ```bash
-python test.py
+# Frontend tests
+cd apps/web
+npm test
+
+# Backend tests
+python -m pytest
 ```
 
-## ⚡ Performance Tips
+### 🔧 Adding New Retailers
+1. Create crawler in `src/crawlers/{retailer}/`
+2. Implement retailer-specific parsing logic
+3. Add retailer configuration to scripts
+4. Update database with retailer information
 
-### 🚀 Fastest Crawling
-- Use `--from-hierarchy-file` mode (10x faster than discovery crawling)
-- Set `--concurrency 15-20` for hierarchy mode
-- Use `--mode urls-only` for maximum memory efficiency
+### 📱 Frontend Development
+The web app uses modern React patterns:
+- **App Router**: Next.js 13+ app directory structure
+- **Server Components**: Efficient server-side rendering
+- **TypeScript**: Full type safety across the stack
+- **Tailwind CSS**: Utility-first styling
+- **Radix UI**: Accessible component primitives
 
-### 🏭 Production Deployment
-- Enable Redis for URL queue management
-- Configure Supabase for structured data storage
-- Monitor UPC lookup cache hit rates for cost optimization
+## 🚀 Deployment
 
-### 💾 Memory Optimization
-- Use URLs-only mode for large crawls
-- Process data in batches via Redis queues
-- Clear UPC lookup cache periodically in long-running processes
+### 🌐 Web Application
+Deploy the Next.js app to Vercel, Netlify, or your preferred platform:
 
-## 🔧 Troubleshooting
+```bash
+cd apps/web
+npm run build
+```
 
-### ❗ Common Issues
-1. **📥 Import errors**: Ensure you're running scripts from the project root
-2. **📦 Missing dependencies**: Install all requirements, especially computer vision packages
-3. **🔍 UPC lookup failures**: Check internet connectivity and service rate limits
-4. **💾 High memory usage**: Use urls-only mode or reduce concurrency
+### 🤖 Backend Crawlers
+Set up automated crawling with cron jobs or cloud functions:
 
-### ⚡ Performance Issues
-- Monitor UPC lookup service response times
-- Adjust concurrency based on system resources and target site limits  
-- Use hierarchy files instead of discovery crawling when possible
+```bash
+# Example cron job for daily crawling
+0 2 * * * cd /path/to/trackbasket && python scripts/crawl.py --retailer amazon --from-hierarchy-file
+```
 
-## 📄 License
+### 🗄️ Database
+- Use Supabase hosted database for production
+- Set up proper RLS (Row Level Security) policies
+- Configure backups and monitoring
 
-[Add your license information here]
+## 📈 Performance & Scaling
+
+### ⚡ Frontend Optimization
+- **Static Generation**: Pre-render category and product pages
+- **Image Optimization**: Next.js automatic image optimization
+- **Code Splitting**: Automatic route-based code splitting
+- **Caching**: Intelligent caching with ISR (Incremental Static Regeneration)
+
+### 🔧 Backend Optimization
+- **Concurrent Crawling**: Configurable worker pools
+- **Rate Limiting**: Respectful crawling with intelligent delays
+- **Caching**: Redis for UPC lookups and temporary data
+- **Database Indexing**: Optimized queries for fast searches
+
+## 🔐 Security
+
+- **Authentication**: Supabase Auth with RLS policies
+- **API Security**: Protected API routes with middleware
+- **Data Validation**: Input validation on both client and server
+- **CAPTCHA Handling**: Automated CAPTCHA solving for crawlers
 
 ## 🤝 Contributing
 
-[Add contribution guidelines here] 
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
