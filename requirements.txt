@@ -15,3 +15,6 @@ torch
 easyocr
 matplotlib
 numpy
+pyautogui
+pytesseract
+pillow

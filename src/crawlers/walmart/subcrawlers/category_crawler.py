@@ -14,6 +14,9 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from selenium.webdriver.safari.service import Service as SafariService
 from selenium.webdriver.safari.options import Options as SafariOptions
 
+# import Walmart CAPTCHA solver
+from .walmart_captcha_solver import WalmartCAPTCHASolver
+
 MAX_DEPTH = 10
 CONCURRENCY = 1
 HOVER_DELAY_RANGE = (700, 1000)
@@ -92,12 +95,13 @@ def _safe_close_driver(driver, logger):
     except Exception as e:
         logger.debug(f"Error closing driver: {e}")
 
-def _safe_navigate_with_relaunch(driver, url, logger, use_safari=True, proxy_manager=None, max_retries=3) -> Tuple[bool, webdriver.Remote]:
+def _safe_navigate_with_captcha_solving(driver, url, logger, use_safari=True, proxy_manager=None, max_retries=3) -> Tuple[bool, webdriver.Remote]:
     """
-    Navigate to URL with automatic browser relaunching when blocked.
+    Navigate to URL with CAPTCHA solving and automatic browser relaunching when blocked.
     Returns: (success, driver) where driver might be a new instance if relaunched.
     """
     current_driver = driver
+    captcha_solver = None
     
     for attempt in range(max_retries):
         try:
@@ -112,10 +116,35 @@ def _safe_navigate_with_relaunch(driver, url, logger, use_safari=True, proxy_man
             # check if we're blocked
             if _is_blocked_page(current_driver):
                 logger.warning(f"Detected blocked page: {current_driver.current_url}")
+                
+                # try to solve CAPTCHA before relaunching
+                logger.info("Attempting to solve CAPTCHA...")
+                try:
+                    if captcha_solver is None:
+                        captcha_solver = WalmartCAPTCHASolver(driver=current_driver)
+                    
+                    # attempt to solve the CAPTCHA
+                    captcha_solved = captcha_solver.solve_captcha(max_attempts=2)
+                    
+                    if captcha_solved:
+                        logger.info("CAPTCHA solved successfully!")
+                        # wait for page to load after CAPTCHA solve
+                        WebDriverWait(current_driver, 10).until(
+                            lambda d: d.execute_script("return document.readyState") == "complete"
+                        )
+                        return True, current_driver
+                    else:
+                        logger.warning("CAPTCHA solving failed, trying browser relaunch...")
+                
+                except Exception as captcha_error:
+                    logger.warning(f"CAPTCHA solving error: {captcha_error}, trying browser relaunch...")
+                
+                # if CAPTCHA solving failed, fall back to browser relaunch
                 logger.info(f"Relaunching browser (attempt {attempt + 1}/{max_retries})")
                 
                 # close current driver
                 _safe_close_driver(current_driver, logger)
+                captcha_solver = None 
                 
                 # wait a bit before relaunching
                 relaunch_delay = random.uniform(3, 8)
@@ -127,17 +156,7 @@ def _safe_navigate_with_relaunch(driver, url, logger, use_safari=True, proxy_man
                 
                 # try navigation again with new driver
                 logger.info("Retrying navigation with fresh browser...")
-                current_driver.get(url)
-                
-                # wait for page to load
-                WebDriverWait(current_driver, 15).until(
-                    EC.presence_of_element_located((By.TAG_NAME, "body"))
-                )
-                
-                # check again if still blocked
-                if _is_blocked_page(current_driver):
-                    logger.warning("Still blocked after relaunch, will retry...")
-                    continue
+                continue
             
             # wait for final page state
             WebDriverWait(current_driver, 10).until(
@@ -154,6 +173,7 @@ def _safe_navigate_with_relaunch(driver, url, logger, use_safari=True, proxy_man
                 # close and relaunch for any error
                 logger.info("Relaunching browser due to error...")
                 _safe_close_driver(current_driver, logger)
+                captcha_solver = None  # reset solver for new driver
                 
                 relaunch_delay = random.uniform(2, 5)
                 time.sleep(relaunch_delay)
@@ -413,8 +433,8 @@ def _crawl_category_recursive(driver, node_json, depth, visited, logger, max_dep
                 try:
                     logger.info(f"Navigating to subcategory: {name} ({url})")
                     
-                    # use safe navigation with automatic browser relaunching
-                    success, driver = _safe_navigate_with_relaunch(
+                    # use safe navigation with CAPTCHA solving and automatic browser relaunching
+                    success, driver = _safe_navigate_with_captcha_solving(
                         driver, url, logger, use_safari, proxy_manager
                     )
                     
@@ -463,8 +483,8 @@ def crawl_category(start_url: str = START_URL, max_depth: int = MAX_DEPTH,
         # navigate to starting URL
         logger.info(f"Starting Walmart category crawl from: {start_url}")
         
-        # use safe navigation with automatic browser relaunching
-        success, driver = _safe_navigate_with_relaunch(
+        # use safe navigation with CAPTCHA solving and automatic browser relaunching
+        success, driver = _safe_navigate_with_captcha_solving(
             driver, start_url, logger, use_safari, proxy_manager
         )
         
