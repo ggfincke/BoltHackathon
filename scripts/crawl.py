@@ -16,8 +16,10 @@ Usage:
     python crawl.py --retailer amazon --backend supabase --mode full --hierarchical
 
 
-Main usage:
-    python crawl.py --retailer amazon --from-hierarchy-file --mode full --backend supabase  --category "Marshmallows"
+Main usage (supabase):
+    python crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 4 --upc-concurrency 6
+    python crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
+    python crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
 
 """
 
