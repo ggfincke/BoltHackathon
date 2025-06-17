@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
+import ProductCard from '~/components/ProductCard';
 
 type Product = {
   id: string;
@@ -124,35 +125,6 @@ export default function Search() {
     }
   });
   
-  // Get best listing for a product (lowest price in stock)
-  const getBestListing = (product: Product) => {
-    if (!product.listings?.length) return null;
-
-    // Filter out listings that don't have a valid numeric price
-    const validListings = product.listings.filter(
-      (l) => typeof l.price === 'number' && !Number.isNaN(l.price)
-    );
-
-    if (validListings.length === 0) return null;
-
-    // First try to find in-stock listings among the valid ones
-    const inStockListings = validListings.filter((l) => l.in_stock);
-
-    // If there are in-stock listings, return the lowest-priced one
-    if (inStockListings.length > 0) {
-      return inStockListings.reduce(
-        (best, current) => (current.price < best.price ? current : best),
-        inStockListings[0]
-      );
-    }
-
-    // Otherwise return the overall lowest-priced listing
-    return validListings.reduce(
-      (best, current) => (current.price < best.price ? current : best),
-      validListings[0]
-    );
-  };
-  
   // Handle page change
   const handlePageChange = (newPage: number) => {
     // Create new URL with updated page parameter
@@ -225,61 +197,9 @@ export default function Search() {
       ) : sortedProducts.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {sortedProducts.map((product) => {
-              const bestListing = getBestListing(product);
-              const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
-              
-              return (
-                <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-                  <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img 
-                      src={imageUrl} 
-                      alt={product.name}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
-                    
-                    {product.brand && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                        {product.brand.name}
-                      </p>
-                    )}
-                    
-                    {bestListing ? (
-                      <div className="mt-1">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-base">
-                            {bestListing.price != null
-                              ? `$${bestListing.price.toFixed(2)}`
-                              : 'N/A'}
-                          </span>
-                          <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
-                            {bestListing.retailer.name}
-                          </span>
-                        </div>
-                        
-                        <div className="mt-2">
-                          <a 
-                            href={bestListing.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block w-full bg-primary text-buttonText text-center py-1.5 rounded-md hover:bg-opacity-90 transition-colors text-sm"
-                          >
-                            View Deal
-                          </a>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 dark:text-gray-400 italic mt-1 text-xs">
-                        No listings available
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {sortedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} compact={true} />
+            ))}
           </div>
           
           {/* Pagination */}

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
 import Breadcrumbs from '~/components/Breadcrumbs';
-import ProductGrid from '~/components/ProductGrid';
+import ProductCard from '~/components/ProductCard';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type Product = {
@@ -127,6 +127,7 @@ export default function CategoryPage() {
                         currency, 
                         in_stock, 
                         url,
+                        image_url,
                         retailer:retailers(name)
                       )
                     `)
@@ -329,67 +330,9 @@ export default function CategoryPage() {
               
               {/* Products grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {products.map((product) => {
-                  const bestListing = product.listings?.reduce((best, current) => {
-                    if (!best) return current;
-                    if (!current.price) return best;
-                    if (!best.price) return current;
-                    return current.price < best.price ? current : best;
-                  }, null as any);
-                  
-                  const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
-                  
-                  return (
-                    <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-                      <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                        <img 
-                          src={imageUrl} 
-                          alt={product.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
-                        
-                        {product.brand && (
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                            {product.brand.name}
-                          </p>
-                        )}
-                        
-                        {bestListing ? (
-                          <div className="mt-1">
-                            <div className="flex justify-between items-center">
-                              <span className="font-bold text-base">
-                                {bestListing.price != null
-                                  ? `$${bestListing.price.toFixed(2)}`
-                                  : 'N/A'}
-                              </span>
-                              <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
-                                {bestListing.retailer.name}
-                              </span>
-                            </div>
-                            
-                            <div className="mt-2">
-                              <a 
-                                href={bestListing.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="block w-full bg-primary text-buttonText text-center py-1.5 rounded-md hover:bg-opacity-90 transition-colors text-sm"
-                              >
-                                View Deal
-                              </a>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-gray-500 dark:text-gray-400 italic mt-1 text-xs">
-                            No listings available
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} compact={true} />
+                ))}
               </div>
               
               {/* Pagination */}

@@ -13,6 +13,7 @@ export interface Database {
         Row: {
           added_at: string | null
           basket_id: string
+          created_at: string | null
           id: string
           notes: string | null
           price_at_add: number | null
@@ -23,6 +24,7 @@ export interface Database {
         Insert: {
           added_at?: string | null
           basket_id: string
+          created_at?: string | null
           id?: string
           notes?: string | null
           price_at_add?: number | null
@@ -33,6 +35,7 @@ export interface Database {
         Update: {
           added_at?: string | null
           basket_id?: string
+          created_at?: string | null
           id?: string
           notes?: string | null
           price_at_add?: number | null
@@ -208,6 +211,7 @@ export interface Database {
           id: string
           image_url: string | null
           is_active: boolean | null
+          level: number | null
           name: string
           parent_id: string | null
           path: string | null
@@ -220,6 +224,7 @@ export interface Database {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          level?: number | null
           name: string
           parent_id?: string | null
           path?: string | null
@@ -232,6 +237,7 @@ export interface Database {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          level?: number | null
           name?: string
           parent_id?: string | null
           path?: string | null
@@ -261,8 +267,8 @@ export interface Database {
           original_url: string | null
           product_name: string
           resolved_at: string | null
-          retailer_source: string | null
           retry_count: number | null
+          retailer_source: string | null
           services_tried: Json | null
           status: string | null
           updated_at: string | null
@@ -280,8 +286,8 @@ export interface Database {
           original_url?: string | null
           product_name: string
           resolved_at?: string | null
-          retailer_source?: string | null
           retry_count?: number | null
+          retailer_source?: string | null
           services_tried?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -299,8 +305,8 @@ export interface Database {
           original_url?: string | null
           product_name?: string
           resolved_at?: string | null
-          retailer_source?: string | null
           retry_count?: number | null
+          retailer_source?: string | null
           services_tried?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -468,29 +474,29 @@ export interface Database {
       }
       notification_preferences: {
         Row: {
-          channel: Database["public"]["Enums"]["notification_channel"]
+          channel: string
           created_at: string | null
           id: string
           is_enabled: boolean | null
-          notification_type: Database["public"]["Enums"]["notification_type"]
+          notification_type: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          channel: Database["public"]["Enums"]["notification_channel"]
+          channel: string
           created_at?: string | null
           id?: string
           is_enabled?: boolean | null
-          notification_type: Database["public"]["Enums"]["notification_type"]
+          notification_type: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          channel?: Database["public"]["Enums"]["notification_channel"]
+          channel?: string
           created_at?: string | null
           id?: string
           is_enabled?: boolean | null
-          notification_type?: Database["public"]["Enums"]["notification_type"]
+          notification_type?: string
           updated_at?: string | null
           user_id?: string
         }
@@ -509,7 +515,7 @@ export interface Database {
           id: string
           listing_id: string | null
           message: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
+          notification_type: string
           status: string | null
           title: string
           updated_at: string | null
@@ -520,7 +526,7 @@ export interface Database {
           id?: string
           listing_id?: string | null
           message: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
+          notification_type: string
           status?: string | null
           title: string
           updated_at?: string | null
@@ -531,7 +537,7 @@ export interface Database {
           id?: string
           listing_id?: string | null
           message?: string
-          notification_type?: Database["public"]["Enums"]["notification_type"]
+          notification_type?: string
           status?: string | null
           title?: string
           updated_at?: string | null
@@ -558,21 +564,24 @@ export interface Database {
           id: string
           listing_id: string
           price: number
-          timestamp: string | null
+          recorded_at: string | null
+          sale_price: number | null
         }
         Insert: {
           currency?: string | null
           id?: string
           listing_id: string
           price: number
-          timestamp?: string | null
+          recorded_at?: string | null
+          sale_price?: number | null
         }
         Update: {
           currency?: string | null
           id?: string
           listing_id?: string
           price?: number
-          timestamp?: string | null
+          recorded_at?: string | null
+          sale_price?: number | null
         }
         Relationships: [
           {
@@ -778,61 +787,6 @@ export interface Database {
         }
         Relationships: []
       }
-      subscriptions: {
-        Row: {
-          auto_renew: boolean | null
-          created_at: string | null
-          end_date: string | null
-          id: string
-          is_active: boolean | null
-          payment_id: string | null
-          plan_id: string
-          start_date: string
-          status: Database["public"]["Enums"]["subscription_status"] | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          auto_renew?: boolean | null
-          created_at?: string | null
-          end_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          payment_id?: string | null
-          plan_id: string
-          start_date: string
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          auto_renew?: boolean | null
-          created_at?: string | null
-          end_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          payment_id?: string | null
-          plan_id?: string
-          start_date?: string
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       subscription_plans: {
         Row: {
           created_at: string | null
@@ -868,6 +822,61 @@ export interface Database {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          payment_id: string | null
+          plan_id: string
+          start_date: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          payment_id?: string | null
+          plan_id: string
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          payment_id?: string | null
+          plan_id?: string
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       users: {
         Row: {
@@ -929,9 +938,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      notification_channel: "email" | "push" | "sms"
-      notification_type: "price_drop" | "availability" | "changes" | "general"
-      subscription_status: "active" | "inactive" | "cancelled" | "expired"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
