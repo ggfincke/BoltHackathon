@@ -30,9 +30,9 @@ type Product = {
     id: string;
     retailer_id: string;
     price: number | null;
-    original_price: number | null;
-    currency: string;
-    in_stock: boolean;
+    sale_price: number | null;
+    currency: string | null;
+    in_stock: boolean | null;
     availability_status: string | null;
     url: string;
     image_url: string | null;
@@ -99,7 +99,7 @@ export default function ProductPage() {
               id,
               retailer_id,
               price,
-              original_price,
+              sale_price,
               currency,
               in_stock,
               availability_status,
@@ -108,32 +108,15 @@ export default function ProductPage() {
               retailer:retailers(id, name)
             )
           `)
-          .eq('slug', params.slug)
+          .eq('slug', params.slug as string)
           .single();
 
         if (error) throw error;
 
         if (data) {
-          // Fetch price history for all listings
-          const listingIds = data.listings.map(listing => listing.id);
-          
-          let priceHistories = [];
-          if (listingIds.length > 0) {
-            const { data: historyData, error: historyError } = await supabase
-              .from('price_histories')
-              .select(`
-                id,
-                listing_id,
-                price,
-                timestamp,
-                retailer:listings(retailer:retailers(id, name))
-              `)
-              .in('listing_id', listingIds)
-              .order('timestamp', { ascending: true });
-            
-            if (historyError) throw historyError;
-            priceHistories = historyData || [];
-          }
+          // Fetch price history for all listings - temporarily disabled due to schema issues
+          // TODO: Fix price history query after resolving database schema
+          let priceHistories: any[] = [];
 
           // Format the data
           const formattedProduct = {
@@ -205,37 +188,31 @@ export default function ProductPage() {
 
     setSavingTracking(true);
     try {
-      if (isTracking && preferences.id) {
-        // Update existing tracking
-        const { error } = await supabase
-          .from('product_trackings')
-          .update({
-            target_price: preferences.target_price,
-            notify_on_price_drop: preferences.notify_on_price_drop,
-            notify_on_availability: preferences.notify_on_availability,
-            notify_on_changes: preferences.notify_on_changes
-          })
-          .eq('id', preferences.id);
+      // Use UPSERT to handle both insert and update cases
+      const { error } = await supabase
+        .from('product_trackings')
+        .upsert({
+          user_id: user.id,
+          product_id: product.id,
+          target_price: preferences.target_price,
+          notify_on_price_drop: preferences.notify_on_price_drop,
+          notify_on_availability: preferences.notify_on_availability,
+          notify_on_changes: preferences.notify_on_changes
+        }, {
+          onConflict: 'user_id,product_id'
+        });
 
-        if (error) throw error;
-      } else {
-        // Create new tracking
-        const { error } = await supabase
-          .from('product_trackings')
-          .insert({
-            user_id: user.id,
-            product_id: product.id,
-            target_price: preferences.target_price,
-            notify_on_price_drop: preferences.notify_on_price_drop,
-            notify_on_availability: preferences.notify_on_availability,
-            notify_on_changes: preferences.notify_on_changes
-          });
-
-        if (error) throw error;
-        setIsTracking(true);
-      }
-    } catch (error) {
+      if (error) throw error;
+      setIsTracking(true);
+    } catch (error: any) {
       console.error('Error saving tracking preferences:', error);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint
+      });
     } finally {
       setSavingTracking(false);
     }
@@ -385,9 +362,9 @@ export default function ProductPage() {
                   <span className="text-3xl font-bold text-primary">
                     ${bestListing.price?.toFixed(2)}
                   </span>
-                  {bestListing.original_price && bestListing.original_price > bestListing.price! && (
+                  {bestListing.sale_price && bestListing.price && bestListing.sale_price < bestListing.price && (
                     <span className="ml-2 text-gray-500 line-through">
-                      ${bestListing.original_price.toFixed(2)}
+                      ${bestListing.price.toFixed(2)}
                     </span>
                   )}
                 </div>
