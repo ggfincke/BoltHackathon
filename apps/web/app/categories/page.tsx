@@ -15,18 +15,42 @@ export default function CategoriesPage() {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        // Fetch top-level categories (parent_id is null)
-        const { data, error } = await supabase
+        // Fetch grocery categories directly (skipping the home -> grocery store -> groceries path)
+        // Look for "Groceries" category first
+        const { data: groceriesCategory } = await supabase
           .from('categories')
-          .select('*')
-          .is('parent_id', null)
+          .select('id, name, slug')
+          .eq('name', 'Groceries')
           .eq('is_active', true)
-          .order('name');
+          .single();
         
-        if (error) throw error;
-        setCategories(data || []);
+        if (groceriesCategory) {
+          // If we found Groceries, get its subcategories
+          const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('parent_id', groceriesCategory.id)
+            .eq('is_active', true)
+            .order('name');
+          
+          if (error) throw error;
+          setCategories(data || []);
+        } else {
+          // Fallback: just get top-level categories
+          const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .is('parent_id', null)
+            .eq('is_active', true)
+            .order('name');
+          
+          if (error) throw error;
+          setCategories(data || []);
+        }
       } catch (error) {
         console.error('Error fetching categories:', error);
+        // Fallback to empty categories
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -47,7 +71,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Categories</h1>
+      <h1 className="text-3xl font-bold mb-6">Grocery Categories</h1>
       
       {categories.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

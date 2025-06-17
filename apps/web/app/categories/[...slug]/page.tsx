@@ -64,34 +64,46 @@ export default function CategoryPage() {
 
         // If no subcategories, fetch products
         if (!subcategoriesData?.length) {
-          const { data: productsData, error: productsError } = await supabase
-            .from('products')
-            .select(`
-              id, 
-              name, 
-              slug, 
-              brand:brands(name),
-              listings(
+          // First get product IDs from the junction table
+          const { data: productCategoryData, error: productCategoryError } = await supabase
+            .from('product_categories')
+            .select('product_id')
+            .eq('category_id', categoryData.id);
+            
+          if (productCategoryError) throw productCategoryError;
+          
+          // Extract product IDs from the junction table results
+          const productIds = productCategoryData.map(item => item.product_id);
+          
+          // Only proceed if we have product IDs
+          if (productIds.length > 0) {
+            // Now fetch the actual products using those IDs
+            const { data: productsData, error: productsError } = await supabase
+              .from('products')
+              .select(`
                 id, 
-                price, 
-                currency, 
-                in_stock, 
-                url, 
-                image_url,
-                retailer:retailers(name)
-              )
-            `)
-            .in('id', (
-              supabase
-                .from('product_categories')
-                .select('product_id')
-                .eq('category_id', categoryData.id)
-            ))
-            .eq('is_active', true)
-            .limit(50);
+                name, 
+                slug, 
+                brand:brands(name),
+                listings(
+                  id, 
+                  price, 
+                  currency, 
+                  in_stock, 
+                  url, 
+                  image_url,
+                  retailer:retailers(name)
+                )
+              `)
+              .in('id', productIds)
+              .eq('is_active', true)
+              .limit(50);
 
-          if (productsError) throw productsError;
-          setProducts(productsData || []);
+            if (productsError) throw productsError;
+            setProducts(productsData || []);
+          } else {
+            setProducts([]);
+          }
         }
 
         // Build breadcrumbs
@@ -197,7 +209,7 @@ export default function CategoryPage() {
       <nav className="mb-6">
         <ol className="flex flex-wrap items-center text-sm">
           {breadcrumbs.map((crumb, index) => (
-            <li key={crumb.slug} className="flex items-center">
+            <li key={crumb.slug || index} className="flex items-center">
               {index > 0 && <span className="mx-2 text-gray-500">/</span>}
               {index === breadcrumbs.length - 1 ? (
                 <span className="font-medium">{crumb.name}</span>
