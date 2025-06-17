@@ -341,6 +341,25 @@ export default function BasketDetail() {
     );
   }
   
+  if (!user) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
+          <h2 className="text-xl font-semibold mb-2">Sign in to view baskets</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            You need to be signed in to view and manage shopping baskets.
+          </p>
+          <a
+            href={`/auth/login?redirectedFrom=/basket/${id}`}
+            className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+          >
+            Sign In or Create Account
+          </a>
+        </div>
+      </div>
+    );
+  }
+  
   if (!basket) {
     return (
       <div className="container mx-auto py-8">

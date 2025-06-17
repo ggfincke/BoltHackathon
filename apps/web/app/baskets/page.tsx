@@ -27,12 +27,11 @@ export default function Baskets() {
 
   useEffect(() => {
     if (!authLoading) {
-      if (!user) {
-        router.push('/auth/login?redirectedFrom=/baskets');
-        return;
+      if (user) {
+        fetchBaskets();
+      } else {
+        setIsLoading(false);
       }
-      
-      fetchBaskets();
     }
   }, [user, authLoading, router]);
 
@@ -163,6 +162,25 @@ export default function Baskets() {
       <div className="container mx-auto py-8">
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
+          <h2 className="text-xl font-semibold mb-2">Sign in to view your baskets</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            You need to be signed in to create and manage your shopping baskets.
+          </p>
+          <Link 
+            href="/auth/login?redirectedFrom=/baskets"
+            className="inline-block bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+          >
+            Sign In or Create Account
+          </Link>
         </div>
       </div>
     );
