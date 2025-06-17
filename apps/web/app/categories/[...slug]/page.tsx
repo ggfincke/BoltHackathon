@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
+import Breadcrumbs from '~/components/Breadcrumbs';
+import ProductGrid from '~/components/ProductGrid';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type Product = {
@@ -23,15 +25,25 @@ type Product = {
   }[];
 };
 
+type SortOption = 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
+
 export default function CategoryPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category | null>(null);
   const [subcategories, setSubcategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<{name: string, slug: string}[]>([]);
-
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [sortOption, setSortOption] = useState<SortOption>('price_asc');
+  
+  // Pagination
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = 20; // 20 products per page (4 rows of 5)
+  
   // Get slug from params
   const slugArray = Array.isArray(params.slug) ? params.slug : [params.slug];
   const currentSlug = slugArray[slugArray.length - 1];
@@ -75,9 +87,16 @@ export default function CategoryPage() {
           // Extract product IDs from the junction table results
           const productIds = productCategoryData.map(item => item.product_id);
           
+          // Get total count for pagination
+          setTotalProducts(productIds.length);
+          
           // Only proceed if we have product IDs
           if (productIds.length > 0) {
-            // Now fetch the actual products using those IDs
+            // Calculate pagination offsets
+            const from = (page - 1) * pageSize;
+            const to = from + pageSize - 1;
+            
+            // Now fetch the actual products using those IDs with pagination
             const { data: productsData, error: productsError } = await supabase
               .from('products')
               .select(`
@@ -97,7 +116,7 @@ export default function CategoryPage() {
               `)
               .in('id', productIds)
               .eq('is_active', true)
-              .limit(50);
+              .range(from, to);
 
             if (productsError) throw productsError;
             setProducts(productsData || []);
@@ -118,7 +137,7 @@ export default function CategoryPage() {
     if (currentSlug) {
       fetchCategoryData();
     }
-  }, [currentSlug]);
+  }, [currentSlug, page]);
 
   // Build breadcrumb trail by traversing parent categories
   const buildBreadcrumbs = async (currentCategory: Category) => {
@@ -145,33 +164,47 @@ export default function CategoryPage() {
     setBreadcrumbs(breadcrumbsArray);
   };
 
-  // Get best listing for a product (lowest price in stock)
-  const getBestListing = (product: Product) => {
-    if (!product.listings?.length) return null;
-
-    // Filter out listings that don't have a valid numeric price
-    const validListings = product.listings.filter(
-      (l) => typeof l.price === 'number' && !Number.isNaN(l.price)
-    );
-
-    if (validListings.length === 0) return null;
-
-    // First try to find in-stock listings among the valid ones
-    const inStockListings = validListings.filter((l) => l.in_stock);
-
-    // If there are in-stock listings, return the lowest-priced one
-    if (inStockListings.length > 0) {
-      return inStockListings.reduce(
-        (best, current) => (current.price! < best.price! ? current : best),
-        inStockListings[0]
+  // Handle sort change
+  const handleSortChange = (option: SortOption) => {
+    setSortOption(option);
+    
+    // Sort products based on selected option
+    const sortedProducts = [...products].sort((a, b) => {
+      // Get the lowest price listing for each product
+      const aPrice = a.listings?.reduce((min, listing) => 
+        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
+        null as number | null
       );
-    }
+      
+      const bPrice = b.listings?.reduce((min, listing) => 
+        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
+        null as number | null
+      );
+      
+      switch (option) {
+        case 'price_asc':
+          return (aPrice || Infinity) - (bPrice || Infinity);
+        case 'price_desc':
+          return (bPrice || 0) - (aPrice || 0);
+        case 'name_asc':
+          return a.name.localeCompare(b.name);
+        case 'name_desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+    
+    setProducts(sortedProducts);
+  };
 
-    // Otherwise return the overall lowest-priced listing
-    return validListings.reduce(
-      (best, current) => (current.price! < best.price! ? current : best),
-      validListings[0]
-    );
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    // Create new URL with updated page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    
+    router.push(`/categories/${slugArray.join('/')}?${params.toString()}`);
   };
 
   if (loading) {
@@ -203,28 +236,13 @@ export default function CategoryPage() {
     );
   }
 
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(totalProducts / pageSize);
+
   return (
     <div className="container mx-auto py-8">
       {/* Breadcrumbs */}
-      <nav className="mb-6">
-        <ol className="flex flex-wrap items-center text-sm">
-          {breadcrumbs.map((crumb, index) => (
-            <li key={crumb.slug || index} className="flex items-center">
-              {index > 0 && <span className="mx-2 text-gray-500">/</span>}
-              {index === breadcrumbs.length - 1 ? (
-                <span className="font-medium">{crumb.name}</span>
-              ) : (
-                <Link 
-                  href={crumb.slug ? `/categories/${crumb.slug}` : '/'}
-                  className="text-primary hover:underline"
-                >
-                  {crumb.name}
-                </Link>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <Breadcrumbs items={breadcrumbs} />
 
       <h1 className="text-3xl font-bold mb-6">{category.name}</h1>
       
@@ -238,19 +256,19 @@ export default function CategoryPage() {
       {subcategories.length > 0 ? (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Browse Categories</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {subcategories.map((subcat) => (
               <Link 
                 key={subcat.id} 
                 href={`/categories/${subcat.slug}`}
-                className="bg-surface p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
+                className="bg-surface p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
               >
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-primary">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-primary">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                   </svg>
                 </div>
-                <h3 className="font-medium text-lg">{subcat.name}</h3>
+                <h3 className="font-medium text-sm">{subcat.name}</h3>
               </Link>
             ))}
           </div>
@@ -259,63 +277,143 @@ export default function CategoryPage() {
         // Products grid (leaf category)
         <div>
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.map((product) => {
-                const bestListing = getBestListing(product);
-                const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
-                
-                return (
-                  <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-                    <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                      <img 
-                        src={imageUrl} 
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-medium text-lg mb-1 line-clamp-2">{product.name}</h3>
-                      
-                      {product.brand && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                          {product.brand.name}
-                        </p>
-                      )}
-                      
-                      {bestListing ? (
-                        <div className="mt-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-bold text-lg">
-                              {bestListing.price != null
-                                ? `$${bestListing.price.toFixed(2)}`
-                                : 'N/A'}
-                            </span>
-                            <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                              {bestListing.retailer.name}
-                            </span>
+            <>
+              {/* Sort controls */}
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalProducts)} of {totalProducts} products
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">Sort by:</span>
+                  <select
+                    value={sortOption}
+                    onChange={(e) => handleSortChange(e.target.value as SortOption)}
+                    className="p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background text-sm"
+                  >
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                    <option value="name_asc">Name: A to Z</option>
+                    <option value="name_desc">Name: Z to A</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Products grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {products.map((product) => {
+                  const bestListing = product.listings?.reduce((best, current) => {
+                    if (!best) return current;
+                    if (!current.price) return best;
+                    if (!best.price) return current;
+                    return current.price < best.price ? current : best;
+                  }, null as any);
+                  
+                  const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
+                  
+                  return (
+                    <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
+                      <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <img 
+                          src={imageUrl} 
+                          alt={product.name}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
+                        
+                        {product.brand && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                            {product.brand.name}
+                          </p>
+                        )}
+                        
+                        {bestListing ? (
+                          <div className="mt-1">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-base">
+                                {bestListing.price != null
+                                  ? `$${bestListing.price.toFixed(2)}`
+                                  : 'N/A'}
+                              </span>
+                              <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                                {bestListing.retailer.name}
+                              </span>
+                            </div>
+                            
+                            <div className="mt-2">
+                              <a 
+                                href={bestListing.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="block w-full bg-primary text-buttonText text-center py-1.5 rounded-md hover:bg-opacity-90 transition-colors text-sm"
+                              >
+                                View Deal
+                              </a>
+                            </div>
                           </div>
-                          
-                          <div className="mt-3">
-                            <a 
-                              href={bestListing.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="block w-full bg-primary text-buttonText text-center py-2 rounded-md hover:bg-opacity-90 transition-colors"
-                            >
-                              View Deal
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 dark:text-gray-400 italic mt-2">
-                          No listings available
-                        </p>
-                      )}
+                        ) : (
+                          <p className="text-gray-500 dark:text-gray-400 italic mt-1 text-xs">
+                            No listings available
+                          </p>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+              
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      // Show pages around current page
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (page <= 3) {
+                        pageNum = i + 1;
+                      } else if (page >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = page - 2 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                            page === pageNum 
+                              ? 'bg-primary text-buttonText' 
+                              : 'bg-surface border border-gray-300 dark:border-gray-700'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page === totalPages}
+                      className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
               <h2 className="text-xl font-semibold mb-2">No products found</h2>

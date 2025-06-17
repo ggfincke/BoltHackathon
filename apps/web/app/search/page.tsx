@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
 
@@ -31,11 +31,15 @@ type SortOption = 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
 
 export default function Search() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const query = searchParams.get('q') || '';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = 20; // 20 products per page (4 rows of 5)
   
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('price_asc');
+  const [totalCount, setTotalCount] = useState(0);
   
   useEffect(() => {
     if (!query) return;
@@ -43,6 +47,22 @@ export default function Search() {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
+        // Calculate pagination offsets
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+        
+        // Get total count first (for pagination)
+        const countQuery = supabase
+          .from('products')
+          .select('id', { count: 'exact' })
+          .ilike('name', `%${query}%`);
+          
+        const { count, error: countError } = await countQuery;
+        
+        if (countError) throw countError;
+        setTotalCount(count || 0);
+        
+        // Then get paginated data
         const { data, error } = await supabase
           .from('products')
           .select(`
@@ -63,7 +83,7 @@ export default function Search() {
             )
           `)
           .ilike('name', `%${query}%`)
-          .limit(50);
+          .range(from, to);
         
         if (error) throw error;
         setProducts(data || []);
@@ -75,7 +95,7 @@ export default function Search() {
     };
     
     fetchProducts();
-  }, [query]);
+  }, [query, page, pageSize]);
   
   // Sort products based on selected option
   const sortedProducts = [...products].sort((a, b) => {
@@ -133,6 +153,18 @@ export default function Search() {
     );
   };
   
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    // Create new URL with updated page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    
+    router.push(`/search?${params.toString()}`);
+  };
+  
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(totalCount / pageSize);
+  
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
@@ -167,7 +199,7 @@ export default function Search() {
         {products.length > 0 && (
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {products.length} results
+              Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalCount)} of {totalCount} results
             </p>
             <div className="flex items-center gap-2">
               <span className="text-sm">Sort by:</span>
@@ -191,63 +223,116 @@ export default function Search() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       ) : sortedProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => {
-            const bestListing = getBestListing(product);
-            const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
-            
-            return (
-              <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-                <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  <img 
-                    src={imageUrl} 
-                    alt={product.name}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-lg mb-1 line-clamp-2">{product.name}</h3>
-                  
-                  {product.brand && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      {product.brand.name}
-                    </p>
-                  )}
-                  
-                  {bestListing ? (
-                    <div className="mt-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-lg">
-                          {bestListing.price != null
-                            ? `$${bestListing.price.toFixed(2)}`
-                            : 'N/A'}
-                        </span>
-                        <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                          {bestListing.retailer.name}
-                        </span>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {sortedProducts.map((product) => {
+              const bestListing = getBestListing(product);
+              const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
+              
+              return (
+                <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
+                  <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img 
+                      src={imageUrl} 
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
+                    
+                    {product.brand && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                        {product.brand.name}
+                      </p>
+                    )}
+                    
+                    {bestListing ? (
+                      <div className="mt-1">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-base">
+                            {bestListing.price != null
+                              ? `$${bestListing.price.toFixed(2)}`
+                              : 'N/A'}
+                          </span>
+                          <span className="text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                            {bestListing.retailer.name}
+                          </span>
+                        </div>
+                        
+                        <div className="mt-2">
+                          <a 
+                            href={bestListing.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="block w-full bg-primary text-buttonText text-center py-1.5 rounded-md hover:bg-opacity-90 transition-colors text-sm"
+                          >
+                            View Deal
+                          </a>
+                        </div>
                       </div>
-                      
-                      <div className="mt-3">
-                        <a 
-                          href={bestListing.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="block w-full bg-primary text-buttonText text-center py-2 rounded-md hover:bg-opacity-90 transition-colors"
-                        >
-                          View Deal
-                        </a>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 dark:text-gray-400 italic mt-2">
-                      No listings available
-                    </p>
-                  )}
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 italic mt-1 text-xs">
+                        No listings available
+                      </p>
+                    )}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                  className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  // Show pages around current page
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                        page === pageNum 
+                          ? 'bg-primary text-buttonText' 
+                          : 'bg-surface border border-gray-300 dark:border-gray-700'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages}
+                  className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+                >
+                  Next
+                </button>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          )}
+        </>
       ) : query ? (
         <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
           <h2 className="text-xl font-semibold mb-2">No results found</h2>
