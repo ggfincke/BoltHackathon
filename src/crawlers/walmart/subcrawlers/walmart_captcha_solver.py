@@ -14,12 +14,18 @@ import pyautogui
 from PIL import Image, ImageEnhance
 import io
 import pytesseract
+import logging
+
+logger = logging.getLogger(__name__)
 
 class WalmartCAPTCHASolver:
-    def __init__(self, headless=False):
-        self.driver = None
+    def __init__(self, driver=None, headless=False):
+        self.driver = driver
         self.headless = headless
-        self.setup_driver()
+        self.external_driver = driver is not None
+        
+        if not self.external_driver:
+            self.setup_driver()
     
     def setup_driver(self):
         # init Chrome driver w/ stealth settings
@@ -49,21 +55,20 @@ class WalmartCAPTCHASolver:
         # execute script to hide automation indicators
         self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     
-    # take screenshot & return as OpenCV image
+    # take screenshot and return as OpenCV image
     def take_screenshot(self):
         try:
             screenshot = self.driver.get_screenshot_as_png()
             img = Image.open(io.BytesIO(screenshot))
-            # PIL -> OpenCV format
+            # PIL -> OpenCV
             opencv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
             return opencv_img
         except Exception as e:
-            print(f"Error taking screenshot: {e}")
+            logger.error(f"Error taking screenshot: {e}")
             return None
     
-    # find button by text recognition
+    # find button by text recognition using OCR
     def find_button_by_text_recognition(self, img):
-        # use OCR to find 'PRESS & HOLD' text & button area
         try:
             # convert to grayscale for better OCR
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -74,7 +79,7 @@ class WalmartCAPTCHASolver:
             # use pytesseract to find text
             data = pytesseract.image_to_data(enhanced, output_type=pytesseract.Output.DICT)
             
-            # "PRESS" & "HOLD" text
+            # look for "PRESS" & "HOLD" text
             press_boxes = []
             hold_boxes = []
             
@@ -87,13 +92,13 @@ class WalmartCAPTCHASolver:
                     if 'PRESS' in text_upper:
                         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
                         press_boxes.append((x, y, w, h))
-                        print(f"Found 'PRESS' text at: ({x}, {y}, {w}, {h})")
+                        logger.debug(f"Found 'PRESS' text at: ({x}, {y}, {w}, {h})")
                     elif 'HOLD' in text_upper:
                         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
                         hold_boxes.append((x, y, w, h))
-                        print(f"Found 'HOLD' text at: ({x}, {y}, {w}, {h})")
+                        logger.debug(f"Found 'HOLD' text at: ({x}, {y}, {w}, {h})")
             
-            # found both PRESS & HOLD -> estimate button center
+            # if found both PRESS & HOLD -> estimate button center
             if press_boxes and hold_boxes:
                 # find closest PRESS & HOLD texts (should be on the same button)
                 min_distance = float('inf')
@@ -102,7 +107,7 @@ class WalmartCAPTCHASolver:
                 
                 for press_box in press_boxes:
                     for hold_box in hold_boxes:
-                        # calc distance b/w centers
+                        # calc distance between centers
                         press_center = (press_box[0] + press_box[2]//2, press_box[1] + press_box[3]//2)
                         hold_center = (hold_box[0] + hold_box[2]//2, hold_box[1] + hold_box[3]//2)
                         
@@ -114,7 +119,7 @@ class WalmartCAPTCHASolver:
                             best_press = press_box
                             best_hold = hold_box
                 
-                # reasonable distance
+                # check reasonable distance
                 if best_press and best_hold and min_distance < 200:  
                     # calc button center area
                     left = min(best_press[0], best_hold[0])
@@ -123,17 +128,16 @@ class WalmartCAPTCHASolver:
                     bottom = max(best_press[1] + best_press[3], best_hold[1] + best_hold[3])
                     
                     # expand area to cover full button
-                    padding = 20
                     button_center = (
                         (left + right) // 2,
                         (top + bottom) // 2
                     )
                     
-                    print(f"Estimated button center: {button_center}")
+                    logger.debug(f"Estimated button center: {button_center}")
                     return button_center
             
         except Exception as e:
-            print(f"OCR method failed: {e}")
+            logger.error(f"OCR method failed: {e}")
         
         return None
     
@@ -174,63 +178,17 @@ class WalmartCAPTCHASolver:
                             center_x = x + w // 2
                             center_y = y + h // 2
                             
-                            print(f"Found potential button shape at: ({center_x}, {center_y})")
-                            print(f"Button area: {area}, aspect ratio: {aspect_ratio:.2f}")
+                            logger.debug(f"Found potential button shape at: ({center_x}, {center_y})")
+                            logger.debug(f"Button area: {area}, aspect ratio: {aspect_ratio:.2f}")
                             
                             return (center_x, center_y)
             
         except Exception as e:
-            print(f"Shape detection failed: {e}")
+            logger.error(f"Shape detection failed: {e}")
         
         return None
     
-    # find button by looking for common button patterns
-    def find_button_by_template_matching(self, img):
-        try:
-            # convert to grayscale for better template matching
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            
-            # look for dark text on light background (typical button style)
-            # apply different thresholds to catch various button styles
-            thresholds = [127, 100, 150, 80, 180]
-            
-            for threshold_val in thresholds:
-                _, thresh = cv2.threshold(gray, threshold_val, 255, cv2.THRESH_BINARY)
-                
-                # find contours
-                contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                
-                for contour in contours:
-                    area = cv2.contourArea(contour)
-                    
-                    # look for button-sized areas
-                    if 1500 < area < 30000:
-                        x, y, w, h = cv2.boundingRect(contour)
-                        aspect_ratio = w / h
-                        
-                        # button-like dimensions
-                        if 1.8 < aspect_ratio < 5 and h > 30 and w > 100:
-                            center_x = x + w // 2
-                            center_y = y + h // 2
-                            
-                            # check if this area might contain text
-                            roi = gray[y:y+h, x:x+w]
-                            
-                            # simple check for text-like patterns
-                            edges = cv2.Canny(roi, 50, 150)
-                            edge_density = np.sum(edges > 0) / (w * h)
-                            
-                            # reasonable amount of edges for text
-                            if 0.05 < edge_density < 0.4:  
-                                print(f"Found potential button by template matching at: ({center_x}, {center_y})")
-                                return (center_x, center_y)
-            
-        except Exception as e:
-            print(f"Template matching failed: {e}")
-        
-        return None
-    
-    # click and hold at specific screen coordinates (uses mouse)
+    # click and hold at specific screen coordinates using mouse
     def click_and_hold_at_coordinates(self, x, y):
         try:
             # get browser window position and size
@@ -244,7 +202,7 @@ class WalmartCAPTCHASolver:
             actual_x = window_x + x
             actual_y = window_y + y + chrome_height
             
-            print(f"Clicking at screen coordinates: ({actual_x}, {actual_y})")
+            logger.debug(f"Clicking at screen coordinates: ({actual_x}, {actual_y})")
             
             # move mouse to position with some randomness
             offset_x = random.randint(-3, 3)
@@ -264,89 +222,106 @@ class WalmartCAPTCHASolver:
             
             # hold for realistic duration
             hold_duration = random.uniform(3.8, 5.2)
-            print(f"Holding for {hold_duration:.2f} seconds...")
+            logger.info(f"Holding for {hold_duration:.2f} seconds...")
             time.sleep(hold_duration)
             
             # release
             pyautogui.mouseUp(button='left')
             
-            print("Press and hold completed!")
+            logger.info("Press and hold completed!")
             return True
             
         except Exception as e:
-            print(f"Error during click and hold: {e}")
+            logger.error(f"Error during click and hold: {e}")
             return False
     
     # main method to solve the CAPTCHA using image recognition
-    def solve_captcha(self, url="https://www.walmart.com/blocked"):
+    def solve_captcha(self, url=None, max_attempts=3):
         try:
-            print(f"Navigating to {url}...")
-            self.driver.get(url)
-            
-            # wait for page to load
-            time.sleep(random.uniform(3, 5))
-            
-            print("Taking screenshot for analysis...")
-            img = self.take_screenshot()
-            
-            if img is None:
-                print("Failed to take screenshot")
-                return False
-            
-            # save screenshot for debugging
-            cv2.imwrite("captcha_screenshot.png", img)
-            print("Screenshot saved as 'captcha_screenshot.png'")
-            
-            # try multiple methods to find button
-            button_coords = None
-            
-            print("\n--- Method 1: OCR Text Recognition ---")
-            button_coords = self.find_button_by_text_recognition(img)
-            
-            if not button_coords:
-                print("\n--- Method 2: Shape Detection ---")
-                button_coords = self.find_button_by_shape_detection(img)
-            
-            if not button_coords:
-                print("\n--- Method 3: Template Matching ---")
-                button_coords = self.find_button_by_template_matching(img)
-            
-            if button_coords:
-                print(f"\n✅ Button found at coordinates: {button_coords}")
+            # navigate to URL if provided and using internal driver
+            if url and not self.external_driver:
+                logger.info(f"Navigating to {url}...")
+                self.driver.get(url)
                 
-                # perform click & hold
-                success = self.click_and_hold_at_coordinates(button_coords[0], button_coords[1])
+                # wait for page to load
+                time.sleep(random.uniform(3, 5))
+            
+            for attempt in range(max_attempts):
+                logger.info(f"CAPTCHA solve attempt {attempt + 1}/{max_attempts}")
                 
-                if success:
-                    # wait & check if redirected
-                    time.sleep(3)
-                    current_url = self.driver.current_url
+                # check if we're actually on a blocked page
+                current_url = self.driver.current_url.lower()
+                if not any(keyword in current_url for keyword in ['blocked', 'challenge', 'captcha']):
+                    logger.info("Not on a blocked page, CAPTCHA solving not needed")
+                    return True
+                
+                logger.info("Taking screenshot for analysis...")
+                img = self.take_screenshot()
+                
+                if img is None:
+                    logger.error("Failed to take screenshot")
+                    continue
+                
+                # try multiple methods to find button
+                button_coords = None
+                
+                logger.debug("Trying OCR text recognition...")
+                button_coords = self.find_button_by_text_recognition(img)
+                
+                if not button_coords:
+                    logger.debug("Trying shape detection...")
+                    button_coords = self.find_button_by_shape_detection(img)
+                
+                if button_coords:
+                    logger.info(f"Button found at coordinates: {button_coords}")
                     
-                    if "blocked" not in current_url:
-                        print("🎉 CAPTCHA solved! Successfully redirected!")
-                        return True
-                    else:
-                        print("Still on blocked page - CAPTCHA may need another attempt")
-                        return False
+                    # perform click & hold
+                    success = self.click_and_hold_at_coordinates(button_coords[0], button_coords[1])
+                    
+                    if success:
+                        # wait & check if redirected
+                        time.sleep(3)
+                        current_url = self.driver.current_url
+                        
+                        if "blocked" not in current_url:
+                            logger.info("CAPTCHA solved! Successfully redirected!")
+                            return True
+                        else:
+                            logger.warning("Still on blocked page - retrying...")
+                            continue
+                    
+                else:
+                    logger.warning(f"Could not locate button using image recognition on attempt {attempt + 1}")
                 
-            else:
-                print("❌ Could not locate button using any image recognition method")
-                print("You may need to manually inspect the screenshot and adjust the detection algorithms")
-                return False
+                # wait before next attempt
+                if attempt < max_attempts - 1:
+                    time.sleep(random.uniform(2, 4))
+                    
+            logger.error(f"Failed to solve CAPTCHA after {max_attempts} attempts")
+            return False
                 
         except Exception as e:
-            print(f"Error solving CAPTCHA: {e}")
+            logger.error(f"Error solving CAPTCHA: {e}")
             return False
 
-    # close the browser
+    # close the browser if using internal driver
     def close(self):
-        if self.driver:
-            self.driver.quit()
+        if not self.external_driver and self.driver:
+            try:
+                self.driver.quit()
+            except Exception as e:
+                logger.debug(f"Error closing driver: {e}")
 
-# main function to run the CAPTCHA solver
+# example script to test the Walmart CAPTCHA solver
 def main():
     print("🤖 Starting Walmart CAPTCHA Solver (Image Recognition Mode)")
     print("=" * 60)
+    
+    # setup logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     
     # disable pyautogui failsafe for smoother operation
     pyautogui.FAILSAFE = False
@@ -356,14 +331,13 @@ def main():
     
     try:
         # solve CAPTCHA
-        success = solver.solve_captcha()
+        success = solver.solve_captcha("https://www.walmart.com/blocked")
         
         if success:
             print("\n✅ SUCCESS: CAPTCHA solved!")
             input("\nPress Enter to close browser...")
         else:
             print("\n❌ FAILED: Could not solve CAPTCHA")
-            print("Check the saved screenshot 'captcha_screenshot.png' for debugging")
             input("\nPress Enter to close browser...")
             
     except KeyboardInterrupt:
