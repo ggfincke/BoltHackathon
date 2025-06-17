@@ -92,17 +92,6 @@ export default function SearchOverlay({
     <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex flex-col">
       <div className="container mx-auto pt-20 px-4">
         <div className="relative">
-          {/* Close button */}
-          <button 
-            onClick={onClose}
-            className="absolute right-0 top-0 p-2 text-text hover:text-primary transition-colors"
-            aria-label="Close search"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          
           {/* Search input */}
           <div className="flex items-center border-b-2 border-primary pb-2">
             <SearchIcon className="w-6 h-6 text-primary mr-2" />
@@ -113,14 +102,25 @@ export default function SearchOverlay({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search products..."
-              className="w-full bg-transparent border-none outline-none text-xl"
+              className="flex-1 bg-transparent border-none outline-none text-xl"
               autoFocus
             />
             <button 
               onClick={handleSearch}
-              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors ml-4"
+              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors ml-2"
             >
               Search
+            </button>
+            
+            {/* Close button */}
+            <button 
+              onClick={onClose}
+              className="p-2 text-text hover:text-primary transition-colors ml-4"
+              aria-label="Close search"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
           
