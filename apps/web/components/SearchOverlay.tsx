@@ -118,7 +118,7 @@ export default function SearchOverlay({
             />
             <button 
               onClick={handleSearch}
-              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors ml-2"
+              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors ml-4"
             >
               Search
             </button>
