@@ -17,8 +17,8 @@ type Product = {
   listings?: {
     id: string;
     price: number | null;
-    currency: string;
-    in_stock: boolean;
+    currency: string | null;
+    in_stock: boolean | null;
     url: string;
     image_url?: string | null;
     retailer: { name: string };
@@ -46,7 +46,7 @@ export default function CategoryPage() {
   
   // Get slug from params
   const slugArray = Array.isArray(params.slug) ? params.slug : [params.slug];
-  const currentSlug = slugArray[slugArray.length - 1];
+  const currentSlug = slugArray[slugArray.length - 1] as string;
 
   useEffect(() => {
     const fetchCategoryData = async () => {
@@ -90,39 +90,68 @@ export default function CategoryPage() {
           // Get total count for pagination
           setTotalProducts(productIds.length);
           
-          // Only proceed if we have product IDs
-          if (productIds.length > 0) {
-            // Calculate pagination offsets
-            const from = (page - 1) * pageSize;
-            const to = from + pageSize - 1;
-            
-            // Now fetch the actual products using those IDs with pagination
-            const { data: productsData, error: productsError } = await supabase
-              .from('products')
-              .select(`
-                id, 
-                name, 
-                slug, 
-                brand:brands(name),
-                listings(
-                  id, 
-                  price, 
-                  currency, 
-                  in_stock, 
-                  url, 
-                  image_url,
-                  retailer:retailers(name)
-                )
-              `)
-              .in('id', productIds)
-              .eq('is_active', true)
-              .range(from, to);
+                      // Only proceed if we have product IDs
+            if (productIds.length > 0) {
+              console.log(`Found ${productIds.length} products in category`);
+              
+              // Calculate pagination - get the specific IDs for this page
+              const from = (page - 1) * pageSize;
+              const to = from + pageSize - 1;
+              const pageProductIds = productIds.slice(from, Math.min(to + 1, productIds.length));
+              
+              console.log(`Fetching ${pageProductIds.length} products for page ${page}`);
+              
+              // Chunk the page product IDs to avoid URL length limits (max 50 IDs per request)
+              const chunkSize = 50;
+              const productChunks = [];
+              for (let i = 0; i < pageProductIds.length; i += chunkSize) {
+                productChunks.push(pageProductIds.slice(i, i + chunkSize));
+              }
+              
+              // Fetch products in chunks and combine results
+              const allProducts = [];
+              for (const chunk of productChunks) {
+                try {
+                  const { data: productsData, error: productsError } = await supabase
+                    .from('products')
 
-            if (productsError) throw productsError;
-            setProducts(productsData || []);
-          } else {
-            setProducts([]);
-          }
+                    // TODO: add image_url later once there are entries; for some reason compiler doesn't like it 
+                    .select(`
+                      id, 
+                      name, 
+                      slug, 
+                      brand:brands(name),
+                      listings(
+                        id, 
+                        price, 
+                        currency, 
+                        in_stock, 
+                        url,
+                        retailer:retailers(name)
+                      )
+                    `)
+                    .in('id', chunk)
+                    .eq('is_active', true);
+
+                  if (productsError) {
+                    console.error('Error fetching product chunk:', productsError);
+                    throw productsError;
+                  }
+                  
+                  if (productsData) {
+                    allProducts.push(...productsData);
+                  }
+                } catch (chunkError) {
+                  console.error('Error in product chunk fetch:', chunkError);
+                  // Continue with other chunks even if one fails
+                }
+              }
+              
+              console.log(`Successfully loaded ${allProducts.length} products`);
+              setProducts(allProducts);
+            } else {
+              setProducts([]);
+            }
         }
 
         // Build breadcrumbs
