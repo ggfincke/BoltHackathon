@@ -8,6 +8,7 @@ import Breadcrumbs from '~/components/Breadcrumbs';
 import PriceHistoryChart from '~/components/PriceHistoryChart';
 import PriceComparisonTable from '~/components/PriceComparisonTable';
 import ProductTrackingForm from '~/components/ProductTrackingForm';
+import AddToBasketModal from '~/components/AddToBasketModal';
 
 type Product = {
   id: string;
@@ -76,6 +77,7 @@ export default function ProductPage() {
   const [isTracking, setIsTracking] = useState(false);
   const [savingTracking, setSavingTracking] = useState(false);
   const [breadcrumbs, setBreadcrumbs] = useState<{name: string, slug: string}[]>([]);
+  const [isAddToBasketModalOpen, setIsAddToBasketModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -114,15 +116,41 @@ export default function ProductPage() {
         if (error) throw error;
 
         if (data) {
-          // Fetch price history for all listings - temporarily disabled due to schema issues
-          // TODO: Fix price history query after resolving database schema
-          let priceHistories: any[] = [];
+          // Fetch price history for all listings
+          const priceHistories = await Promise.all(
+            data.listings.map(async (listing) => {
+              const { data: historyData, error: historyError } = await supabase
+                .from('price_histories')
+                .select(`
+                  id,
+                  listing_id,
+                  price,
+                  timestamp,
+                  retailer:listings(
+                    retailer:retailers(id, name)
+                  )
+                `)
+                .eq('listing_id', listing.id)
+                .order('timestamp', { ascending: true })
+                .limit(100);
+              
+              if (historyError) {
+                console.error('Error fetching price history:', historyError);
+                return [];
+              }
+              
+              return historyData.map(item => ({
+                ...item,
+                retailer: item.retailer?.retailer || { id: '', name: 'Unknown' }
+              }));
+            })
+          );
 
           // Format the data
           const formattedProduct = {
             ...data,
             categories: data.categories.map(c => c.category),
-            price_histories: priceHistories
+            price_histories: priceHistories.flat()
           };
 
           setProduct(formattedProduct);
@@ -133,7 +161,7 @@ export default function ProductPage() {
             const category = formattedProduct.categories[0];
             const breadcrumbItems = [
               { name: 'Home', slug: '' },
-              { name: 'Categories', slug: '' },
+              { name: 'Categories', slug: 'categories' },
               { name: category.name, slug: category.slug },
               { name: formattedProduct.name, slug: '' }
             ];
@@ -371,7 +399,7 @@ export default function ProductPage() {
                 <div className="mt-1 text-sm">
                   Best price from <span className="font-medium">{bestListing.retailer.name}</span>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 flex gap-3">
                   <a 
                     href={bestListing.url} 
                     target="_blank" 
@@ -380,6 +408,12 @@ export default function ProductPage() {
                   >
                     View Best Deal
                   </a>
+                  <button
+                    onClick={() => setIsAddToBasketModalOpen(true)}
+                    className="inline-block bg-surface border border-gray-300 dark:border-gray-700 px-6 py-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-medium"
+                  >
+                    Add to Basket
+                  </button>
                 </div>
               </div>
             )}
@@ -415,6 +449,14 @@ export default function ProductPage() {
           </div>
         </div>
       )}
+
+      {/* Add to Basket Modal */}
+      <AddToBasketModal
+        isOpen={isAddToBasketModalOpen}
+        onClose={() => setIsAddToBasketModalOpen(false)}
+        productId={product.id}
+        productName={product.name}
+      />
     </div>
   );
 }
