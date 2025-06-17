@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 type Product = {
   id: string;
@@ -56,17 +57,21 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
   
   return (
     <div className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
-      <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-        <img 
-          src={imageUrl} 
-          alt={product.name}
-          className="w-full h-full object-contain"
-        />
-      </div>
+      <Link href={`/product/${product.slug}`} className="block">
+        <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
+          <img 
+            src={imageUrl} 
+            alt={product.name}
+            className="w-full h-full object-contain"
+          />
+        </div>
+      </Link>
       <div className={compact ? "p-3" : "p-4"}>
-        <h3 className={`font-medium ${compact ? "text-sm mb-1" : "text-lg mb-1"} line-clamp-2`}>
-          {product.name}
-        </h3>
+        <Link href={`/product/${product.slug}`} className="block">
+          <h3 className={`font-medium ${compact ? "text-sm mb-1" : "text-lg mb-1"} line-clamp-2 hover:text-primary transition-colors`}>
+            {product.name}
+          </h3>
+        </Link>
         
         {product.brand && (
           <p className={`${compact ? "text-xs mb-1" : "text-sm mb-2"} text-gray-600 dark:text-gray-400`}>
@@ -87,21 +92,35 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
               </span>
             </div>
             
-            <div className={compact ? "mt-2" : "mt-3"}>
+            <div className="flex gap-2 mt-2">
+              <Link 
+                href={`/product/${product.slug}`}
+                className={`flex-1 bg-gray-200 dark:bg-gray-700 text-center ${compact ? "py-1.5 text-xs" : "py-2 text-sm"} rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+              >
+                Details
+              </Link>
               <a 
                 href={bestListing.url} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className={`block w-full bg-primary text-buttonText text-center ${compact ? "py-1.5 text-sm" : "py-2"} rounded-md hover:bg-opacity-90 transition-colors`}
+                className={`flex-1 bg-primary text-buttonText text-center ${compact ? "py-1.5 text-xs" : "py-2 text-sm"} rounded-md hover:bg-opacity-90 transition-colors`}
               >
                 View Deal
               </a>
             </div>
           </div>
         ) : (
-          <p className={`text-gray-500 dark:text-gray-400 italic ${compact ? "mt-1 text-xs" : "mt-2"}`}>
-            No listings available
-          </p>
+          <div className="mt-2">
+            <p className={`text-gray-500 dark:text-gray-400 italic ${compact ? "text-xs" : "text-sm"}`}>
+              No listings available
+            </p>
+            <Link 
+              href={`/product/${product.slug}`}
+              className={`block w-full bg-gray-200 dark:bg-gray-700 text-center ${compact ? "py-1.5 text-xs mt-2" : "py-2 text-sm mt-3"} rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+            >
+              View Details
+            </Link>
+          </div>
         )}
       </div>
     </div>
