@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '~/lib/auth'
 
@@ -16,6 +16,7 @@ export default function AuthForm({ type }: AuthFormProps) {
   const [message, setMessage] = useState<string | null>(null)
   
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signIn, signUp, resetPassword } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +39,9 @@ export default function AuthForm({ type }: AuthFormProps) {
         const { error } = await signIn(email, password)
         if (error) throw error
         
-        router.push('/')
+        // Check if there's a redirect parameter
+        const redirectTo = searchParams.get('redirectedFrom') || '/'
+        router.push(redirectTo)
       } else if (type === 'reset') {
         const { error } = await resetPassword(email)
         if (error) throw error

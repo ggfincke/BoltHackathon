@@ -8,6 +8,7 @@ import { HomeIcon, SearchIcon, CategoriesIcon, BasketsIcon, UserIcon, LogoIcon }
 import ProfileDropdown from './ProfileDropdown';
 import { useAuth } from '~/lib/auth';
 import SearchOverlay from './SearchOverlay';
+import NotificationCenter from './NotificationCenter';
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -77,6 +78,8 @@ export default function NavBar() {
               >
                 <SearchIcon className="w-5 h-5" />
               </button>
+              
+              {user && <NotificationCenter />}
               
               <ThemeToggle />
               

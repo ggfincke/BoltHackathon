@@ -68,6 +68,14 @@ export default function ProfileDropdown() {
             Settings
           </Link>
           
+          <Link 
+            href="/settings/notifications" 
+            className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => setIsOpen(false)}
+          >
+            Notification Settings
+          </Link>
+          
           <button
             onClick={handleSignOut}
             className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800"
