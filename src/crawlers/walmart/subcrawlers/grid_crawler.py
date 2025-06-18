@@ -646,8 +646,8 @@ def _extract_full(driver: webdriver.Remote, url: str, max_pages: int, logger, us
                 }
                 
                 # log if price was corrected
-                if raw_price != validated_price and validated_price != "Unknown Price":
-                    logger.info(f"Price corrected for {product_data['title']}: {raw_price} -> {validated_price}")
+                # if raw_price != validated_price and validated_price != "Unknown Price":
+                #     logger.info(f"Price corrected for {product_data['title']}: {raw_price} -> {validated_price}")
                 
                 page_products.append(product_data)
                 SEEN_PRODUCT_IDS.add(product_id)

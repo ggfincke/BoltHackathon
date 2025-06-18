@@ -162,7 +162,7 @@ def validate_numeric_parameters(max_pages: int, crawler_concurrency: int, upc_co
 # validate flag combinations
 def validate_flag_combinations(args):
     # validate category/department are only used w/ appropriate modes
-    if not args.from_hierarchy_file and not args.hierarchical:
+    if args.from_hierarchy_file is None and not args.hierarchical:
         if not (args.category or args.department):
             raise ValueError("Category or department must be specified for non-hierarchical crawls. "
                            "Use --category, --department, --hierarchical, or --from-hierarchy-file")
