@@ -1,6 +1,9 @@
 """
 Walmart CAPTCHA Solver - Image Recognition Approach
 Uses computer vision to detect and click the "PRESS & HOLD" button
+
+
+ONLY WORKS ON WINDOWS
 """
 
 import time
@@ -188,6 +191,23 @@ class WalmartCAPTCHASolver:
         
         return None
     
+    # check if button is still present using image recognition
+    def is_button_still_present(self):
+        try:
+            img = self.take_screenshot()
+            if img is None:
+                return False
+            
+            # try to find button using both methods
+            button_coords = self.find_button_by_text_recognition(img)
+            if not button_coords:
+                button_coords = self.find_button_by_shape_detection(img)
+            
+            return button_coords is not None
+        except Exception as e:
+            logger.debug(f"Error checking button presence: {e}")
+            return False
+    
     # click and hold at specific screen coordinates using mouse
     def click_and_hold_at_coordinates(self, x, y):
         try:
@@ -217,22 +237,59 @@ class WalmartCAPTCHASolver:
             # small delay before clicking
             time.sleep(random.uniform(0.2, 0.5))
             
+            # store initial URL to detect page changes
+            initial_url = self.driver.current_url
+            logger.info(f"Initial URL: {initial_url}")
+            
             # click & hold
             pyautogui.mouseDown(button='left')
+            logger.info("Mouse button pressed - holding and monitoring for page change...")
             
-            # hold for realistic duration
-            hold_duration = random.uniform(3.8, 5.2)
-            logger.info(f"Holding for {hold_duration:.2f} seconds...")
-            time.sleep(hold_duration)
+            # monitor for page change only (ignore button visual changes)
+            max_hold_time = 15  # hold for up to 15 seconds
+            start_time = time.time()
+            check_interval = 0.5  # check every 500ms to avoid interfering
             
-            # release
+            while time.time() - start_time < max_hold_time:
+                time.sleep(check_interval)
+                
+                try:
+                    # check if URL changed (page redirect)
+                    current_url = self.driver.current_url
+                    if current_url != initial_url:
+                        logger.info(f"Page changed! New URL: {current_url}")
+                        break
+                    
+                    # check if still on blocked page
+                    if "blocked" not in current_url.lower():
+                        logger.info("No longer on blocked page!")
+                        break
+                    
+                except Exception as e:
+                    logger.debug(f"Error during monitoring: {e}")
+                    continue
+            
+            # calculate how long we held
+            hold_duration = time.time() - start_time
+            
+            # release mouse button
             pyautogui.mouseUp(button='left')
+            
+            if hold_duration >= max_hold_time:
+                logger.warning(f"Reached maximum hold time ({max_hold_time}s) - releasing button")
+            else:
+                logger.info(f"Released button after {hold_duration:.2f} seconds")
             
             logger.info("Press and hold completed!")
             return True
             
         except Exception as e:
             logger.error(f"Error during click and hold: {e}")
+            # ensure mouse button is released even if error occurs
+            try:
+                pyautogui.mouseUp(button='left')
+            except:
+                pass
             return False
     
     # main method to solve the CAPTCHA using image recognition

@@ -5,21 +5,21 @@ This script provides a unified interface to run different retailer crawlers
 with various configurations and output modes.
 
 Usage:
-    python crawl.py --retailer amazon --mode full
-    python crawl.py --retailer target --mode urls-only --category "Beverages"
-    python crawl.py --retailer walmart --mode full --category "Snacks"
-    python crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
-    python crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
-    python crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
-    python crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
-    python crawl.py --retailer target --backend supabase --mode full --category "Snacks"
-    python crawl.py --retailer amazon --backend supabase --mode full --hierarchical
+    python scripts/crawl.py --retailer amazon --mode full
+    python scripts/crawl.py --retailer target --mode urls-only --category "Beverages"
+    python scripts/crawl.py --retailer walmart --mode full --category "Snacks"
+    python scripts/crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
+    python scripts/crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
+    python scripts/crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
+    python scripts/crawl.py --retailer target --backend supabase --mode full --category "Snacks"
+    python scripts/crawl.py --retailer amazon --backend supabase --mode full --hierarchical
 
 
 Main usage (supabase):
-    python crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 4 --upc-concurrency 6
-    python crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
-    python crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
+    python scripts/crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 4 --upc-concurrency 6
+    python scripts/crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
 
 """
 
