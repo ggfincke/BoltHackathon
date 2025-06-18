@@ -5,21 +5,23 @@ This script provides a unified interface to run different retailer crawlers
 with various configurations and output modes.
 
 Usage:
-    python crawl.py --retailer amazon --mode full
-    python crawl.py --retailer target --mode urls-only --category "Beverages"
-    python crawl.py --retailer walmart --mode full --category "Snacks"
-    python crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
-    python crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
-    python crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
-    python crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
-    python crawl.py --retailer target --backend supabase --mode full --category "Snacks"
-    python crawl.py --retailer amazon --backend supabase --mode full --hierarchical
+    python scripts/crawl.py --retailer amazon --mode full
+    python scripts/crawl.py --retailer target --mode urls-only --category "Beverages"
+    python scripts/crawl.py --retailer walmart --mode full --category "Snacks"
+    python scripts/crawl.py --retailer amazon --mode full --hierarchical --max-pages 10
+    python scripts/crawl.py --retailer target --from-hierarchy-file hierarchy.json --mode urls-only
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file --category "Beverages" --mode full
+    python scripts/crawl.py --retailer amazon --from-hierarchy-file --category "Marshmallows" --mode full
+    python scripts/crawl.py --retailer target --backend supabase --mode full --category "Snacks"
+    python scripts/crawl.py --retailer amazon --backend supabase --mode full --hierarchical
 
+    test 
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file "" --category "Beverages" --mode full --backend supabase --max-pages 1 --crawler-concurrency 1 --upc-concurrency 6
 
 Main usage (supabase):
-    python crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 4 --upc-concurrency 6
-    python crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
-    python crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --crawler-concurrency 1 --upc-concurrency 6
+    python scripts/crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 4 --upc-concurrency 6
+    python scripts/crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 1 --upc-concurrency 6
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 1 --upc-concurrency 4
 
 """
 
@@ -148,6 +150,143 @@ def validate_hierarchy_file(file_path: str) -> Path:
         raise ValueError(f"Hierarchy file must be a JSON file: {file_path}")
     return path
 
+# validate numeric parameters
+def validate_numeric_parameters(max_pages: int, crawler_concurrency: int, upc_concurrency: int):
+    if max_pages <= 0:
+        raise ValueError(f"max-pages must be positive, got: {max_pages}")
+    if crawler_concurrency <= 0:
+        raise ValueError(f"crawler-concurrency must be positive, got: {crawler_concurrency}")
+    if upc_concurrency <= 0:
+        raise ValueError(f"upc-concurrency must be positive, got: {upc_concurrency}")
+
+# validate flag combinations
+def validate_flag_combinations(args):
+    # validate category/department are only used w/ appropriate modes
+    if not args.from_hierarchy_file and not args.hierarchical:
+        if not (args.category or args.department):
+            raise ValueError("Category or department must be specified for non-hierarchical crawls. "
+                           "Use --category, --department, --hierarchical, or --from-hierarchy-file")
+    
+    # validate mutually exclusive flags
+    if args.enable_upc_lookup and args.disable_upc_lookup:
+        raise ValueError("Cannot specify both --enable-upc-lookup and --disable-upc-lookup")
+    
+    # validate backend-specific requirements
+    if args.backend == "redis" and args.output:
+        raise ValueError("Cannot specify --output with Redis backend (Redis doesn't use file output)")
+
+# validate category exists in hierarchy
+def validate_category_in_hierarchy(hierarchy: dict, category: str, retailer: str) -> bool:
+    def search_in_node(node, target_name):
+        if isinstance(node, dict):
+            # check if this node matches
+            node_name = node.get("name") or node.get("department_name")
+            if node_name and node_name.lower() == target_name.lower():
+                return True
+            
+            # recurse into sub_items
+            if node.get("sub_items"):
+                for child in node["sub_items"]:
+                    if search_in_node(child, target_name):
+                        return True
+                        
+            # check entry_point_categories if they exist
+            if node.get("entry_point_categories"):
+                for child in node["entry_point_categories"]:
+                    if search_in_node(child, target_name):
+                        return True
+        elif isinstance(node, list):
+            for item in node:
+                if search_in_node(item, target_name):
+                    return True
+        return False
+    
+    # search in departments if they exist
+    if "departments" in hierarchy:
+        for department in hierarchy["departments"]:
+            if search_in_node(department, category):
+                return True
+    
+    # search in sub_items if they exist (for Walmart structure)
+    if "sub_items" in hierarchy:
+        if search_in_node(hierarchy["sub_items"], category):
+            return True
+    
+    # search the entire hierarchy as fallback
+    return search_in_node(hierarchy, category)
+
+# get available categories from hierarchy for error messages
+def get_available_categories(hierarchy: dict, max_items: int = 20) -> list:
+    categories = []
+    
+    def collect_from_node(node, depth=0):
+        if len(categories) >= max_items:
+            return
+            
+        if isinstance(node, dict):
+            name = node.get("name") or node.get("department_name")
+            if name:
+                categories.append(name)
+            
+            # limit depth to avoid too many categories
+            if node.get("sub_items") and depth < 3:
+                for child in node["sub_items"]:
+                    collect_from_node(child, depth + 1)
+                    
+            if node.get("entry_point_categories") and depth < 3:
+                for child in node["entry_point_categories"]:
+                    collect_from_node(child, depth + 1)
+        elif isinstance(node, list):
+            for item in node:
+                collect_from_node(item, depth)
+    
+    if "departments" in hierarchy:
+        for dept in hierarchy["departments"]:
+            collect_from_node(dept)
+    elif "sub_items" in hierarchy:
+        collect_from_node(hierarchy["sub_items"])
+    else:
+        collect_from_node(hierarchy)
+    
+    return categories[:max_items]
+
+# validate category/department exists in retailer hierarchy
+def validate_category_or_department(retailer: str, category: str = None, department: str = None):
+    if not (category or department):
+        return
+    
+    # load the retailer's hierarchy file
+    retailer_config = RETAILER_CONFIG[retailer]
+    hierarchy_file = retailer_config["default_hierarchy_file"]
+    
+    if not os.path.exists(hierarchy_file):
+        # if default hierarchy file doesn't exist, skip validation
+        return
+    
+    try:
+        with open(hierarchy_file, 'r', encoding='utf-8') as f:
+            hierarchy = json.load(f)
+    except Exception:
+        # if we can't load the hierarchy, skip validation
+        return
+    
+    target = category or department
+    target_type = "category" if category else "department"
+    
+    if not validate_category_in_hierarchy(hierarchy, target, retailer):
+        available_categories = get_available_categories(hierarchy)
+        available_list = "\n  - ".join(available_categories)
+        
+        # max_items reached
+        if len(available_categories) == 20:
+            available_list += "\n  ... and more"
+        
+        raise ValueError(
+            f"Invalid {target_type} '{target}' for retailer '{retailer}'.\n"
+            f"Available categories include:\n  - {available_list}\n\n"
+            f"Use --hierarchical to crawl all categories, or specify a valid {target_type}."
+        )
+
 # main function
 def main():
     parser = argparse.ArgumentParser(
@@ -174,6 +313,7 @@ Examples:
   %(prog)s --retailer walmart --backend supabase --mode full --enable-upc-lookup
   %(prog)s --retailer target --backend redis --mode urls-only
   %(prog)s --list-retailers
+  %(prog)s --list-categories amazon
         """
     )
     
@@ -296,6 +436,12 @@ Examples:
     )
     
     parser.add_argument(
+        "--list-categories",
+        metavar="RETAILER",
+        help="List available categories for a specific retailer and exit"
+    )
+    
+    parser.add_argument(
         "--test-redis",
         action="store_true",
         help="Test Redis connection and exit"
@@ -315,6 +461,35 @@ Examples:
         for retailer, config in RETAILER_CONFIG.items():
             print(f"  {retailer}: {config['description']} (ID: {config['retailer_id']})")
             print(f"    Default hierarchy file: {config['default_hierarchy_file']}")
+        return
+    
+    if args.list_categories:
+        try:
+            validate_retailer(args.list_categories)
+            retailer_config = RETAILER_CONFIG[args.list_categories]
+            hierarchy_file = retailer_config["default_hierarchy_file"]
+            
+            if not os.path.exists(hierarchy_file):
+                print(f"❌ Hierarchy file not found for {args.list_categories}: {hierarchy_file}")
+                sys.exit(1)
+            
+            with open(hierarchy_file, 'r', encoding='utf-8') as f:
+                hierarchy = json.load(f)
+            
+            categories = get_available_categories(hierarchy, max_items=50)
+            print(f"Available categories for {args.list_categories}:")
+            for category in categories:
+                print(f"  - {category}")
+            
+            if len(categories) == 50:
+                print("  ... and more")
+                
+        except ValueError as e:
+            print(f"❌ {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"❌ Error loading categories: {e}")
+            sys.exit(1)
         return
     
     if args.test_redis:
@@ -345,16 +520,19 @@ Examples:
     if not args.retailer:
         parser.error("--retailer is required (use --list-retailers to see options)")
     
-    # validate Supabase requirements
-    if args.backend == "supabase":
-        supabase_url = args.supabase_url or os.getenv('SUPABASE_URL')
-        supabase_key = args.supabase_key or os.getenv('SUPABASE_ANON_KEY')
-        
-        if not supabase_url or not supabase_key:
-            parser.error("Supabase backend requires --supabase-url and --supabase-key or "
-                        "SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
+    # validate retailer first
+    try:
+        validate_retailer(args.retailer)
+    except ValueError as e:
+        parser.error(str(e))
     
-    # handle backward compatibility
+    # validate flag combinations
+    try:
+        validate_flag_combinations(args)
+    except ValueError as e:
+        parser.error(str(e))
+    
+    # handle backward compatibility for concurrency
     if args.concurrency is not None:
         print(f"⚠️  WARNING: --concurrency is deprecated. "
               f"Using --crawler-concurrency={args.concurrency} and --upc-concurrency={args.concurrency}")
@@ -363,6 +541,27 @@ Examples:
     else:
         crawler_concurrency = args.crawler_concurrency
         upc_concurrency = args.upc_concurrency
+    
+    # validate numeric parameters
+    try:
+        validate_numeric_parameters(args.max_pages, crawler_concurrency, upc_concurrency)
+    except ValueError as e:
+        parser.error(str(e))
+    
+    # validate category/department exists in hierarchy
+    try:
+        validate_category_or_department(args.retailer, args.category, args.department)
+    except ValueError as e:
+        parser.error(str(e))
+    
+    # validate Supabase requirements
+    if args.backend == "supabase":
+        supabase_url = args.supabase_url or os.getenv('SUPABASE_URL')
+        supabase_key = args.supabase_key or os.getenv('SUPABASE_ANON_KEY')
+        
+        if not supabase_url or not supabase_key:
+            parser.error("Supabase backend requires --supabase-url and --supabase-key or "
+                        "SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
     
     # determine UPC lookup setting
     enable_upc_lookup = args.enable_upc_lookup and not args.disable_upc_lookup
@@ -375,9 +574,6 @@ Examples:
     logger.info(f"🔍 UPC lookup concurrency: {upc_concurrency}")
     
     try:
-        # validate retailer
-        validate_retailer(args.retailer)
-        
         # get retailer configuration
         retailer_config = RETAILER_CONFIG[args.retailer]
         crawler_class = retailer_config["class"]
