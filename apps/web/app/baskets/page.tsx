@@ -39,11 +39,18 @@ export default function Baskets() {
     try {
       setIsLoading(true);
       
+      // Check if user exists before making the query
+      if (!user?.id) {
+        setBaskets([]);
+        setIsLoading(false);
+        return;
+      }
+      
       // Get baskets the user has access to
       const { data: basketUsers, error: basketUsersError } = await supabase
         .from('basket_users')
         .select('basket_id, role')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
       
       if (basketUsersError) throw basketUsersError;
       
@@ -53,7 +60,16 @@ export default function Baskets() {
         return;
       }
       
-      const basketIds = basketUsers.map(bu => bu.basket_id);
+      // Filter out null basket_ids and ensure we have valid strings
+      const basketIds = basketUsers
+        .map(bu => bu.basket_id)
+        .filter((id): id is string => id !== null && id !== undefined);
+      
+      if (basketIds.length === 0) {
+        setBaskets([]);
+        setIsLoading(false);
+        return;
+      }
       
       // Get basket details with item count and total cost
       const { data, error } = await supabase
@@ -70,6 +86,12 @@ export default function Baskets() {
         .in('id', basketIds);
       
       if (error) throw error;
+      
+      if (!data) {
+        setBaskets([]);
+        setIsLoading(false);
+        return;
+      }
       
       // Get total cost for each basket
       const basketsWithDetails = await Promise.all(data.map(async (basket) => {
@@ -104,7 +126,12 @@ export default function Baskets() {
         });
         
         return {
-          ...basket,
+          id: basket.id,
+          name: basket.name,
+          description: basket.description,
+          is_public: basket.is_public ?? false, 
+          created_at: basket.created_at ?? new Date().toISOString(),
+          updated_at: basket.updated_at ?? new Date().toISOString(),
           item_count: basket.basket_items?.[0]?.count || 0,
           total_cost: totalCost
         };
@@ -120,40 +147,49 @@ export default function Baskets() {
 
   const handleCreateBasket = async (name: string, description: string, isPublic: boolean) => {
     try {
-      // Create new basket
-      const { data: basketData, error: basketError } = await supabase
+      // Check if user exists before creating basket
+      if (!user?.id) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // Generate UUID on the client
+      const basketId = crypto.randomUUID();
+
+      // Insert new basket
+      const { error: basketError } = await supabase
         .from('baskets')
         .insert({
+          id: basketId,
           name,
           description,
-          is_public: isPublic
-        })
-        .select()
-        .single();
-      
+          is_public: isPublic,
+        });
+
       if (basketError) throw basketError;
-      
-      // Add user as owner
+
+      // Add user as owner of the basket
       const { error: userError } = await supabase
         .from('basket_users')
         .insert({
-          basket_id: basketData.id,
-          user_id: user?.id,
-          role: 'owner'
+          basket_id: basketId,
+          user_id: user.id,
+          role: 'owner',
         });
-      
+
       if (userError) throw userError;
-      
-      // Refresh baskets
+
+      // Refresh baskets list
       fetchBaskets();
-      
-      // Close modal
+
+      // Close the modal
       setIsModalOpen(false);
-      
-      // Navigate to the new basket
-      router.push(`/basket/${basketData.id}`);
+
+      // Navigate to the new basket page
+      router.push(`/basket/${basketId}`);
     } catch (error) {
-      console.error('Error creating basket:', error);
+      // Log full error object for easier debugging
+      console.error('Error creating basket:', JSON.stringify(error, null, 2));
     }
   };
 
