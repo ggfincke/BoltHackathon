@@ -15,10 +15,7 @@ export default function SettingsLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Redirect to middleware (prevents race conditions b/w server and client auth checks)
-  useEffect(() => {
-    console.log('Settings layout auth state:', { user: !!user, loading });
-  }, [user, loading]);
+  // Middleware handles authentication - no client-side redirects needed
 
   if (loading) {
     return (

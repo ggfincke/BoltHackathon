@@ -47,7 +47,6 @@ export default function NotificationSettings() {
   const fetchPreferences = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching preferences for user:', user?.id, user?.email);
       
       if (!user?.id) {
         throw new Error('User ID is required');
@@ -63,11 +62,8 @@ export default function NotificationSettings() {
         throw error;
       }
       
-      console.log('Fetched preferences:', data);
-      
       // If no preferences exist yet, create default ones
       if (!data || data.length === 0) {
-        console.log('No preferences found, creating defaults...');
         await createDefaultPreferences();
         return;
       }

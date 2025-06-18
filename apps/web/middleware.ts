@@ -24,18 +24,11 @@ export async function middleware(req: NextRequest) {
     }
   )
   
-  // Log cookies for debugging
-  const cookies = req.cookies.getAll()
-  const authCookies = cookies.filter(cookie => cookie.name.includes('supabase'))
-  console.log('Auth cookies found:', authCookies.length, authCookies.map(c => c.name))
-  
   // Use getUser for secure authentication validation
   const {
     data: { user },
     error
   } = await supabase.auth.getUser()
-
-  console.log('Middleware - Path:', req.nextUrl.pathname, 'User:', user?.email || 'None', 'Error:', error?.message || 'None')
 
   // Check if the request is for a protected route
   const protectedRoutes = ['/profile', '/settings']
@@ -45,7 +38,6 @@ export async function middleware(req: NextRequest) {
 
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !user) {
-    console.log('Redirecting to login - no user found')
     const redirectUrl = new URL('/auth/login', req.url)
     redirectUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
