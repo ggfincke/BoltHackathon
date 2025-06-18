@@ -15,11 +15,10 @@ export default function SettingsLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  // Redirect to middleware (prevents race conditions b/w server and client auth checks)
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login?redirectedFrom=' + pathname);
-    }
-  }, [user, loading, router, pathname]);
+    console.log('Settings layout auth state:', { user: !!user, loading });
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -32,7 +31,7 @@ export default function SettingsLayout({
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null; 
   }
 
   const settingsLinks = [

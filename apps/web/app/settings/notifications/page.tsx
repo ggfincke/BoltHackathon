@@ -39,36 +39,46 @@ export default function NotificationSettings() {
   ];
 
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/auth/login?redirectedFrom=/settings/notifications');
-        return;
-      }
-      
+    if (!authLoading && user) {
       fetchPreferences();
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   const fetchPreferences = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching preferences for user:', user?.id, user?.email);
       
+      if (!user?.id) {
+        throw new Error('User ID is required');
+      }
+
       const { data, error } = await supabase
         .from('notification_preferences')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching preferences:', error);
+        throw error;
+      }
+      
+      console.log('Fetched preferences:', data);
       
       // If no preferences exist yet, create default ones
       if (!data || data.length === 0) {
+        console.log('No preferences found, creating defaults...');
         await createDefaultPreferences();
         return;
       }
       
-      setPreferences(data);
+      setPreferences(data as NotificationPreference[]);
     } catch (error) {
       console.error('Error fetching notification preferences:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to load notification preferences. Please try refreshing the page.' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -76,30 +86,59 @@ export default function NotificationSettings() {
 
   const createDefaultPreferences = async () => {
     try {
+      if (!user?.id) {
+        throw new Error('User ID is required');
+      }
+
+      // First ensure user exists in users table
+      const { error: userError } = await supabase
+        .from('users')
+        .upsert({
+          id: user.id,
+          email: user.email || '',
+          first_name: user.user_metadata?.first_name || '',
+          last_name: user.user_metadata?.last_name || '',
+        }, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        });
+
+      if (userError) {
+        console.error('Error ensuring user exists:', userError);
+        // Continue anyway, user might already exist
+      }
+
       const defaultPreferences = [];
       
       // Create default preferences for all combinations
-      for (const type of notificationTypes) {
-        for (const channel of notificationChannels) {
-          defaultPreferences.push({
-            user_id: user?.id,
-            notification_type: type.id as any,
-            channel: channel.id as any,
-            is_enabled: channel.id === 'email' // Enable email by default
-          });
+              for (const type of notificationTypes) {
+          for (const channel of notificationChannels) {
+            defaultPreferences.push({
+              user_id: user.id,
+              notification_type: type.id as 'price_drop' | 'availability' | 'changes' | 'general',
+              channel: channel.id as 'email' | 'push' | 'sms',
+              is_enabled: channel.id === 'email'
+            });
+          }
         }
-      }
       
       const { data, error } = await supabase
         .from('notification_preferences')
         .insert(defaultPreferences)
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Database error details:', error);
+        throw error;
+      }
       
-      setPreferences(data || []);
+      setPreferences((data || []) as NotificationPreference[]);
     } catch (error) {
       console.error('Error creating default notification preferences:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to initialize notification preferences. Please try refreshing the page.' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +185,7 @@ export default function NotificationSettings() {
     }
   };
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="container mx-auto py-8">
         <div className="flex justify-center py-12">
