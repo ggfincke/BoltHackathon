@@ -24,6 +24,13 @@ except ImportError:
     sys.path.insert(0, parent_dir)
     from base_scraper import BaseScraper
     
+# attempt to import the CAPTCHA solver relative to package structure
+try:
+    from .walmart_captcha_solver import WalmartCAPTCHASolver
+except ImportError:
+    # fallback when running as standalone script
+    from walmart_captcha_solver import WalmartCAPTCHASolver
+
 # walmart scraper
 class WalmartScraper(BaseScraper):
     def __init__(self, proxy_manager=None, logger=None):
@@ -151,18 +158,13 @@ class WalmartScraper(BaseScraper):
             self.logger.error(f"An error occurred: {e}")
             return None
 
+    # get rating & review count
     def get_rating_reviews(self, driver):
-        """
-        Return (Decimal rating | None, int review_count | None).
-
-        Looks for the visually-visible span whose text is like
-        '4.7 stars out of 1642 reviews'.
-        """
         try:
             WebDriverWait(driver, 10).until(
                 lambda d: any("stars out of" in s.text for s in d.find_elements(By.CSS_SELECTOR, "span"))
             )
-
+            
             for span in driver.find_elements(By.CSS_SELECTOR, "span"):
                 txt = span.text.strip()
                 if "stars out of" in txt and "reviews" in txt:
@@ -175,10 +177,8 @@ class WalmartScraper(BaseScraper):
         except Exception:
             return None, None
 
+    # get UPC/GTIN string from Walmart's schema-org script tag
     def get_upc(self, driver):
-        """
-        Return the UPC/GTIN string from Walmart's schema-org script tag, or None.
-        """
         try:
             script_tag = driver.find_element(
                 By.CSS_SELECTOR,
@@ -193,9 +193,22 @@ class WalmartScraper(BaseScraper):
     def scrape_product(self, url):
         driver = None
         try:
+            # launch browser instance (undetected-chromedriver via BaseScraper)
             driver = self.setup_driver(headless=False)
+
+            # initialise CAPTCHA solver to reuse same Selenium session
+            captcha_solver = WalmartCAPTCHASolver(driver=driver)
+
             driver.get(url)
                     
+            # if Walmart detected automation and presented a blocking page, attempt to solve
+            current = driver.current_url.lower()
+            if any(keyword in current for keyword in ["blocked", "challenge", "captcha"]):
+                self.logger.info("Encountered Walmart CAPTCHA – attempting automated solve ...")
+                if not captcha_solver.solve_captcha():
+                    self.logger.error("Unable to solve Walmart CAPTCHA. Aborting scrape.")
+                    return None
+
             # product details
             product_name = self.get_product_name(driver)
             price = self.get_price(driver)
