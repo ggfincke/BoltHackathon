@@ -16,7 +16,7 @@ Example Usage:
     python scripts/update.py --all-retailers --priority-only --track-only
 
 Normal usage:
-    python scripts/update.py --retailer amazon
+    python scripts/update.py --retailer amazon 
     python scripts/update.py --retailer target
     python scripts/update.py --retailer walmart
 """

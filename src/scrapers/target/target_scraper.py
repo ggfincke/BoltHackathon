@@ -24,6 +24,12 @@ except ImportError:
     sys.path.insert(0, parent_dir)
     from base_scraper import BaseScraper
 
+
+# wait times (in seconds) - TODO: needs tuned
+WAIT_LONG = 8    
+WAIT_MEDIUM = 5
+WAIT_SHORT = 2     
+
 # target scraper
 class TargetScraper(BaseScraper):
     def __init__(self, proxy_manager=None, logger=None):
@@ -37,7 +43,7 @@ class TargetScraper(BaseScraper):
             
             # wait until at least one screen-reader span is in the DOM
             self.logger.debug("Waiting for ScreenReaderOnly spans to load...")
-            WebDriverWait(driver, 15).until(
+            WebDriverWait(driver, WAIT_LONG).until(
                 EC.presence_of_element_located(
                     (By.CSS_SELECTOR, "span[class*='ScreenReaderOnly']")
                 )
@@ -115,7 +121,7 @@ class TargetScraper(BaseScraper):
                 pass
 
             # wait until UPC text appears in DOM
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, WAIT_MEDIUM).until(
                 lambda d: "UPC" in d.page_source
             )
 
@@ -170,7 +176,7 @@ class TargetScraper(BaseScraper):
     def get_price(self, driver):
         try:
             # get price from main product block
-            price_element = WebDriverWait(driver, 10).until(
+            price_element = WebDriverWait(driver, WAIT_MEDIUM).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, '[data-test="product-price"]'))
             )
             raw = price_element.text.replace('$','').replace(',','').strip()
@@ -179,7 +185,7 @@ class TargetScraper(BaseScraper):
         # fallback price element
         except (TimeoutException, NoSuchElementException, ValueError):
             try:
-                fallback = WebDriverWait(driver, 5).until(
+                fallback = WebDriverWait(driver, WAIT_SHORT).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '.styles__StyledPriceText-sc-__sc-17hp6jc-0'))
                 )
                 raw = fallback.text.replace('$','').replace(',','').strip()
@@ -200,7 +206,7 @@ class TargetScraper(BaseScraper):
                 
             # find add to cart button
             try:
-                add_to_cart_button = WebDriverWait(driver, 10).until(
+                add_to_cart_button = WebDriverWait(driver, WAIT_MEDIUM).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '[data-test="shippingButton"]'))
                 )
                 
@@ -222,7 +228,7 @@ class TargetScraper(BaseScraper):
                 return True  
             
             # wait for shipping fulfillment tab
-            shipping_tab = WebDriverWait(driver, 10).until(
+            shipping_tab = WebDriverWait(driver, WAIT_MEDIUM).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-test="fulfillment-cell-shipping"]'))
             )
             
@@ -238,7 +244,7 @@ class TargetScraper(BaseScraper):
     def get_image_url(self, driver):
         try:
             # wait for hero image with Target URL pattern
-            hero_img = WebDriverWait(driver, 10).until(
+            hero_img = WebDriverWait(driver, WAIT_MEDIUM).until(
                 lambda d: next(
                     (
                         img for img in d.find_elements(By.CSS_SELECTOR, "img[srcset]")
@@ -268,7 +274,7 @@ class TargetScraper(BaseScraper):
             driver.get(url)
             
             # wait for product page to load
-            product_name_el = WebDriverWait(driver, 15).until(
+            product_name_el = WebDriverWait(driver, WAIT_LONG).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, '[data-test="product-title"]'))
             )
             product_name = product_name_el.text.strip()
