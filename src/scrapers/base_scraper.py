@@ -42,6 +42,7 @@ class BaseScraper(ABC):
             'product_data': {
                 'name': scraped_data['name'],
                 'image': scraped_data.get('image_url', None),
+                'upc': scraped_data.get('upc', None),
             },
             'listing_data': {
                 'retailer_id': retailer_id,
