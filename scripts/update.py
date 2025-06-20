@@ -56,12 +56,15 @@ class ProductUpdater:
         self.logger = logger
         self.scraper_concurrency = scraper_concurrency
         
-        # init scrapers
-        self.scrapers = {
-            'amazon': AmazonScraper(),
-            'target': TargetScraper(), 
-            'walmart': WalmartScraper()
+        # scraper classes (not instances) - instances will be created per worker
+        self.scraper_classes = {
+            'amazon': AmazonScraper,
+            'target': TargetScraper, 
+            'walmart': WalmartScraper
         }
+        
+        # store scraper instances for cleanup (will be populated during execution)
+        self.active_scrapers = []
         
         # stats tracking
         self.stats = {
@@ -75,11 +78,12 @@ class ProductUpdater:
 
     # close scrapers
     def close_scrapers(self):
-        for scraper in self.scrapers.values():
+        for scraper in self.active_scrapers:
             try:
                 scraper.close_driver()
             except Exception:
                 pass
+        self.active_scrapers.clear()
 
     # clone a product w/ a new UPC (used for UPC reconciliation)
     # TODO: should be removed once we have a better way to handle UPCs
@@ -235,23 +239,14 @@ class ProductUpdater:
             self.logger.error(f"Error querying products: {e}")
             return []
 
-    # update a single listing using appropriate scraper
-    async def update_single_listing(self, listing: Dict) -> bool:
+    # synchronous version of update_single_listing for use in worker threads
+    def _update_single_listing_sync(self, listing: Dict, scraper) -> bool:
         try:
             listing_id = listing['id']
             product_name = listing['product']['name'] if listing['product'] else 'Unknown'
             retailer_slug = listing['retailer']['slug'] if listing['retailer'] else 'unknown'
             url = listing['url']
             current_price = listing['price']
-            
-            self.logger.info(f"Updating {retailer_slug} listing for: {product_name}")
-            
-            # get appropriate scraper
-            if retailer_slug not in self.scrapers:
-                self.logger.error(f"No scraper available for retailer: {retailer_slug}")
-                return False
-            
-            scraper = self.scrapers[retailer_slug]
             
             # scrape fresh data
             scraped_data = scraper.scrape_product(url)
@@ -377,23 +372,90 @@ class ProductUpdater:
             self.stats['failed_updates'] += 1
             return False
 
-    # update multiple listings w/ concurrency control
+
+
+    # update multiple listings w/ proper concurrency control using worker pool
     async def update_listings_batch(self, listings: List[Dict]) -> None:
-        semaphore = asyncio.Semaphore(self.scraper_concurrency)
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
         
-        async def update_with_semaphore(listing):
-            async with semaphore:
-                return await self.update_single_listing(listing)
+        # split listings into batches for concurrent processing
+        batch_size = max(1, len(listings) // self.scraper_concurrency)
+        batches = [listings[i:i + batch_size] for i in range(0, len(listings), batch_size)]
         
-        tasks = [update_with_semaphore(listing) for listing in listings]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        self.logger.info(f"🔄 Processing {len(listings)} listings in {len(batches)} batches with {self.scraper_concurrency} workers")
         
-        # count results
-        for result in results:
-            self.stats['total_processed'] += 1
-            if isinstance(result, Exception):
-                self.logger.error(f"Task failed with exception: {result}")
-                self.stats['failed_updates'] += 1
+        # use ThreadPoolExecutor for concurrent processing (since scrapers use Selenium)
+        with ThreadPoolExecutor(max_workers=min(self.scraper_concurrency, len(batches))) as executor:
+            # submit all batches
+            future_to_batch = {
+                executor.submit(self._process_listings_batch_sync, batch, i + 1): i + 1 
+                for i, batch in enumerate(batches)
+            }
+            
+            # collect results as they complete
+            for future in as_completed(future_to_batch):
+                batch_num = future_to_batch[future]
+                try:
+                    batch_results = future.result()
+                    self.logger.info(f"Batch {batch_num} completed: {batch_results} listings processed")
+                except Exception as e:
+                    self.logger.error(f"Batch {batch_num} failed: {e}")
+    
+    # process a batch of listings synchronously (called by worker threads)
+    def _process_listings_batch_sync(self, listings: List[Dict], batch_num: int) -> int:
+        self.logger.info(f"Worker {batch_num}: Processing {len(listings)} listings")
+        
+        # create scrapers for this worker thread
+        worker_scrapers = {}
+        processed_count = 0
+        
+        try:
+            for listing in listings:
+                try:
+                    listing_id = listing['id']
+                    product_name = listing['product']['name'] if listing['product'] else 'Unknown'
+                    retailer_slug = listing['retailer']['slug'] if listing['retailer'] else 'unknown'
+                    url = listing['url']
+                    
+                    self.logger.info(f"Worker {batch_num}: Updating {retailer_slug} listing for: {product_name}")
+                    
+                    # get or create scraper for this retailer in this worker thread
+                    if retailer_slug not in worker_scrapers:
+                        if retailer_slug not in self.scraper_classes:
+                            self.logger.error(f"No scraper available for retailer: {retailer_slug}")
+                            self.stats['failed_updates'] += 1
+                            continue
+                        
+                        scraper_class = self.scraper_classes[retailer_slug]
+                        worker_scrapers[retailer_slug] = scraper_class()
+                        self.active_scrapers.append(worker_scrapers[retailer_slug])
+                    
+                    scraper = worker_scrapers[retailer_slug]
+                    
+                    # call the synchronous version of update_single_listing
+                    success = self._update_single_listing_sync(listing, scraper)
+                    processed_count += 1
+                    
+                    if success:
+                        self.logger.debug(f"Worker {batch_num}: Successfully updated listing {listing_id}")
+                    else:
+                        self.logger.warning(f"Worker {batch_num}: Failed to update listing {listing_id}")
+                        
+                except Exception as e:
+                    self.logger.error(f"Worker {batch_num}: Error processing listing {listing.get('id', 'unknown')}: {e}")
+                    self.stats['failed_updates'] += 1
+                    
+        finally:
+            # close scrapers for this worker
+            for scraper in worker_scrapers.values():
+                try:
+                    scraper.close_driver()
+                except Exception:
+                    pass
+        
+        self.logger.info(f"Worker {batch_num}: Completed processing {processed_count} listings")
+        return processed_count
 
     # print update summary statistics
     def print_summary(self):
