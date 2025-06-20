@@ -263,9 +263,8 @@ class TargetScraper(BaseScraper):
     
     # scrape product data from Target page
     def scrape_product(self, url):
-        driver = None
+        driver = self.get_driver(headless=False)
         try:
-            driver = self.setup_driver(headless=False)
             driver.get(url)
             
             # wait for product page to load
@@ -309,11 +308,7 @@ class TargetScraper(BaseScraper):
             return None
             
         finally:
-            if driver:
-                try:
-                    driver.quit()
-                except Exception as e:
-                    pass
+            pass
 
 # test scraper functionality
 if __name__ == "__main__":

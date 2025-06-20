@@ -11,6 +11,7 @@ class BaseScraper(ABC):
     def __init__(self, proxy_manager=None, logger=None):
         self.proxy_manager = proxy_manager
         self.logger = logger or logging.getLogger(__name__)
+        self.driver = None
     
     # setup driver with anti-detection measures
     def setup_driver(self, headless=True):
@@ -30,6 +31,19 @@ class BaseScraper(ABC):
         chrome_options.add_argument("--log-level=3")
         
         return uc.Chrome(options=chrome_options)
+
+    def get_driver(self, headless=True):
+        if not self.driver:
+            self.driver = self.setup_driver(headless=headless)
+        return self.driver
+
+    def close_driver(self):
+        if self.driver:
+            try:
+                self.driver.quit()
+            except Exception:
+                pass
+            self.driver = None
     
     # each scraper must implement this method, will be different for each retailer
     @abstractmethod

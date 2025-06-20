@@ -191,11 +191,8 @@ class WalmartScraper(BaseScraper):
 
     # scrape a product from Walmart
     def scrape_product(self, url):
-        driver = None
+        driver = self.get_driver(headless=False)
         try:
-            # launch browser instance (undetected-chromedriver via BaseScraper)
-            driver = self.setup_driver(headless=False)
-
             # initialise CAPTCHA solver to reuse same Selenium session
             captcha_solver = WalmartCAPTCHASolver(driver=driver)
 
@@ -244,8 +241,7 @@ class WalmartScraper(BaseScraper):
             return None
             
         finally:
-            if driver:
-                driver.quit()
+            pass
 
 # test case
 if __name__ == "__main__":

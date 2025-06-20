@@ -73,6 +73,14 @@ class ProductUpdater:
             'no_change': 0
         }
 
+    # close scrapers
+    def close_scrapers(self):
+        for scraper in self.scrapers.values():
+            try:
+                scraper.close_driver()
+            except Exception:
+                pass
+
     # clone a product w/ a new UPC (used for UPC reconciliation)
     # TODO: should be removed once we have a better way to handle UPCs
     def _clone_product_with_new_upc(self, product_id: str, upc: str) -> Optional[str]:
@@ -578,8 +586,9 @@ async def main():
         logger.info(f"Updating {len(products)} products for {retailer}")
         await updater.update_listings_batch(products)
     
-    # print final summary
+    # print final summary and clean up
     updater.print_summary()
+    updater.close_scrapers()
 
 if __name__ == "__main__":
     asyncio.run(main())
