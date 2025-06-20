@@ -5,17 +5,20 @@ This script updates existing product listings by calling scrapers on products
 from Supabase and updating listings with fresh data from the scrapers.
 Also updates live prices and inserts new entries into price history.
 
-Usage:
+Example Usage:
     python scripts/update.py --retailer amazon --max-products 100
     python scripts/update.py --retailer target --category "Beverages" --max-products 50
     python scripts/update.py --retailer walmart --brand "Coca-Cola" --days-since-update 7
     python scripts/update.py --retailer amazon --product-id "12345678-1234-1234-1234-123456789012"
     python scripts/update.py --all-retailers --max-products 25 --priority-only
     python scripts/update.py --retailer target --stale-only --days-since-update 3
-
-Priority modes:
     python scripts/update.py --retailer amazon --priority-only --max-products 200
     python scripts/update.py --all-retailers --priority-only --track-only
+
+Normal usage:
+    python scripts/update.py --retailer amazon
+    python scripts/update.py --retailer target
+    python scripts/update.py --retailer walmart
 """
 
 import sys
@@ -28,6 +31,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from dotenv import load_dotenv
 from decimal import Decimal
+import re
 
 # load environment variables
 load_dotenv(override=True)
@@ -38,6 +42,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src
 # import required modules
 from supabase import create_client
 from scrapers import AmazonScraper, TargetScraper, WalmartScraper
+
+# create a slug from a product name
+def create_slug(name: str) -> str:
+    slug = re.sub(r'[^\w\s-]', '', name.lower())
+    slug = re.sub(r'[\s_-]+', '-', slug)
+    slug = slug.strip('-')
+    return slug[:255]
 
 class ProductUpdater:
     def __init__(self, supabase_client, logger: logging.Logger, scraper_concurrency: int = 5):
@@ -62,6 +73,52 @@ class ProductUpdater:
             'no_change': 0
         }
 
+    # clone a product w/ a new UPC (used for UPC reconciliation)
+    # TODO: should be removed once we have a better way to handle UPCs
+    def _clone_product_with_new_upc(self, product_id: str, upc: str) -> Optional[str]:
+        try:
+            prod_result = self.supabase.table('products').select('*').eq('id', product_id).execute()
+            if not prod_result.data:
+                self.logger.error(f"Could not fetch product {product_id} for cloning")
+                return None
+
+            prod = prod_result.data[0]
+            new_data = {
+                'name': prod['name'],
+                'slug': create_slug(f"{prod['name']}-{upc}"),
+                'description': prod.get('description'),
+                'brand_id': prod.get('brand_id'),
+                'weight': prod.get('weight'),
+                'dimensions': prod.get('dimensions'),
+                'upc': upc,
+                'is_active': True
+            }
+
+            insert_res = self.supabase.table('products').insert(new_data).execute()
+            if not insert_res.data:
+                self.logger.error("Failed to insert cloned product")
+                return None
+
+            new_id = insert_res.data[0]['id']
+
+            # copy category assignments
+            cat_result = self.supabase.table('product_categories').select('category_id,is_primary').eq('product_id', product_id).execute()
+            if cat_result.data:
+                for cat in cat_result.data:
+                    try:
+                        self.supabase.table('product_categories').insert({
+                            'product_id': new_id,
+                            'category_id': cat['category_id'],
+                            'is_primary': cat.get('is_primary', False)
+                        }).execute()
+                    except Exception as e:
+                        self.logger.error(f"Error copying category {cat['category_id']} to cloned product: {e}")
+
+            return new_id
+        except Exception as e:
+            self.logger.error(f"Error cloning product {product_id}: {e}")
+            return None
+
     # get products to update (from supabase)
     def get_products_to_update(self, 
                              retailer: Optional[str] = None,
@@ -84,7 +141,7 @@ class ProductUpdater:
                 url,
                 price,
                 updated_at,
-                product:products(id, name, slug),
+                product:products(id, name, slug, upc),
                 retailer:retailers(id, name, slug)
             ''')
             
@@ -203,6 +260,7 @@ class ProductUpdater:
             new_review_count = scraped_data.get('review_count')
             new_availability = scraped_data.get('availability', 'in_stock')
             new_image_url = scraped_data.get('images', [None])[0]
+            new_upc = scraped_data.get('upc')
             
             # prepare update data
             update_data = {
@@ -220,6 +278,32 @@ class ProductUpdater:
                 update_data['availability_status'] = new_availability
             if new_image_url:
                 update_data['image_url'] = new_image_url
+
+            # handle UPC reconciliation
+            existing_upc = listing['product'].get('upc') if listing.get('product') else None
+            if new_upc and new_upc != existing_upc:
+                # check how many listings reference this product
+                listing_count_res = self.supabase.table('listings').select('id').eq('product_id', listing['product_id']).execute()
+                listing_count = len(listing_count_res.data) if listing_count_res.data else 0
+
+                if listing_count > 1:
+                    # create new product and move listing
+                    new_product_id = self._clone_product_with_new_upc(listing['product_id'], new_upc)
+                    if new_product_id:
+                        update_data['product_id'] = new_product_id
+                        update_data['upc'] = new_upc
+                        listing['product_id'] = new_product_id
+                        self.logger.info(f"Created new product {new_product_id} for UPC {new_upc}")
+                else:
+                    # update product UPC in place
+                    try:
+                        self.supabase.table('products').update({'upc': new_upc}).eq('id', listing['product_id']).execute()
+                        update_data['upc'] = new_upc
+                        self.logger.info(f"Updated UPC for product {listing['product_id']} to {new_upc}")
+                    except Exception as e:
+                        self.logger.error(f"Failed to update UPC for product {listing['product_id']}: {e}")
+            elif new_upc:
+                update_data['upc'] = new_upc
             
             # handle price update
             price_changed = False
@@ -249,10 +333,11 @@ class ProductUpdater:
                     self.logger.warning(f"Could not parse price '{new_price}': {e}")
             
             # update listing in database
-            update_result = self.supabase.table('listings').update(update_data).eq('id', listing_id).execute()
-            
-            if not update_result.data:
-                self.logger.error(f"Failed to update listing {listing_id}")
+            try:
+                self.supabase.table('listings').update(update_data).eq('id', listing_id).execute()
+                self.logger.debug(f"Successfully updated listing {listing_id}")
+            except Exception as e:
+                self.logger.error(f"Failed to update listing {listing_id}: {e}")
                 self.stats['failed_updates'] += 1
                 return False
             
