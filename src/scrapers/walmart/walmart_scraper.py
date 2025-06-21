@@ -33,8 +33,8 @@ except ImportError:
 
 # walmart scraper
 class WalmartScraper(BaseScraper):
-    def __init__(self, proxy_manager=None, logger=None):
-        super().__init__(proxy_manager, logger)
+    def __init__(self, proxy_manager=None, logger=None, use_safari=False):
+        super().__init__(proxy_manager, logger, use_safari)
         # set retailer id
         self.retailer_id = 3 
     

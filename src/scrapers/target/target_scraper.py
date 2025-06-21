@@ -32,8 +32,8 @@ WAIT_SHORT = 2
 
 # target scraper
 class TargetScraper(BaseScraper):
-    def __init__(self, proxy_manager=None, logger=None):
-        super().__init__(proxy_manager, logger)
+    def __init__(self, proxy_manager=None, logger=None, use_safari=False):
+        super().__init__(proxy_manager, logger, use_safari)
         self.retailer_id = 2 
     
     # extract rating & review count from page

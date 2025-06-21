@@ -51,10 +51,16 @@ def create_slug(name: str) -> str:
     return slug[:255]
 
 class ProductUpdater:
-    def __init__(self, supabase_client, logger: logging.Logger, scraper_concurrency: int = 5):
+    def __init__(self, supabase_client, logger: logging.Logger, scraper_concurrency: int = 1, use_safari: bool = False):
         self.supabase = supabase_client
         self.logger = logger
         self.scraper_concurrency = scraper_concurrency
+        self.use_safari = use_safari
+        
+        # Safari driver allows only one concurrent session per machine
+        if self.use_safari and self.scraper_concurrency > 1:
+            self.logger.warning("Safari driver supports only one concurrent session; reducing scraper_concurrency to 1")
+            self.scraper_concurrency = 1
         
         # scraper classes (not instances) - instances will be created per worker
         self.scraper_classes = {
@@ -137,7 +143,7 @@ class ProductUpdater:
                              category: Optional[str] = None,
                              brand: Optional[str] = None,
                              product_id: Optional[str] = None,
-                             max_products: int = 100,
+                             max_products: Optional[int] = None,
                              days_since_update: int = 1,
                              stale_only: bool = False,
                              priority_only: bool = False,
@@ -223,7 +229,9 @@ class ProductUpdater:
                 pass
             
             # apply limit & ordering
-            query = query.order('updated_at', desc=False).limit(max_products)
+            query = query.order('updated_at', desc=False)
+            if max_products:
+                query = query.limit(max_products)
             
             # execute query
             result = query.execute()
@@ -428,7 +436,7 @@ class ProductUpdater:
                             continue
                         
                         scraper_class = self.scraper_classes[retailer_slug]
-                        worker_scrapers[retailer_slug] = scraper_class()
+                        worker_scrapers[retailer_slug] = scraper_class(use_safari=self.use_safari)
                         self.active_scrapers.append(worker_scrapers[retailer_slug])
                     
                     scraper = worker_scrapers[retailer_slug]
@@ -509,8 +517,7 @@ async def main():
     parser.add_argument(
         "--max-products", "-p",
         type=int,
-        default=100,
-        help="Maximum number of products to update (default: 100)"
+        help="Maximum number of products to update (optional, processes all if not specified)"
     )
     
     parser.add_argument(
@@ -544,6 +551,12 @@ async def main():
         type=int,
         default=5,
         help="Number of concurrent scrapers (default: 5)"
+    )
+    
+    parser.add_argument(
+        "--use-safari",
+        action="store_true",
+        help="Use Safari driver instead of Chrome (macOS only)"
     )
     
     # supabase configuration
@@ -604,7 +617,7 @@ async def main():
         sys.exit(1)
     
     # init updater
-    updater = ProductUpdater(supabase, logger, args.scraper_concurrency)
+    updater = ProductUpdater(supabase, logger, args.scraper_concurrency, args.use_safari)
     
     # determine retailers to process
     retailers_to_process = []

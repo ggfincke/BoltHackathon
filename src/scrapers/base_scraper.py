@@ -5,16 +5,25 @@ import random
 from abc import ABC, abstractmethod
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 
 # base scraper class - all scrapers inherit from this
 class BaseScraper(ABC):
-    def __init__(self, proxy_manager=None, logger=None):
+    def __init__(self, proxy_manager=None, logger=None, use_safari=False):
         self.proxy_manager = proxy_manager
         self.logger = logger or logging.getLogger(__name__)
+        self.use_safari = use_safari
         self.driver = None
     
-    # setup driver with anti-detection measures
+    # setup driver
     def setup_driver(self, headless=True):
+        if self.use_safari:
+            return self._setup_safari_driver()
+        else:
+            return self._setup_chrome_driver(headless)
+    
+    # setup chrome driver - undetected-chromedriver
+    def _setup_chrome_driver(self, headless=False):
         proxy = self.proxy_manager.get_proxy() if self.proxy_manager else None
         
         chrome_options = uc.ChromeOptions()
@@ -31,12 +40,24 @@ class BaseScraper(ABC):
         chrome_options.add_argument("--log-level=3")
         
         return uc.Chrome(options=chrome_options)
+    
+    # setup safari driver
+    def _setup_safari_driver(self):
+        # Safari doesn't support headless mode & has limited options
+        if self.proxy_manager:
+            self.logger.warning("Safari driver does not support proxy configuration")
+        
+        safari_options = webdriver.SafariOptions()
+        
+        return webdriver.Safari(options=safari_options)
 
+    # get driver
     def get_driver(self, headless=True):
         if not self.driver:
             self.driver = self.setup_driver(headless=headless)
         return self.driver
 
+    # close driver
     def close_driver(self):
         if self.driver:
             try:
