@@ -1,23 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --text: #11090e;
+  --text: #1a1a1a;
   --background: #ffffff;
   --surface: #f8f9fa;
-  --primary: #85d1e7;
-  --secondary: #c65b82;
-  --accent: #6f506f;
+  --primary: #0066cc;
+  --secondary: #d63384;
+  --accent: #6f42c1;
   --button-text: #ffffff;
+  --button-text-dark: #1a1a1a;
+  --surface-hover: #e9ecef;
+  --primary-hover: #0052a3;
+  --secondary-hover: #b02a5b;
+  --accent-hover: #5a2d8e;
 }
 
 .dark {
-  --text: #f6eef3;
+  --text: #f8f9fa;
   --background: #0d1117;
   --surface: #161b22;
-  --primary: #85d1e7;
-  --secondary: #c65b82;
-  --accent: #6f506f;
-  --button-text: #fdfdfd;
+  --primary: #4fc3f7;
+  --secondary: #f48fb1;
+  --accent: #ce93d8;
+  --button-text: #1a1a1a;
+  --button-text-dark: #f8f9fa;
+  --surface-hover: #21262d;
+  --primary-hover: #29b6f6;
+  --secondary-hover: #f06292;
+  --accent-hover: #ba68c8;
 }
 
 body {
@@ -28,5 +38,22 @@ body {
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Button base styles for accessibility */
+  .btn-primary {
+    @apply bg-primary text-buttonText hover:bg-primary-hover transition-colors;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-buttonText hover:bg-secondary-hover transition-colors;
+  }
+  
+  .btn-accent {
+    @apply bg-accent text-buttonText hover:bg-accent-hover transition-colors;
+  }
+  
+  .btn-surface {
+    @apply bg-surface text-text hover:bg-surface-hover transition-colors;
   }
 }

@@ -28,7 +28,7 @@ export default function NavBar() {
         <div className="container mx-auto">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl">
+              <Link href="/" className="flex items-center gap-2 text-primary hover:text-primaryHover font-bold text-xl transition-colors">
                 <LogoIcon className="w-6 h-6" />
                 <span>TrackBasket</span>
               </Link>
@@ -45,7 +45,7 @@ export default function NavBar() {
                     <button
                       key={item.name}
                       onClick={() => setSearchOpen(true)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface`}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-surface text-text hover:bg-surfaceHover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                     >
                       <Icon className="w-5 h-5" />
                       <span>{item.name}</span>
@@ -57,10 +57,10 @@ export default function NavBar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
                       isActive 
-                        ? 'bg-primary text-buttonText font-medium' 
-                        : 'hover:bg-surface'
+                        ? 'bg-primary text-buttonText font-medium hover:bg-primaryHover' 
+                        : 'bg-surface text-text hover:bg-surfaceHover'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -73,7 +73,7 @@ export default function NavBar() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-md hover:bg-surface transition-colors md:hidden"
+                className="p-2 rounded-md bg-surface text-text hover:bg-surfaceHover transition-colors md:hidden focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                 aria-label="Search"
               >
                 <SearchIcon className="w-5 h-5" />
@@ -88,7 +88,7 @@ export default function NavBar() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-secondary text-buttonText hover:bg-secondaryHover transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background"
                 >
                   <UserIcon className="w-5 h-5" />
                   <span className="hidden md:inline">Login</span>
@@ -97,7 +97,7 @@ export default function NavBar() {
               
               {/* Mobile menu button - only shown on small screens */}
               <div className="md:hidden">
-                <button className="p-2 rounded-md hover:bg-surface">
+                <button className="p-2 rounded-md bg-surface text-text hover:bg-surfaceHover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
                   <CategoriesIcon className="w-6 h-6" />
                 </button>
               </div>
@@ -118,8 +118,10 @@ export default function NavBar() {
                   <button
                     key={item.name}
                     onClick={() => setSearchOpen(true)}
-                    className={`flex flex-col items-center py-3 ${
-                      isActive ? 'text-primary' : 'text-text'
+                    className={`flex flex-col items-center py-3 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-md ${
+                      isActive 
+                        ? 'text-primary bg-surface' 
+                        : 'text-text hover:text-primary hover:bg-surface'
                     }`}
                   >
                     <Icon className="w-6 h-6" />
@@ -132,8 +134,10 @@ export default function NavBar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex flex-col items-center py-3 ${
-                    isActive ? 'text-primary' : 'text-text'
+                  className={`flex flex-col items-center py-3 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-md ${
+                    isActive 
+                      ? 'text-primary bg-surface' 
+                      : 'text-text hover:text-primary hover:bg-surface'
                   }`}
                 >
                   <Icon className="w-6 h-6" />
@@ -145,8 +149,10 @@ export default function NavBar() {
             {user ? (
               <Link
                 href="/profile"
-                className={`flex flex-col items-center py-3 ${
-                  pathname === '/profile' ? 'text-primary' : 'text-text'
+                className={`flex flex-col items-center py-3 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-md ${
+                  pathname === '/profile' 
+                    ? 'text-primary bg-surface' 
+                    : 'text-text hover:text-primary hover:bg-surface'
                 }`}
               >
                 <UserIcon className="w-6 h-6" />
@@ -155,8 +161,10 @@ export default function NavBar() {
             ) : (
               <Link
                 href="/auth/login"
-                className={`flex flex-col items-center py-3 ${
-                  pathname === '/auth/login' ? 'text-primary' : 'text-text'
+                className={`flex flex-col items-center py-3 px-2 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background rounded-md ${
+                  pathname === '/auth/login' 
+                    ? 'text-secondary bg-surface' 
+                    : 'text-text hover:text-secondary hover:bg-surface'
                 }`}
               >
                 <UserIcon className="w-6 h-6" />
