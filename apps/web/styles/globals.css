@@ -30,3 +30,107 @@ body {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+  opacity: 0.8;
+}
+
+/* Improved Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Smooth Transitions */
+a, button {
+  transition: all 0.2s ease;
+}
+
+/* Improved Card Styles */
+.card {
+  @apply bg-surface rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md;
+}
+
+.card-hover {
+  @apply hover:translate-y-[-4px] hover:shadow-md transition-all duration-300;
+}
+
+/* Improved Button Styles */
+.btn-primary {
+  @apply bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-transparent border border-primary text-primary px-4 py-2 rounded-md hover:bg-primary/10 transition-colors;
+}
+
+/* Improved Form Styles */
+input, select, textarea {
+  @apply bg-background border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all;
+}
+
+/* Improved Badge Styles */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-primary {
+  @apply bg-primary/20 text-primary;
+}
+
+.badge-secondary {
+  @apply bg-secondary/20 text-secondary;
+}
+
+/* Improved Table Styles */
+table {
+  @apply w-full border-collapse;
+}
+
+th {
+  @apply text-left py-3 px-4 font-semibold;
+}
+
+td {
+  @apply py-3 px-4 border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Improved Mobile Navigation */
+.mobile-nav-item {
+  @apply flex items-center w-full px-4 py-3 hover:bg-surface transition-colors;
+}
