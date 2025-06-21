@@ -4,19 +4,19 @@ import { FaShoppingBasket, FaRegBell, FaSearch, FaChartLine, FaUsers } from 'rea
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero Section with Primary Color Background */}
       <section className="bg-primary py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-2xl text-white">
+          <div className="max-w-2xl text-buttonText">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Track prices across retailers and save money</h1>
-            <p className="text-lg md:text-xl mb-8 text-white/90">Compare prices, create shopping baskets, and get notified when prices drop on your favorite products.</p>
+            <p className="text-lg md:text-xl mb-8 text-buttonText/90">Compare prices, create shopping baskets, and get notified when prices drop on your favorite products.</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/categories" className="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center shadow-lg">
+              <Link href="/categories" className="bg-buttonText text-primary hover:bg-buttonText/90 px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center shadow-lg">
                 Browse Categories
               </Link>
-              <Link href="/baskets" className="bg-secondary text-white hover:bg-secondary/90 px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center shadow-lg">
+              <Link href="/baskets" className="bg-secondary text-buttonText hover:bg-secondary/90 px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center shadow-lg">
                 <FaShoppingBasket className="mr-2" />
                 Create a Basket
               </Link>
@@ -29,31 +29,31 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="bg-white dark:bg-gray-800 py-10 border-b border-gray-200 dark:border-gray-700">
+      <section className="bg-surface py-10 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex items-center justify-center">
               <div className="text-primary text-4xl font-bold mr-3">3+</div>
-              <div className="text-gray-700 dark:text-gray-300">Major retailers tracked</div>
+              <div className="text-text">Major retailers tracked</div>
             </div>
             <div className="flex items-center justify-center">
               <div className="text-primary text-4xl font-bold mr-3">1000+</div>
-              <div className="text-gray-700 dark:text-gray-300">Products monitored daily</div>
+              <div className="text-text">Products monitored daily</div>
             </div>
             <div className="flex items-center justify-center">
               <div className="text-primary text-4xl font-bold mr-3">15%</div>
-              <div className="text-gray-700 dark:text-gray-300">Average savings</div>
+              <div className="text-text">Average savings</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-900">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold">Popular Categories</h2>
-            <Link href="/categories" className="text-primary hover:underline flex items-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-text">Popular Categories</h2>
+            <Link href="/categories" className="text-primary hover:text-primary/80 flex items-center font-medium">
               View all <BsArrowRight className="ml-2" />
             </Link>
           </div>
@@ -66,7 +66,7 @@ export default function Home() {
               { name: 'Produce', image: 'https://images.pexels.com/photos/1656663/pexels-photo-1656663.jpeg', color: 'primary' }
             ].map((category, index) => (
               <Link href={`/categories/${category.name.toLowerCase()}`} key={index} className="group">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden transition-transform hover:shadow-md group-hover:scale-[1.02] border-t-4 border-primary">
+                <div className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:shadow-md group-hover:scale-[1.02] border-t-4 border-primary">
                   <div className="h-40 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
                     <img 
                       src={category.image} 
@@ -80,7 +80,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Explore {category.name.toLowerCase()}</p>
+                    <p className="text-sm text-text/70">Explore {category.name.toLowerCase()}</p>
                     <div className="mt-2 flex justify-between items-center">
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                         Best deals
@@ -96,82 +96,82 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white dark:bg-gray-800">
+      <section className="py-16 bg-surface">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">Why Use TrackBasket?</h2>
-          <p className="text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12">Our platform helps you make smarter shopping decisions and save money on your groceries.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 text-text">Why Use TrackBasket?</h2>
+          <p className="text-center text-text/70 max-w-2xl mx-auto mb-12">Our platform helps you make smarter shopping decisions and save money on your groceries.</p>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-surface p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-primary">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+            <div className="bg-background p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-primary">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 text-buttonText">
                 <FaSearch className="text-2xl" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Compare Prices</h3>
-              <p className="text-gray-600 dark:text-gray-400">Find the best deals by comparing prices across multiple retailers in real-time.</p>
+              <h3 className="text-xl font-semibold mb-3 text-text">Compare Prices</h3>
+              <p className="text-text/70">Find the best deals by comparing prices across multiple retailers in real-time.</p>
             </div>
             
-            <div className="bg-surface p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-secondary">
-              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+            <div className="bg-background p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-secondary">
+              <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-buttonText">
                 <FaShoppingBasket className="text-2xl" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Create Baskets</h3>
-              <p className="text-gray-600 dark:text-gray-400">Organize your shopping with custom baskets and share them with family and friends.</p>
+              <h3 className="text-xl font-semibold mb-3 text-text">Create Baskets</h3>
+              <p className="text-text/70">Organize your shopping with custom baskets and share them with family and friends.</p>
             </div>
             
-            <div className="bg-surface p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-accent">
-              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+            <div className="bg-background p-6 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow border-b-4 border-accent">
+              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4 text-buttonText">
                 <FaRegBell className="text-2xl" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Price Alerts</h3>
-              <p className="text-gray-600 dark:text-gray-400">Get notified when prices drop or items come back in stock at your favorite stores.</p>
+              <h3 className="text-xl font-semibold mb-3 text-text">Price Alerts</h3>
+              <p className="text-text/70">Get notified when prices drop or items come back in stock at your favorite stores.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-primary/10">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">How TrackBasket Works</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-text">How TrackBasket Works</h2>
           
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connecting line */}
             <div className="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-primary"></div>
             
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
-              <h3 className="text-xl font-semibold mb-3">Search Products</h3>
-              <p className="text-gray-600 dark:text-gray-400">Find your favorite products across multiple retailers.</p>
+              <div className="w-12 h-12 bg-primary text-buttonText rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+              <h3 className="text-xl font-semibold mb-3 text-text">Search Products</h3>
+              <p className="text-text/70">Find your favorite products across multiple retailers.</p>
             </div>
             
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
-              <h3 className="text-xl font-semibold mb-3">Create Baskets</h3>
-              <p className="text-gray-600 dark:text-gray-400">Add products to your custom shopping baskets.</p>
+              <div className="w-12 h-12 bg-primary text-buttonText rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+              <h3 className="text-xl font-semibold mb-3 text-text">Create Baskets</h3>
+              <p className="text-text/70">Add products to your custom shopping baskets.</p>
             </div>
             
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
-              <h3 className="text-xl font-semibold mb-3">Save Money</h3>
-              <p className="text-gray-600 dark:text-gray-400">Get alerts when prices drop and save on your groceries.</p>
+              <div className="w-12 h-12 bg-primary text-buttonText rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+              <h3 className="text-xl font-semibold mb-3 text-text">Save Money</h3>
+              <p className="text-text/70">Get alerts when prices drop and save on your groceries.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-white dark:bg-gray-800">
+      <section className="py-16 bg-surface">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">What Our Users Say</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-text">What Our Users Say</h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-surface p-6 rounded-lg shadow-sm">
+            <div className="bg-background p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
                   <span className="text-primary font-bold">S</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold">Sarah M.</h4>
+                  <h4 className="font-semibold text-text">Sarah M.</h4>
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -181,16 +181,16 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">"I've saved over $200 on my monthly grocery bill since I started using TrackBasket. The price alerts are a game-changer!"</p>
+              <p className="text-text/70">"I've saved over $200 on my monthly grocery bill since I started using TrackBasket. The price alerts are a game-changer!"</p>
             </div>
             
-            <div className="bg-surface p-6 rounded-lg shadow-sm">
+            <div className="bg-background p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center mr-3">
                   <span className="text-secondary font-bold">J</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold">James T.</h4>
+                  <h4 className="font-semibold text-text">James T.</h4>
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -200,16 +200,16 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">"The basket sharing feature is perfect for our family. We can all add items and find the best deals together."</p>
+              <p className="text-text/70">"The basket sharing feature is perfect for our family. We can all add items and find the best deals together."</p>
             </div>
             
-            <div className="bg-surface p-6 rounded-lg shadow-sm">
+            <div className="bg-background p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mr-3">
                   <span className="text-accent font-bold">L</span>
                 </div>
                 <div>
-                  <h4 className="font-semibold">Lisa K.</h4>
+                  <h4 className="font-semibold text-text">Lisa K.</h4>
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -219,22 +219,22 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-400">"I love being able to compare prices across different stores without having to visit each website individually."</p>
+              <p className="text-text/70">"I love being able to compare prices across different stores without having to visit each website individually."</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-secondary text-white">
+      <section className="py-16 bg-secondary text-buttonText">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to start saving?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">Create an account to track prices, build shopping baskets, and get notified about the best deals.</p>
+          <p className="text-lg mb-8 max-w-2xl mx-auto text-buttonText/90">Create an account to track prices, build shopping baskets, and get notified about the best deals.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signup" className="bg-white text-secondary hover:bg-gray-100 px-8 py-3 rounded-md font-medium transition-colors inline-block shadow-lg">
+            <Link href="/auth/signup" className="bg-buttonText text-secondary hover:bg-buttonText/90 px-8 py-3 rounded-md font-medium transition-colors inline-block shadow-lg">
               Sign Up Now
             </Link>
-            <Link href="/categories" className="bg-transparent border-2 border-white hover:bg-white/10 px-8 py-3 rounded-md font-medium transition-colors inline-block text-white">
+            <Link href="/categories" className="bg-transparent border-2 border-buttonText hover:bg-buttonText/10 px-8 py-3 rounded-md font-medium transition-colors inline-block text-buttonText">
               Browse Categories
             </Link>
           </div>
