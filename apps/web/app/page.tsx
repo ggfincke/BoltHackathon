@@ -9,9 +9,9 @@ export default function Home() {
       <section className="bg-primary py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-2xl text-buttonText">
+          <div className="max-w-2xl text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Track prices across retailers and save money</h1>
-            <p className="text-lg md:text-xl mb-8 text-buttonText/90">Compare prices, create shopping baskets, and get notified when prices drop on your favorite products.</p>
+            <p className="text-lg md:text-xl mb-8 text-white/90">Compare prices, create shopping baskets, and get notified when prices drop on your favorite products.</p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/categories" className="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center shadow-lg">
                 Browse Categories
@@ -234,7 +234,7 @@ export default function Home() {
             <Link href="/auth/signup" className="bg-white text-secondary hover:bg-gray-100 px-8 py-3 rounded-md font-medium transition-colors inline-block shadow-lg">
               Sign Up Now
             </Link>
-            <Link href="/categories" className="bg-transparent border-2 border-white hover:bg-white/10 px-8 py-3 rounded-md font-medium transition-colors inline-block">
+            <Link href="/categories" className="bg-transparent border-2 border-white hover:bg-white/10 px-8 py-3 rounded-md font-medium transition-colors inline-block text-white">
               Browse Categories
             </Link>
           </div>
