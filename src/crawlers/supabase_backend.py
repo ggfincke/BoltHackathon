@@ -322,8 +322,15 @@ class SupabaseBackend(OutputBackend):
                     
             except ValueError as e:
                 if "Duplicate listing" in str(e):
-                    self.logger.info(f"Skipping duplicate listing for product: {record.title}")
-                    return  
+                    # handle dupe listing w/ UPC lookup & potential merging
+                    self._handle_duplicate_listing(
+                        product_id=product_id,
+                        product_name=record.title,
+                        product_url=str(record.url),
+                        retailer_name=retailer_name,
+                        listing_data=listing_data
+                    )
+                    return
                 else:
                     raise
             
@@ -423,8 +430,15 @@ class SupabaseBackend(OutputBackend):
                     
             except ValueError as e:
                 if "Duplicate listing" in str(e):
-                    self.logger.info(f"Skipping duplicate listing for product: {product_title}")
-                    return 
+                    # handle dupe listing w/ UPC lookup & potential merging
+                    self._handle_duplicate_listing(
+                        product_id=product_id,
+                        product_name=product_title,
+                        product_url=product_url,
+                        retailer_name=retailer_name,
+                        listing_data=listing_data
+                    )
+                    return
                 else:
                     raise
             
@@ -765,6 +779,232 @@ class SupabaseBackend(OutputBackend):
             self._created_upc_managers.append(mgr)
 
         return self._thread_local.upc_manager
+
+    # handle dupe listing w/ UPC lookup & potential merging
+    def _handle_duplicate_listing(self, product_id: str, product_name: str, product_url: str, retailer_name: str, listing_data: dict) -> None:
+        try:
+            self.logger.info(f"🔍 Handling duplicate listing for product: {product_name}")
+            
+            # get existing product info
+            existing_product = self.supabase.table('products')\
+                .select('id, name, upc, description, brand_id')\
+                .eq('id', product_id)\
+                .execute()
+            
+            if not existing_product.data:
+                self.logger.warning(f"Could not find existing product {product_id}")
+                return
+            
+            product_data = existing_product.data[0]
+            existing_upc = product_data.get('upc')
+            
+            # if existing product doesn't have UPC, perform lookup
+            if not existing_upc and self.enable_upc_lookup and self.upc_manager:
+                self.logger.info(f"Performing UPC lookup for duplicate product: {product_name}")
+                
+                upc_manager = self._get_thread_upc_manager()
+                upc_result = upc_manager.lookup_upc(
+                    product_name=product_name,
+                    retailer_source=retailer_name,
+                    original_url=product_url,
+                )
+                
+                if upc_result and upc_result.upc:
+                    # update existing product w/ found UPC
+                    self._update_product_upc(product_id, upc_result.upc)
+                    existing_upc = upc_result.upc
+                    self.logger.info(f"✓ Added UPC {upc_result.upc} to existing product: {product_name}")
+                    
+                    # check for other products w/ same UPC for potential merging
+                    products_with_same_upc = self.find_products_by_upc(upc_result.upc)
+                    
+                    if len(products_with_same_upc) > 1:
+                        # multiple products found w/ same UPC - merge them
+                        product_ids = [p['id'] for p in products_with_same_upc if p['id'] != product_id]
+                        
+                        if product_ids:
+                            # use the oldest product as primary (or the one w/ most data)
+                            primary_product = min(products_with_same_upc, key=lambda p: p['created_at'])
+                            duplicate_ids = [p['id'] for p in products_with_same_upc if p['id'] != primary_product['id']]
+                            
+                            if self.merge_products(primary_product['id'], duplicate_ids):
+                                self.logger.info(f"✓ Merged {len(duplicate_ids)} duplicate products with UPC {upc_result.upc}")
+                else:
+                    self.logger.debug(f"No UPC found for duplicate product: {product_name}")
+            else:
+                if existing_upc:
+                    self.logger.debug(f"Product {product_name} already has UPC: {existing_upc}")
+                else:
+                    self.logger.debug(f"UPC lookup disabled or no UPC manager available")
+            
+            # continue to suppress duplicate listing creation
+            self.logger.info(f"Skipped creating duplicate listing for product: {product_name}")
+                
+        except Exception as e:
+            self.logger.error(f"Error handling duplicate listing for {product_name}: {e}")
+
+    # * UPC-based product management methods *
+    
+    # find all products that have the given UPC
+    def find_products_by_upc(self, upc_code: str) -> List[dict]:
+        try:
+            result = self.supabase.table('products')\
+                .select('id, name, description, brand_id, created_at')\
+                .eq('upc', upc_code)\
+                .execute()
+            
+            return result.data if result.data else []
+        except Exception as e:
+            self.logger.error(f"Error finding products by UPC {upc_code}: {e}")
+            return []
+    
+    # merge multiple product records into a primary product
+    def merge_products(self, primary_product_id: str, duplicate_product_ids: List[str]) -> bool:
+        try:
+            # get primary product info for logging & updating
+            primary_result = self.supabase.table('products')\
+                .select('name, description, brand_id')\
+                .eq('id', primary_product_id)\
+                .execute()
+            
+            if not primary_result.data:
+                self.logger.error(f"Could not find primary product {primary_product_id}")
+                return False
+                
+            primary_product = primary_result.data[0]
+            primary_name = primary_product['name']
+            
+            for duplicate_id in duplicate_product_ids:
+                # get duplicate product info for logging
+                duplicate_result = self.supabase.table('products')\
+                    .select('name, description, brand_id')\
+                    .eq('id', duplicate_id)\
+                    .execute()
+                
+                if duplicate_result.data:
+                    duplicate_product = duplicate_result.data[0]
+                    duplicate_name = duplicate_product['name']
+                    
+                    # update primary product w/ enhanced data if available
+                    updates = {}
+                    if not primary_product.get('description') and duplicate_product.get('description'):
+                        updates['description'] = duplicate_product['description']
+                    if not primary_product.get('brand_id') and duplicate_product.get('brand_id'):
+                        updates['brand_id'] = duplicate_product['brand_id']
+                    
+                    if updates:
+                        self.supabase.table('products')\
+                            .update(updates)\
+                            .eq('id', primary_product_id)\
+                            .execute()
+                        self.logger.debug(f"Enhanced primary product {primary_name} with data from {duplicate_name}")
+                        # update local copy of primary product data
+                        primary_product.update(updates)
+                    
+                    # reassign all listings from duplicate to primary product
+                    self.supabase.table('listings')\
+                        .update({'product_id': primary_product_id})\
+                        .eq('product_id', duplicate_id)\
+                        .execute()
+                    
+                    # reassign product category associations
+                    self.supabase.table('product_categories')\
+                        .update({'product_id': primary_product_id})\
+                        .eq('product_id', duplicate_id)\
+                        .execute()
+                    
+                    # mark dupe product as inactive instead of deleting
+                    self.supabase.table('products')\
+                        .update({'is_active': False})\
+                        .eq('id', duplicate_id)\
+                        .execute()
+                    
+                    self.logger.info(f"✓ Merged product '{duplicate_name}' into '{primary_name}'")
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error merging products: {e}")
+            return False
+
+    # trigger UPC lookup for existing listings that lack UPCs
+    def trigger_upc_lookup_for_existing_listings(self, retailer_id: str = None, limit: int = 100) -> Dict[str, Any]:
+        try:
+            # build query for listings w/o UPCs
+            query = self.supabase.table('listings')\
+                .select('id, product_id, url, products(name, upc)')\
+                .is_('upc', 'null')\
+                .limit(limit)
+            
+            if retailer_id:
+                query = query.eq('retailer_id', retailer_id)
+            
+            result = query.execute()
+            
+            if not result.data:
+                return {
+                    "success": True,
+                    "message": "No listings found without UPCs",
+                    "processed": 0,
+                    "successful": 0
+                }
+            
+            processed = 0
+            successful = 0
+            
+            for listing in result.data:
+                if not listing.get('products') or not listing['products'].get('name'):
+                    continue
+                    
+                product_name = listing['products']['name']
+                product_upc = listing['products'].get('upc')
+                listing_id = listing['id']
+                product_id = listing['product_id']
+                
+                # skip if product already has UPC
+                if product_upc:
+                    self._update_listing_upc(listing_id, product_upc)
+                    successful += 1
+                    processed += 1
+                    continue
+                
+                # perform UPC lookup
+                if self.enable_upc_lookup and self.upc_manager:
+                    try:
+                        upc_manager = self._get_thread_upc_manager()
+                        upc_result = upc_manager.lookup_upc(
+                            product_name=product_name,
+                            original_url=listing['url']
+                        )
+                        
+                        if upc_result and upc_result.upc:
+                            # update both product & listing
+                            self._update_product_upc(product_id, upc_result.upc)
+                            self._update_listing_upc(listing_id, upc_result.upc)
+                            successful += 1
+                            self.logger.info(f"✓ Added UPC {upc_result.upc} to existing listing: {product_name}")
+                        
+                        processed += 1
+                        
+                    except Exception as e:
+                        self.logger.error(f"Error performing UPC lookup for {product_name}: {e}")
+                        processed += 1
+            
+            return {
+                "success": True,
+                "processed": processed,
+                "successful": successful,
+                "failed": processed - successful
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error triggering UPC lookup for existing listings: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "processed": 0,
+                "successful": 0
+            }
 
 # * Factory functions *
 

@@ -11,6 +11,7 @@ import time
 import re
 import os
 import sys
+import json
 
 # handle imports based on how script is being run
 try:
@@ -23,10 +24,17 @@ except ImportError:
     sys.path.insert(0, parent_dir)
     from base_scraper import BaseScraper
     
+# attempt to import the CAPTCHA solver relative to package structure
+try:
+    from .walmart_captcha_solver import WalmartCAPTCHASolver
+except ImportError:
+    # fallback when running as standalone script
+    from walmart_captcha_solver import WalmartCAPTCHASolver
+
 # walmart scraper
 class WalmartScraper(BaseScraper):
-    def __init__(self, proxy_manager=None, logger=None):
-        super().__init__(proxy_manager, logger)
+    def __init__(self, proxy_manager=None, logger=None, use_safari=False):
+        super().__init__(proxy_manager, logger, use_safari)
         # set retailer id
         self.retailer_id = 3 
     
@@ -150,13 +158,54 @@ class WalmartScraper(BaseScraper):
             self.logger.error(f"An error occurred: {e}")
             return None
 
+    # get rating & review count
+    def get_rating_reviews(self, driver):
+        try:
+            WebDriverWait(driver, 10).until(
+                lambda d: any("stars out of" in s.text for s in d.find_elements(By.CSS_SELECTOR, "span"))
+            )
+            
+            for span in driver.find_elements(By.CSS_SELECTOR, "span"):
+                txt = span.text.strip()
+                if "stars out of" in txt and "reviews" in txt:
+                    m = re.search(r"([\d.]+)\s*stars\s*out of\s*([\d,]+)\s*reviews", txt, re.I)
+                    if m:
+                        rating  = Decimal(m.group(1))
+                        reviews = int(m.group(2).replace(",", ""))
+                        return rating, reviews
+            return None, None
+        except Exception:
+            return None, None
+
+    # get UPC/GTIN string from Walmart's schema-org script tag
+    def get_upc(self, driver):
+        try:
+            script_tag = driver.find_element(
+                By.CSS_SELECTOR,
+                "script[data-seo-id='schema-org-product'][type='application/ld+json']"
+            )
+            data = json.loads(script_tag.get_attribute("innerHTML"))
+            return str(data.get("gtin13") or data.get("sku"))
+        except Exception:
+            return None
+
     # scrape a product from Walmart
     def scrape_product(self, url):
-        driver = None
+        driver = self.get_driver(headless=False)
         try:
-            driver = self.setup_driver(headless=False)
+            # initialise CAPTCHA solver to reuse same Selenium session
+            captcha_solver = WalmartCAPTCHASolver(driver=driver)
+
             driver.get(url)
                     
+            # if Walmart detected automation and presented a blocking page, attempt to solve
+            current = driver.current_url.lower()
+            if any(keyword in current for keyword in ["blocked", "challenge", "captcha"]):
+                self.logger.info("Encountered Walmart CAPTCHA – attempting automated solve ...")
+                if not captcha_solver.solve_captcha():
+                    self.logger.error("Unable to solve Walmart CAPTCHA. Aborting scrape.")
+                    return None
+
             # product details
             product_name = self.get_product_name(driver)
             price = self.get_price(driver)
@@ -168,25 +217,31 @@ class WalmartScraper(BaseScraper):
             if not in_stock: 
                 third_party_seller = self.is_sold_by_third_party(driver)
                 
+            # rating / reviews & UPC
+            rating, review_count = self.get_rating_reviews(driver)
+            upc                = self.get_upc(driver)
+
             product_data = {
-                "name": product_name,
+                "name":  product_name,
                 "price": price,
-                "url": url,
+                "url":   url,
                 "in_stock": in_stock,
                 "image_url": image_url,
-                "third_party_seller": third_party_seller
+                "third_party_seller": third_party_seller,
+                "rating": rating,
+                "review_count": review_count,
+                "upc":    upc,
             }
             
-            # return data mapped to database structure
-            return self.map_to_database(product_data, self.retailer_id)
+            # return data for testing (instead of mapping to database)
+            return product_data
             
         except Exception as e:
             self.logger.error(f"Error scraping Walmart product: {e}")
             return None
             
         finally:
-            if driver:
-                driver.quit()
+            pass
 
 # test case
 if __name__ == "__main__":
@@ -198,24 +253,16 @@ if __name__ == "__main__":
         if product_data:
             print("\nProduct Details:")
             try:
-                print(f"Name: {product_data['product_data']['name']}")
-                
-                if product_data['listing_data'].get('price'):
-                    print(f"Price: ${product_data['listing_data']['price']}")
-                else:
-                    print("Price: Not found")
-                    
-                if product_data['product_data'].get('image'):
-                    print(f"Image URL: {product_data['product_data']['image']}")
-                else:
-                    print("Image URL: Not found")
-                    
-                print(f"In Stock: {'Yes' if product_data['listing_data'].get('is_in_stock') else 'No'}")
-
-                # third party seller is not in mapped data structure
-                print(f"Third Party Seller: {'Yes' if not product_data['listing_data'].get('is_in_stock') else 'No'}")
-            except KeyError as ke:
-                print(f"Missing expected data field: {ke}")
+                print(f"Name: {product_data.get('name', 'Not found')}")
+                print(f"Price: ${product_data.get('price', 'Not found')}")
+                print(f"Image URL: {product_data.get('image_url', 'Not found')}")
+                print(f"In Stock: {'Yes' if product_data.get('in_stock') else 'No'}")
+                print(f"Third Party Seller: {'Yes' if product_data.get('third_party_seller') else 'No'}")
+                print(f"Rating: {product_data.get('rating', 'Not found')}")
+                print(f"Review Count: {product_data.get('review_count', 'Not found')}")
+                print(f"UPC: {product_data.get('upc', 'Not found')}")
+            except Exception as ke:
+                print(f"Error displaying data: {ke}")
                 print(f"Available data: {product_data}")
         else:
             print("Failed to fetch product data")

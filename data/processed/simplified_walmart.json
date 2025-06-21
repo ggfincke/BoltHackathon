@@ -144,22 +144,126 @@
         {
           "name": "Coffee",
           "link_url": "https://www.walmart.com/cp/coffee/1086446",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "pods",
+              "link_url": "https://www.walmart.com/browse/food/single-serve-cups-pods/976759_1086446_1229653",
+              "sub_items": []
+            },
+            {
+              "name": "Iced & cold brew",
+              "link_url": "https://www.walmart.com/browse/food/bottled-coffee/976759_1086446_1229654",
+              "sub_items": []
+            },
+            {
+              "name": "Ground coffee",
+              "link_url": "https://www.walmart.com/browse/food/ground-coffee/976759_1086446_2174088",
+              "sub_items": []
+            },
+            {
+              "name": "Whole bean coffee",
+              "link_url": "https://www.walmart.com/browse/food/whole-bean-coffee/976759_1086446_1229652",
+              "sub_items": []
+            },
+            {
+              "name": "Instant coffee",
+              "link_url": "https://www.walmart.com/browse/coffee/instant-coffee/976759_1086446_1229650",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Soda",
           "link_url": "https://www.walmart.com/cp/soda-pop/1001680",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "Cola",
+              "link_url": "https://www.walmart.com/browse/food/cola/976759_976782_1001680_3730256",
+              "sub_items": []
+            },
+            {
+              "name": "Lime & Lime soda",
+              "link_url": "https://www.walmart.com/browse/food/lemon-lime/976759_976782_1001680_1875194",
+              "sub_items": []
+            },
+            {
+              "name": "Root beer",
+              "link_url": "https://www.walmart.com/browse/food/root-beer/976759_976782_1001680_8894867",
+              "sub_items": []
+            },
+            {
+              "name": "Ginger ale",
+              "link_url": "https://www.walmart.com/browse/food/ginger-ale/976759_976782_1001680_2032356",
+              "sub_items": []
+            },
+            {
+              "name": "Orange soda",
+              "link_url": "https://www.walmart.com/browse/food/soda-pop/976759_976782_1001680",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Juices",
           "link_url": "https://www.walmart.com/cp/juices/1001321",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "Orange juice",
+              "link_url": "https://www.walmart.com/browse/food/orange-juice/976759_976782_1001321_6637576",
+              "sub_items": []
+            },
+            {
+              "name": "Apple juice",
+              "link_url": "https://www.walmart.com/browse/food/apple-juice/976759_976782_1001321_9302436",
+              "sub_items": []
+            },
+            {
+              "name": "Fruit punch",
+              "link_url": "https://www.walmart.com/browse/food/fruit-punch/976759_976782_1001321_3207704",
+              "sub_items": []
+            },
+            {
+              "name": "Cranberry juice",
+              "link_url": "https://www.walmart.com/browse/food/cranberry-juice/976759_976782_1001321_9114860",
+              "sub_items": []
+            },
+            {
+              "name": "Grape juice",
+              "link_url": "https://www.walmart.com/browse/food/grape-juice/976759_976782_1001321_8286672",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Water",
           "link_url": "https://www.walmart.com/cp/water/1001659",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "Spring Water",
+              "link_url": "https://www.walmart.com/browse/food/spring-water/976759_976782_1001659_1264608",
+              "sub_items": []
+            },
+            {
+              "name": "Sparkling Water",
+              "link_url": "https://www.walmart.com/browse/food/sparkling-water/976759_976782_1001659_1508098",
+              "sub_items": []
+            },
+            {
+              "name": "Flavored Water",
+              "link_url": "https://www.walmart.com/browse/food/flavored-water/976759_976782_1001659_5544934",
+              "sub_items": []
+            },
+            {
+              "name": "Alkaline Water",
+              "link_url": "https://www.walmart.com/browse/food/alkaline-water/976759_976782_1001659_5960983",
+              "sub_items": []
+            },
+            {
+              "name": "Purified Water",
+              "link_url": "https://www.walmart.com/browse/food/purified-water/976759_976782_1001659_7866501",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Energy Drinks",
@@ -263,7 +367,33 @@
         {
           "name": "Chips",
           "link_url": "https://www.walmart.com/cp/chips/1001390",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "Potato Chips",
+              "link_url": "https://www.walmart.com/browse/food/potato-chips/976759_976787_1001390_4402657",
+              "sub_items": []
+            },
+            {
+              "name": "Tortilla Chips",
+              "link_url": "https://www.walmart.com/browse/food/tortilla-chips/976759_976787_1001390_4501185",
+              "sub_items": []
+            },
+            {
+              "name": "Kettle Chips",
+              "link_url": "https://www.walmart.com/browse/food/kettle-chips/976759_976787_1001390_2523039",
+              "sub_items": []
+            },
+            {
+              "name": "Pita Chips",
+              "link_url": "https://www.walmart.com/browse/food/pita-chips-bagel-chips/976759_976787_1001390_8083609",
+              "sub_items": []
+            },
+            {
+              "name": "Veggie Chips",
+              "link_url": "https://www.walmart.com/browse/chips/veggie-chips-grain-chips/976759_976787_1001390_4084278",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Crackers",
@@ -273,7 +403,33 @@
         {
           "name": "Cookies",
           "link_url": "https://www.walmart.com/cp/cookies/1001391",
-          "sub_items": []
+          "sub_items": [
+            {
+              "name": "Chocolate Chip Cookies",
+              "link_url": "https://www.walmart.com/browse/cookies/chocolate-chip-cookies/976759_976787_1001391_1545456",
+              "sub_items": []
+            },
+            {
+              "name": "Peanut Butter Cookies",
+              "link_url": "https://www.walmart.com/browse/food/peanut-butter-cookies/976759_976787_1001391_6460174",
+              "sub_items": []
+            },
+            {
+              "name": "Oatmeal Cookies",
+              "link_url": "https://www.walmart.com/browse/cookies/oatmeal-cookies/976759_976787_1001391_7361615",
+              "sub_items": []
+            },
+            {
+              "name": "Biscotti",
+              "link_url": "https://www.walmart.com/browse/food/biscotti/976759_976787_1001391_2224095",
+              "sub_items": []
+            },
+            {
+              "name": "Shortbread Cookies",
+              "link_url": "https://www.walmart.com/browse/food/shortbread-cookies/976759_976787_1001391_8026949",
+              "sub_items": []
+            }
+          ]
         },
         {
           "name": "Snack nuts",

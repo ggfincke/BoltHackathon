@@ -28,8 +28,8 @@ except ImportError:
 
 # amazon scraper
 class AmazonScraper(BaseScraper):
-    def __init__(self, proxy_manager=None, logger=None):
-        super().__init__(proxy_manager, logger)
+    def __init__(self, proxy_manager=None, logger=None, use_safari=False):
+        super().__init__(proxy_manager, logger, use_safari)
         output_dir = os.path.join("scrapers", "amazon", "output")
         self.captcha_solver = AmazonCaptchaSolver(output_dir=output_dir)
         # set retailer id
@@ -186,20 +186,16 @@ class AmazonScraper(BaseScraper):
     
     # scrape a product from Amazon
     def scrape_product(self, url, max_retries=3):
-        driver = None
+        driver = self.get_driver()
         retry_count = 0
-        
+
         while retry_count < max_retries:
             try:
-                if driver:
-                    try:
-                        driver.quit()
-                    except:
-                        pass
-                
-                driver = self.setup_driver()
+                if retry_count > 0:
+                    self.close_driver()
+                    driver = self.get_driver()
                 self.random_delay(2, 5)
-                
+
                 driver.get(url)
                 
                 if self.is_captcha_present(driver):
@@ -254,9 +250,9 @@ class AmazonScraper(BaseScraper):
                 retry_count += 1
                 time.sleep(10)
                 
+
             finally:
-                if driver:
-                    driver.quit()
+                pass
         
         self.logger.error(f"Failed to scrape Amazon product after {max_retries} attempts")
         return None

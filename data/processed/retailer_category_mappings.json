@@ -5,7 +5,6 @@
     "chocolate": "Chocolate Candy",
     "chocolate candy & bars": "Chocolate Candy",
     "hard candy": "Hard Candy",
-    
     "beverages": "Beverages",
     "coffee": "Coffee",
     "ground coffee": "Coffee",
@@ -20,7 +19,6 @@
     "drinking water": "Water",
     "flavored drinking water": "Water",
     "carbonated drinking water": "Water",
-
     "snacks": "Snacks",
     "chips & pretzels": "Chips",
     "potato chips & crisps": "Chips",
@@ -35,7 +33,6 @@
     "peanuts": "Nuts",
     "mixed nuts": "Nuts",
     "almonds": "Nuts",
-
     "pantry staples": "Pantry Staples",
     "pasta & noodles": "Pasta, Rice & Grains",
     "italian pasta": "Pasta, Rice & Grains",
@@ -44,7 +41,6 @@
     "dried grains & rice": "Pasta, Rice & Grains",
     "dried white rice": "Pasta, Rice & Grains",
     "dried brown rice": "Pasta, Rice & Grains",
-
     "canned foods": "Canned Foods",
     "canned beans": "Canned Foods",
     "canned black beans": "Canned Foods",
@@ -52,7 +48,6 @@
     "canned & jarred tomatoes": "Canned Foods",
     "canned & jarred diced tomatoes": "Canned Foods",
     "canned & jarred tomato sauces": "Canned Foods",
-
     "condiments & salad dressings": "Condiments & Sauces",
     "ketchup": "Condiments & Sauces",
     "mustard": "Condiments & Sauces",
@@ -60,12 +55,10 @@
     "salad dressings": "Condiments & Sauces",
     "ranch salad dressings": "Condiments & Sauces",
     "italian salad dressing": "Condiments & Sauces",
-
     "nut & seed butters": "Peanut Butter & Jelly",
     "peanut butter": "Peanut Butter & Jelly",
     "jams, jellies & sweet spreads": "Peanut Butter & Jelly",
     "jams, jellies & preserves": "Peanut Butter & Jelly",
-
     "cooking oils & vinegars": "Cooking Oil & Vinegar",
     "cooking & baking oils": "Cooking Oil & Vinegar",
     "olive oils": "Cooking Oil & Vinegar",
@@ -73,7 +66,6 @@
     "cooking & baking vinegars": "Cooking Oil & Vinegar",
     "white vinegars": "Cooking Oil & Vinegar",
     "balsamic vinegars": "Cooking Oil & Vinegar",
-
     "cooking & baking supplies": "Cooking & Baking Supplies",
     "baking mixes": "Baking Staples",
     "pancake & waffle mixes": "Pancake Mix & Syrup",
@@ -84,7 +76,6 @@
     "baking syrups, sugars & sweeteners": "Baking Staples",
     "sugars": "Baking Staples",
     "maple syrup": "Pancake Mix & Syrup",
-
     "herbs, spices & seasonings": "Herbs, Spices & Seasonings",
     "salt & salt substitutes": "Herbs, Spices & Seasonings",
     "table salts": "Herbs, Spices & Seasonings",
@@ -94,127 +85,105 @@
     "single herbs & spices": "Herbs, Spices & Seasonings",
     "sweet basil leaf": "Herbs, Spices & Seasonings",
     "cinnamon": "Herbs, Spices & Seasonings",
-
     "breakfast & cereal": "Breakfast & Cereal",
     "cereal": "Cereal",
     "cold breakfast cereals": "Cereal",
     "oatmeal": "Oatmeal",
     "syrups & toppings": "Pancake Mix & Syrup",
-
     "baby food": "Baby Food Jars & Pouches",
     "baby & toddler formula": "Baby Formula",
     "powder baby formula": "Baby Formula",
     "liquid baby formula": "Baby Formula",
-
     "amazon grocery": "Groceries"
   },
   "target": {
     "target grocery": "Groceries",
-
     "produce": "Produce",
     "fresh fruit": "Fresh Fruit",
     "fresh vegetables": "Fresh Vegetables",
     "berries": "Berries",
     "organic produce": "Organic Produce",
-
     "meat & seafood": "Meat & Seafood",
     "chicken": "Chicken",
     "beef": "Beef",
     "fish & seafood": "Fish & Seafood",
     "bacon": "Bacon",
-
     "dairy": "Dairy",
     "milk": "Milk",
     "cheese": "Cheese",
     "eggs": "Eggs",
     "yogurt": "Yogurt",
     "butter & margarine": "Butter & Margarine",
-
     "frozen foods": "Frozen Foods",
     "ice cream & novelties": "Ice Cream & Novelties",
     "frozen pizza": "Frozen Pizza",
     "frozen meals": "Frozen Meals",
     "frozen vegetables": "Frozen Vegetables",
-
     "bakery & bread": "Bakery & Bread",
     "breads": "Breads",
     "bagels & muffins": "Bagels & Muffins",
-
     "beverages": "Beverages",
     "coffee": "Coffee",
     "soda & pop": "Soda & Pop",
     "juice & cider": "Juice & Cider",
     "water": "Water",
     "energy drinks": "Energy Drinks",
-
     "pantry staples": "Pantry Staples",
     "pasta, rice & grains": "Pasta, Rice & Grains",
     "canned foods": "Canned Foods",
     "condiments & sauces": "Condiments & Sauces",
     "peanut butter & jelly": "Peanut Butter & Jelly",
     "cooking oil & vinegar": "Cooking Oil & Vinegar",
-
     "cooking & baking supplies": "Cooking & Baking Supplies",
     "baking staples": "Baking Staples",
-
     "herbs, spices & seasonings": "Herbs, Spices & Seasonings",
-
     "breakfast & cereal": "Breakfast & Cereal",
     "cereal": "Cereal",
     "oatmeal": "Oatmeal",
     "pancake mix & syrup": "Pancake Mix & Syrup",
-
     "snacks": "Snacks",
     "chips": "Chips",
     "crackers": "Crackers",
     "cookies": "Cookies",
     "nuts": "Nuts",
-
     "candy": "Candy",
     "chocolate candy": "Chocolate Candy",
     "gummy & chewy candy": "Gummy & Chewy Candy"
   },
   "walmart": {
     "walmart grocery": "Groceries",
-
     "produce": "Produce",
     "all fruits": "Fresh Fruit",
     "all vegetables": "Fresh Vegetables",
     "berries": "Berries",
     "organic produce": "Organic Produce",
-
     "meat & seafood": "Meat & Seafood",
     "turkey": "Meat & Seafood",
     "steaks": "Beef",
     "ground beef": "Beef",
     "fresh seafood": "Fish & Seafood",
     "bacon": "Bacon",
-
     "dairy & eggs": "Dairy",
     "milk": "Milk",
     "cheese": "Cheese",
     "eggs": "Eggs",
     "yogurt": "Yogurt",
     "butter & margarine": "Butter & Margarine",
-
     "frozen": "Frozen Foods",
     "ice cream": "Ice Cream & Novelties",
     "pizza": "Frozen Pizza",
     "individual meals": "Frozen Meals",
     "vegetables": "Frozen Vegetables",
-
     "bread & bakery": "Bakery & Bread",
     "breads": "Breads",
     "bagels": "Bagels & Muffins",
     "muffins": "Bagels & Muffins",
-
     "beverages": "Beverages",
     "coffee": "Coffee",
     "soda": "Soda & Pop",
     "juices": "Juice & Cider",
     "water": "Water",
     "energy drinks": "Energy Drinks",
-
     "pantry": "Pantry Staples",
     "rice, grains and dried beans": "Pasta, Rice & Grains",
     "pasta": "Pasta, Rice & Grains",
@@ -222,29 +191,54 @@
     "condiments": "Condiments & Sauces",
     "peanut butter & spreads": "Peanut Butter & Jelly",
     "cooking oils & vinegars": "Cooking Oil & Vinegar",
-
     "baking": "Cooking & Baking Supplies",
     "flours": "Baking Staples",
     "sugars": "Baking Staples",
     "cake mixes": "Baking Staples",
-
     "herbs, spices & seasonings": "Herbs, Spices & Seasonings",
-
     "breakfast": "Breakfast & Cereal",
     "cereal": "Cereal",
     "oatmeal & grits": "Oatmeal",
     "pancake & waffle mix": "Pancake Mix & Syrup",
     "syrup": "Pancake Mix & Syrup",
-
     "snacks": "Snacks",
     "chips": "Chips",
     "crackers": "Crackers",
     "cookies": "Cookies",
     "snack nuts": "Nuts",
-
     "candy": "Candy",
     "assorted chocolate boxes": "Chocolate Candy",
     "chewy candy": "Gummy & Chewy Candy",
-    "gummy candy": "Gummy & Chewy Candy"
+    "gummy candy": "Gummy & Chewy Candy",
+    "pods": "Coffee",
+    "iced & cold brew": "Coffee",
+    "ground coffee": "Coffee",
+    "whole bean coffee": "Coffee",
+    "instant coffee": "Coffee",
+    "cola": "Soda & Pop",
+    "lemon & lime soda": "Soda & Pop",
+    "root beer": "Soda & Pop",
+    "ginger ale": "Soda & Pop",
+    "orange soda": "Soda & Pop",
+    "orange juice": "Juice & Cider",
+    "apple juice": "Juice & Cider",
+    "fruit punch": "Juice & Cider",
+    "cranberry juice": "Juice & Cider",
+    "grape juice": "Juice & Cider",
+    "spring water": "Water",
+    "sparkling water": "Water",
+    "flavored water": "Water",
+    "alkaline water": "Water",
+    "purified water": "Water",
+    "potato chips": "Chips",
+    "tortilla chips": "Chips",
+    "kettle chips": "Chips",
+    "veggie chips": "Chips",
+    "pita chips": "Chips",
+    "chocolate chip cookies": "Cookies",
+    "oatmeal cookies": "Cookies",
+    "shortbread cookies": "Cookies",
+    "peanut butter cookies": "Cookies",
+    "biscotti": "Cookies"
   }
-} 
+}

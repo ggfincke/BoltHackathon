@@ -228,6 +228,19 @@ class SupabaseBackend:
         """Find all products matching UPC"""
 ```
 
+#### Duplicate Handling with UPC Integration
+```python
+    def _handle_duplicate_listing(self, product_id: str, product_name: str, 
+                                 product_url: str, retailer_name: str, listing_data: dict) -> None:
+        """Handle duplicate listing with UPC lookup and potential product merging"""
+        
+    def merge_products(self, primary_product_id: str, duplicate_product_ids: list) -> bool:
+        """Merge duplicate products intelligently based on UPC matching"""
+        
+    def trigger_upc_lookup_for_existing_listings(self, retailer_id: str = None, limit: int = 100) -> dict:
+        """Trigger UPC lookup for existing listings that lack UPCs"""
+```
+
 ### Data Normalization
 
 #### Brand Normalization
@@ -629,4 +642,62 @@ def cleanup_old_price_histories(days=90):
 2. **API key management**: Secure Supabase API keys and rotate regularly
 3. **Data encryption**: Ensure sensitive data is encrypted at rest
 4. **Access logging**: Monitor database access patterns
-5. **Regular updates**: Keep Supabase and dependencies updated 
+5. **Regular updates**: Keep Supabase and dependencies updated
+
+### UPC Lookup Integration for Duplicate Listings
+
+The Supabase backend now includes sophisticated handling of duplicate listings that integrates UPC lookup and product merging:
+
+#### How It Works
+
+1. **Duplicate Detection**: When a duplicate listing is encountered (same retailer-specific ID), instead of simply skipping it, the system triggers enhanced processing.
+
+2. **UPC Lookup**: If the existing product lacks a UPC, the system performs a UPC lookup using the product name and URL.
+
+3. **Product Enrichment**: Once a UPC is found, both the product and listing records are updated with the UPC information.
+
+4. **Duplicate Product Detection**: The system searches for other products with the same UPC to identify potential duplicates.
+
+5. **Product Merging**: If multiple products share the same UPC, they are intelligently merged:
+   - The oldest product (by creation date) becomes the primary product
+   - Listings and category associations are reassigned to the primary product
+   - Duplicate products are marked as inactive rather than deleted
+   - Product data is consolidated (descriptions, brand information, etc.)
+
+#### Implementation Details
+
+```python
+# Example of enhanced duplicate handling
+try:
+    listing_id = self._upsert_listing(listing_data)
+    # ... normal processing
+except ValueError as e:
+    if "Duplicate listing" in str(e):
+        # Trigger enhanced duplicate handling
+        self._handle_duplicate_listing(
+            product_id=product_id,
+            product_name=product_name,
+            product_url=product_url,
+            retailer_name=retailer_name,
+            listing_data=listing_data
+        )
+        return
+```
+
+#### Benefits
+
+- **Data Quality**: Reduces product duplication by identifying products with the same UPC
+- **Enrichment**: Automatically adds UPC codes to products that previously lacked them
+- **Consolidation**: Merges duplicate product records while preserving all listing information
+- **Logging**: Comprehensive logging of all UPC lookup and merging operations
+
+#### Configuration
+
+The UPC integration can be configured through the Supabase backend initialization:
+
+```python
+backend = create_supabase_backend(
+    enable_upc_lookup=True,     # Enable/disable UPC lookup
+    upc_concurrency=4          # Number of concurrent UPC lookup workers
+)
+``` 
