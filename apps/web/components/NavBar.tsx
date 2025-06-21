@@ -53,11 +53,11 @@ export default function NavBar() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-sm shadow-sm' : 'bg-background'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-primary/95 backdrop-blur-sm shadow-sm' : 'bg-primary'}`}>
         <div className="container mx-auto">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl">
+              <Link href="/" className="flex items-center gap-2 text-white font-bold text-xl">
                 <LogoIcon className="w-7 h-7" />
                 <span className="hidden sm:inline">TrackBasket</span>
               </Link>
@@ -75,7 +75,7 @@ export default function NavBar() {
                     <button
                       key={item.name}
                       onClick={() => setSearchOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors text-white hover:bg-white/10"
                       aria-label="Search"
                     >
                       <Icon className="w-5 h-5" />
@@ -90,8 +90,8 @@ export default function NavBar() {
                     href={item.href}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors ${
                       isActive 
-                        ? 'bg-primary text-buttonText font-medium' 
-                        : 'hover:bg-surface'
+                        ? 'bg-white text-primary font-medium' 
+                        : 'text-white hover:bg-white/10'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -106,25 +106,33 @@ export default function NavBar() {
               {/* Search Button (Mobile) */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-md hover:bg-surface transition-colors md:hidden"
+                className="p-2 rounded-md text-white hover:bg-white/10 transition-colors md:hidden"
                 aria-label="Search"
               >
                 <SearchIcon className="w-5 h-5" />
               </button>
               
               {/* Notification Center (if logged in) */}
-              {user && <NotificationCenter />}
+              {user && (
+                <div className="text-white">
+                  <NotificationCenter />
+                </div>
+              )}
               
               {/* Theme Toggle */}
-              <ThemeToggle />
+              <div className="text-white">
+                <ThemeToggle />
+              </div>
               
               {/* User Profile / Login */}
               {user ? (
-                <ProfileDropdown />
+                <div className="text-white">
+                  <ProfileDropdown />
+                </div>
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors text-white hover:bg-white/10"
                 >
                   <UserIcon className="w-5 h-5" />
                   <span className="hidden md:inline">Login</span>
@@ -133,7 +141,7 @@ export default function NavBar() {
               
               {/* Mobile Menu Button */}
               <button 
-                className="md:hidden p-2 rounded-md hover:bg-surface transition-colors"
+                className="md:hidden p-2 rounded-md text-white hover:bg-white/10 transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -153,7 +161,7 @@ export default function NavBar() {
         {mobileMenuOpen && (
           <div 
             ref={mobileMenuRef}
-            className="md:hidden bg-background border-t border-gray-200 dark:border-gray-700 shadow-lg"
+            className="md:hidden bg-primary border-t border-white/20 shadow-lg"
           >
             <div className="container mx-auto px-4 py-3 space-y-1">
               {navItems.map((item) => {
@@ -169,7 +177,7 @@ export default function NavBar() {
                         setSearchOpen(true);
                         setMobileMenuOpen(false);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors hover:bg-surface"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
                     >
                       <Icon className="w-5 h-5" />
                       <span>{item.name}</span>
@@ -183,8 +191,8 @@ export default function NavBar() {
                     href={item.href}
                     className={`flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors ${
                       isActive 
-                        ? 'bg-primary text-buttonText font-medium' 
-                        : 'hover:bg-surface'
+                        ? 'bg-white text-primary font-medium' 
+                        : 'text-white hover:bg-white/10'
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -195,12 +203,12 @@ export default function NavBar() {
               })}
               
               {/* Additional mobile menu items */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+              <div className="border-t border-white/20 pt-2 mt-2">
                 {user ? (
                   <>
                     <Link
                       href="/profile"
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors hover:bg-surface"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <UserIcon className="w-5 h-5" />
@@ -208,7 +216,7 @@ export default function NavBar() {
                     </Link>
                     <Link
                       href="/settings"
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors hover:bg-surface"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,7 +229,7 @@ export default function NavBar() {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors hover:bg-surface"
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <UserIcon className="w-5 h-5" />
@@ -235,7 +243,7 @@ export default function NavBar() {
       </header>
       
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-surface z-40">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary border-t border-white/20 z-40">
         <div className="flex justify-around">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -248,7 +256,7 @@ export default function NavBar() {
                   key={item.name}
                   onClick={() => setSearchOpen(true)}
                   className={`flex flex-col items-center py-3 ${
-                    isActive ? 'text-primary' : 'text-text'
+                    isActive ? 'text-white' : 'text-white/80'
                   }`}
                 >
                   <Icon className="w-6 h-6" />
@@ -262,7 +270,7 @@ export default function NavBar() {
                 key={item.name}
                 href={item.href}
                 className={`flex flex-col items-center py-3 ${
-                  isActive ? 'text-primary' : 'text-text'
+                  isActive ? 'text-white' : 'text-white/80'
                 }`}
               >
                 <Icon className="w-6 h-6" />
@@ -275,7 +283,7 @@ export default function NavBar() {
             <Link
               href="/profile"
               className={`flex flex-col items-center py-3 ${
-                pathname === '/profile' ? 'text-primary' : 'text-text'
+                pathname === '/profile' ? 'text-white' : 'text-white/80'
               }`}
             >
               <UserIcon className="w-6 h-6" />
@@ -285,7 +293,7 @@ export default function NavBar() {
             <Link
               href="/auth/login"
               className={`flex flex-col items-center py-3 ${
-                pathname === '/auth/login' ? 'text-primary' : 'text-text'
+                pathname === '/auth/login' ? 'text-white' : 'text-white/80'
               }`}
             >
               <UserIcon className="w-6 h-6" />
