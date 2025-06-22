@@ -53,11 +53,19 @@ export default function NavBar() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-primary/95 backdrop-blur-sm shadow-sm' : 'bg-primary'}`}>
+      <header 
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{
+          backgroundColor: scrolled ? 'rgba(var(--background-rgb), 0.95)' : 'var(--background)',
+          backdropFilter: scrolled ? 'blur(8px)' : 'none',
+          borderBottom: '1px solid rgba(133, 209, 231, 0.2)',
+          boxShadow: scrolled ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'
+        }}
+      >
         <div className="container mx-auto">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center gap-2 text-white font-bold text-xl">
+              <Link href="/" className="flex items-center gap-2 font-bold text-xl" style={{color: 'var(--text)'}}>
                 <LogoIcon className="w-7 h-7" />
                 <span className="hidden sm:inline">TrackBasket</span>
               </Link>
@@ -75,7 +83,13 @@ export default function NavBar() {
                     <button
                       key={item.name}
                       onClick={() => setSearchOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors text-white hover:bg-white/10"
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                      style={{
+                        color: 'var(--text)',
+                        backgroundColor: 'transparent'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       aria-label="Search"
                     >
                       <Icon className="w-5 h-5" />
@@ -88,11 +102,22 @@ export default function NavBar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors ${
-                      isActive 
-                        ? 'bg-white text-primary font-medium' 
-                        : 'text-white hover:bg-white/10'
-                    }`}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                    style={{
+                      backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                      color: isActive ? 'var(--button-text)' : 'var(--text)',
+                      fontWeight: isActive ? '500' : '400'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     <Icon className="w-5 h-5" />
                     <span>{item.name}</span>
@@ -106,7 +131,10 @@ export default function NavBar() {
               {/* Search Button (Mobile) */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-md text-white hover:bg-white/10 transition-colors md:hidden"
+                className="p-2 rounded-md md:hidden"
+                style={{color: 'var(--text)'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 aria-label="Search"
               >
                 <SearchIcon className="w-5 h-5" />
@@ -114,25 +142,28 @@ export default function NavBar() {
               
               {/* Notification Center (if logged in) */}
               {user && (
-                <div className="text-white">
+                <div style={{color: 'var(--text)'}}>
                   <NotificationCenter />
                 </div>
               )}
               
               {/* Theme Toggle */}
-              <div className="text-white">
+              <div style={{color: 'var(--text)'}}>
                 <ThemeToggle />
               </div>
               
               {/* User Profile / Login */}
               {user ? (
-                <div className="text-white">
+                <div style={{color: 'var(--text)'}}>
                   <ProfileDropdown />
                 </div>
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors text-white hover:bg-white/10"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                  style={{color: 'var(--text)'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <UserIcon className="w-5 h-5" />
                   <span className="hidden md:inline">Login</span>
@@ -141,7 +172,10 @@ export default function NavBar() {
               
               {/* Mobile Menu Button */}
               <button 
-                className="md:hidden p-2 rounded-md text-white hover:bg-white/10 transition-colors"
+                className="md:hidden p-2 rounded-md"
+                style={{color: 'var(--text)'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -161,7 +195,11 @@ export default function NavBar() {
         {mobileMenuOpen && (
           <div 
             ref={mobileMenuRef}
-            className="md:hidden bg-primary border-t border-white/20 shadow-lg"
+            className="md:hidden border-t shadow-lg"
+            style={{
+              backgroundColor: 'var(--surface)',
+              borderTopColor: 'rgba(133, 209, 231, 0.2)'
+            }}
           >
             <div className="container mx-auto px-4 py-3 space-y-1">
               {navItems.map((item) => {
@@ -177,7 +215,10 @@ export default function NavBar() {
                         setSearchOpen(true);
                         setMobileMenuOpen(false);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <Icon className="w-5 h-5" />
                       <span>{item.name}</span>
@@ -189,11 +230,22 @@ export default function NavBar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors ${
-                      isActive 
-                        ? 'bg-white text-primary font-medium' 
-                        : 'text-white hover:bg-white/10'
-                    }`}
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                    style={{
+                      backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                      color: isActive ? 'var(--button-text)' : 'var(--text)',
+                      fontWeight: isActive ? '500' : '400'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5" />
@@ -203,12 +255,15 @@ export default function NavBar() {
               })}
               
               {/* Additional mobile menu items */}
-              <div className="border-t border-white/20 pt-2 mt-2">
+              <div className="border-t pt-2 mt-2" style={{borderTopColor: 'rgba(133, 209, 231, 0.2)'}}>
                 {user ? (
                   <>
                     <Link
                       href="/profile"
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <UserIcon className="w-5 h-5" />
@@ -216,7 +271,10 @@ export default function NavBar() {
                     </Link>
                     <Link
                       href="/settings"
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -229,7 +287,10 @@ export default function NavBar() {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md transition-colors text-white hover:bg-white/10"
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                    style={{color: 'var(--text)'}}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <UserIcon className="w-5 h-5" />
@@ -243,7 +304,7 @@ export default function NavBar() {
       </header>
       
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-primary border-t border-white/20 z-40">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 border-t z-40" style={{backgroundColor: 'var(--surface)', borderTopColor: 'rgba(133, 209, 231, 0.2)'}}>
         <div className="flex justify-around">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -255,9 +316,11 @@ export default function NavBar() {
                 <button
                   key={item.name}
                   onClick={() => setSearchOpen(true)}
-                  className={`flex flex-col items-center py-3 ${
-                    isActive ? 'text-white' : 'text-white/80'
-                  }`}
+                  className="flex flex-col items-center py-3"
+                  style={{
+                    color: isActive ? 'var(--primary)' : 'var(--text)',
+                    opacity: isActive ? 1 : 0.8
+                  }}
                 >
                   <Icon className="w-6 h-6" />
                   <span className="text-xs mt-1">{item.name}</span>
@@ -269,9 +332,11 @@ export default function NavBar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex flex-col items-center py-3 ${
-                  isActive ? 'text-white' : 'text-white/80'
-                }`}
+                className="flex flex-col items-center py-3"
+                style={{
+                  color: isActive ? 'var(--primary)' : 'var(--text)',
+                  opacity: isActive ? 1 : 0.8
+                }}
               >
                 <Icon className="w-6 h-6" />
                 <span className="text-xs mt-1">{item.name}</span>
@@ -282,9 +347,11 @@ export default function NavBar() {
           {user ? (
             <Link
               href="/profile"
-              className={`flex flex-col items-center py-3 ${
-                pathname === '/profile' ? 'text-white' : 'text-white/80'
-              }`}
+              className="flex flex-col items-center py-3"
+              style={{
+                color: pathname === '/profile' ? 'var(--primary)' : 'var(--text)',
+                opacity: pathname === '/profile' ? 1 : 0.8
+              }}
             >
               <UserIcon className="w-6 h-6" />
               <span className="text-xs mt-1">Profile</span>
@@ -292,9 +359,11 @@ export default function NavBar() {
           ) : (
             <Link
               href="/auth/login"
-              className={`flex flex-col items-center py-3 ${
-                pathname === '/auth/login' ? 'text-white' : 'text-white/80'
-              }`}
+              className="flex flex-col items-center py-3"
+              style={{
+                color: pathname === '/auth/login' ? 'var(--primary)' : 'var(--text)',
+                opacity: pathname === '/auth/login' ? 1 : 0.8
+              }}
             >
               <UserIcon className="w-6 h-6" />
               <span className="text-xs mt-1">Login</span>
