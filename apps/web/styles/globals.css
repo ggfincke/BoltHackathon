@@ -8,6 +8,7 @@
   --secondary: #c65b82;
   --accent: #6f506f;
   --button-text: #ffffff;
+  --dark-text: #1F2937;
 }
 
 .dark {
@@ -18,6 +19,7 @@
   --secondary: #c65b82;
   --accent: #6f506f;
   --button-text: #fdfdfd;
+  --dark-text: #1F2937;
 }
 
 body {
@@ -110,6 +112,22 @@ html {
 
 .btn-base:active {
   transform: translateY(0);
+}
+
+/* Primary button text color override for accessibility */
+[style*="background: var(--primary)"], 
+[style*="background:var(--primary)"],
+.bg-primary,
+[class*="bg-blue-"] {
+  color: var(--dark-text) !important;
+}
+
+/* Active navigation item styling */
+a[style*="background: var(--primary)"],
+a[style*="background:var(--primary)"],
+a.bg-primary,
+.active-nav-item {
+  color: var(--dark-text) !important;
 }
 
 /* Enhanced card styles */
@@ -293,12 +311,12 @@ html {
 /* Enhanced selection */
 ::selection {
   background: var(--primary);
-  color: var(--button-text);
+  color: var(--dark-text);
 }
 
 ::-moz-selection {
   background: var(--primary);
-  color: var(--button-text);
+  color: var(--dark-text);
 }
 
 /* Enhanced mobile responsiveness */

@@ -18,7 +18,7 @@ export default function Home() {
               Track prices and availability across multiple retailers with ease. Save money and never miss a deal again.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-start animate-fade-in-up delay-200">
-              <Link href="/auth/signup" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--primary)', color: 'var(--text)'}}>
+              <Link href="/auth/signup" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                 Get Started
               </Link>
               <Link href="/categories" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
@@ -37,14 +37,14 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card-enhanced hover-lift">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--primary)', color: 'var(--text)'}}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                 <FaChartLine />
               </div>
               <h3 className="text-2xl font-semibold mb-4" style={{color: 'var(--text)'}}>Price Tracking</h3>
               <p className="opacity-80 mb-6" style={{color: 'var(--text)'}}>
                 Monitor price changes across Amazon, Target, and Walmart. Get notified when prices drop on items you're watching.
               </p>
-              <Link href="/search" className="btn-base px-6 py-2 text-sm w-full text-center" style={{background: 'var(--primary)', color: 'var(--text)'}}>
+              <Link href="/search" className="btn-base px-6 py-2 text-sm w-full text-center" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                 Start Tracking
               </Link>
             </div>
@@ -89,7 +89,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold mb-4" style={{color: 'var(--primary)'}}>How It Works</h3>
                   <ul className="space-y-3 opacity-80" style={{color: 'var(--text)'}}>
                     <li className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--text)'}}>1</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>1</span>
                       Search for products or browse categories
                     </li>
                     <li className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function Home() {
                       Set up notifications for price alerts
                     </li>
                     <li className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--text)'}}>4</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>4</span>
                       Save money by shopping at the best prices
                     </li>
                   </ul>
@@ -121,7 +121,7 @@ export default function Home() {
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'var(--primary)';
-                          e.currentTarget.style.color = 'var(--text)';
+                          e.currentTarget.style.color = 'var(--dark-text)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'var(--surface)';
@@ -147,7 +147,7 @@ export default function Home() {
             Join thousands of smart shoppers who save money with TrackBasket's intelligent price tracking.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signup" className="btn-base px-12 py-4 text-lg" style={{background: 'var(--primary)', color: 'var(--text)'}}>
+            <Link href="/auth/signup" className="btn-base px-12 py-4 text-lg" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
               Create Account
             </Link>
             <Link 
@@ -160,7 +160,7 @@ export default function Home() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--primary)';
-                e.currentTarget.style.color = 'var(--text)';
+                e.currentTarget.style.color = 'var(--dark-text)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';

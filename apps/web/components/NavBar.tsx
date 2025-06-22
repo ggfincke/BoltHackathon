@@ -102,10 +102,10 @@ export default function NavBar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md ${isActive ? 'active-nav-item' : ''}`}
                     style={{
                       backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                      color: isActive ? 'var(--button-text)' : 'var(--text)',
+                      color: isActive ? 'var(--dark-text)' : 'var(--text)',
                       fontWeight: isActive ? '500' : '400'
                     }}
                     onMouseEnter={(e) => {
@@ -233,7 +233,7 @@ export default function NavBar() {
                     className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
                     style={{
                       backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                      color: isActive ? 'var(--button-text)' : 'var(--text)',
+                      color: isActive ? 'var(--dark-text)' : 'var(--text)',
                       fontWeight: isActive ? '500' : '400'
                     }}
                     onMouseEnter={(e) => {
@@ -334,7 +334,8 @@ export default function NavBar() {
                 href={item.href}
                 className="flex flex-col items-center py-3"
                 style={{
-                  color: isActive ? 'var(--primary)' : 'var(--text)',
+                  color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                  backgroundColor: isActive ? 'var(--primary)' : 'transparent',
                   opacity: isActive ? 1 : 0.8
                 }}
               >
@@ -349,7 +350,8 @@ export default function NavBar() {
               href="/profile"
               className="flex flex-col items-center py-3"
               style={{
-                color: pathname === '/profile' ? 'var(--primary)' : 'var(--text)',
+                color: pathname === '/profile' ? 'var(--dark-text)' : 'var(--text)',
+                backgroundColor: pathname === '/profile' ? 'var(--primary)' : 'transparent',
                 opacity: pathname === '/profile' ? 1 : 0.8
               }}
             >
@@ -361,7 +363,8 @@ export default function NavBar() {
               href="/auth/login"
               className="flex flex-col items-center py-3"
               style={{
-                color: pathname === '/auth/login' ? 'var(--primary)' : 'var(--text)',
+                color: pathname === '/auth/login' ? 'var(--dark-text)' : 'var(--text)',
+                backgroundColor: pathname === '/auth/login' ? 'var(--primary)' : 'transparent',
                 opacity: pathname === '/auth/login' ? 1 : 0.8
               }}
             >
