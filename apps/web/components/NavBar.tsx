@@ -83,7 +83,7 @@ export default function NavBar() {
                     <button
                       key={item.name}
                       onClick={() => setSearchOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-md ${isActive ? 'active-nav-item' : ''}`}
                       style={{
                         color: 'var(--text)',
                         backgroundColor: 'transparent'
@@ -318,7 +318,8 @@ export default function NavBar() {
                   onClick={() => setSearchOpen(true)}
                   className="flex flex-col items-center py-3"
                   style={{
-                    color: isActive ? 'var(--primary)' : 'var(--text)',
+                    color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                    backgroundColor: isActive ? 'var(--primary)' : 'transparent',
                     opacity: isActive ? 1 : 0.8
                   }}
                 >

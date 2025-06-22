@@ -60,6 +60,22 @@ html {
   }
 }
 
+/* Primary button text color override for accessibility */
+[style*="background: var(--primary)"], 
+[style*="background:var(--primary)"],
+.bg-primary,
+[class*="bg-blue-"] {
+  color: var(--dark-text) !important;
+}
+
+/* Active navigation item styling */
+a[style*="background: var(--primary)"],
+a[style*="background:var(--primary)"],
+a.bg-primary,
+.active-nav-item {
+  color: var(--dark-text) !important;
+}
+
 /* Beautiful gradient backgrounds */
 .gradient-bg-primary {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -112,22 +128,6 @@ html {
 
 .btn-base:active {
   transform: translateY(0);
-}
-
-/* Primary button text color override for accessibility */
-[style*="background: var(--primary)"], 
-[style*="background:var(--primary)"],
-.bg-primary,
-[class*="bg-blue-"] {
-  color: var(--dark-text) !important;
-}
-
-/* Active navigation item styling */
-a[style*="background: var(--primary)"],
-a[style*="background:var(--primary)"],
-a.bg-primary,
-.active-nav-item {
-  color: var(--dark-text) !important;
 }
 
 /* Enhanced card styles */
