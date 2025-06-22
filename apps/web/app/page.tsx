@@ -1,27 +1,29 @@
 "use client";
 
 import Link from 'next/link';
-import { BsArrowRight } from 'react-icons/bs';
+import { useAuth } from '~/lib/auth';
 import { FaShoppingBasket, FaRegBell, FaSearch, FaChartLine, FaUsers } from 'react-icons/fa';
 
 export default function Home() {
+  const { user } = useAuth();
+  
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="gradient-bg-surface py-24 md:py-28">
         <div className="container">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text animate-fade-in-up">
               Welcome to TrackBasket
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-80 animate-fade-in-up delay-100" style={{color: 'var(--text)'}}>
               Track prices and availability across multiple retailers with ease. Save money and never miss a deal again.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 items-start animate-fade-in-up delay-200">
-              <Link href="/auth/signup" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-200">
+              <Link href="/auth/signup" className="btn-base px-12 py-3" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                 Get Started
               </Link>
-              <Link href="/categories" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
+              <Link href="/categories" className="btn-base px-12 py-3" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
                 Browse Categories
               </Link>
             </div>
@@ -36,7 +38,7 @@ export default function Home() {
             About TrackBasket
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="card-enhanced hover-lift">
+            <div className="card-enhanced text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                 <FaChartLine />
               </div>
@@ -49,7 +51,7 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="card-enhanced hover-lift">
+            <div className="card-enhanced text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
                 <FaShoppingBasket />
               </div>
@@ -62,7 +64,7 @@ export default function Home() {
               </Link>
             </div>
             
-            <div className="card-enhanced hover-lift">
+            <div className="card-enhanced text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--accent)', color: 'var(--button-text)'}}>
                 <FaRegBell />
               </div>
@@ -83,9 +85,9 @@ export default function Home() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="card-enhanced">
-              <h2 className="text-3xl font-bold mb-6" style={{color: 'var(--text)'}}>Getting Started</h2>
+              <h2 className="text-3xl font-bold mb-6 text-center" style={{color: 'var(--text)'}}>Getting Started</h2>
               <div className="grid md:grid-cols-2 gap-8">
-                <div>
+                <div className="text-center">
                   <h3 className="text-xl font-semibold mb-4" style={{color: 'var(--primary)'}}>How It Works</h3>
                   <ul className="space-y-3 opacity-80" style={{color: 'var(--text)'}}>
                     <li className="flex items-center gap-3">
@@ -106,14 +108,14 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-                <div>
+                <div className="text-center">
                   <h3 className="text-xl font-semibold mb-4" style={{color: 'var(--secondary)'}}>Popular Categories</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {['Beverages', 'Snacks', 'Dairy', 'Produce', 'Frozen Foods', 'Bakery'].map((category) => (
                       <Link 
                         key={category}
                         href={`/categories/${category.toLowerCase().replace(' ', '-')}`}
-                        className="px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 hover:transform hover:-translate-y-1"
+                        className="px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200"
                         style={{
                           background: 'var(--surface)',
                           color: 'var(--text)',
@@ -149,25 +151,6 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup" className="btn-base px-12 py-4 text-lg" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
               Create Account
-            </Link>
-            <Link 
-              href="/about" 
-              className="btn-base px-12 py-4 text-lg border-2 hover:transform hover:-translate-y-1"
-              style={{
-                background: 'transparent',
-                color: 'var(--text)',
-                borderColor: 'var(--primary)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--primary)';
-                e.currentTarget.style.color = 'var(--dark-text)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--text)';
-              }}
-            >
-              Watch Demo
             </Link>
           </div>
         </div>
