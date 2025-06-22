@@ -8,24 +8,21 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="gradient-bg-surface py-32 md:py-40">
+      <section className="gradient-bg-surface py-24 md:py-28">
         <div className="container">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold mb-8 gradient-text animate-fade-in-up">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text animate-fade-in-up">
               Welcome to TrackBasket
             </h1>
-            <p className="text-xl md:text-2xl mb-10 opacity-80 animate-fade-in-up delay-100" style={{color: 'var(--text)'}}>
+            <p className="text-xl md:text-2xl mb-8 opacity-80 animate-fade-in-up delay-100" style={{color: 'var(--text)'}}>
               Track prices and availability across multiple retailers with ease. Save money and never miss a deal again.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-start animate-fade-in-up delay-200">
-              <Link href="/auth/signup" className="btn-base" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>
+              <Link href="/auth/signup" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--primary)', color: 'var(--text)'}}>
                 Get Started
               </Link>
-              <Link href="/categories" className="btn-base" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
+              <Link href="/categories" className="btn-base px-10 py-3 w-full sm:w-auto" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
                 Browse Categories
-              </Link>
-              <Link href="/about" className="btn-base" style={{background: 'var(--accent)', color: 'var(--button-text)'}}>
-                Learn More
               </Link>
             </div>
           </div>
@@ -33,21 +30,21 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20" style={{background: 'var(--surface)'}}>
+      <section className="py-16" style={{background: 'var(--surface)'}}>
         <div className="container">
-          <h2 className="text-4xl font-bold text-center mb-12" style={{color: 'var(--text)'}}>
-            Features
+          <h2 className="text-4xl font-bold text-center mb-10" style={{color: 'var(--text)'}}>
+            About TrackBasket
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card-enhanced hover-lift">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6" style={{background: 'var(--primary)', color: 'var(--text)'}}>
                 <FaChartLine />
               </div>
               <h3 className="text-2xl font-semibold mb-4" style={{color: 'var(--text)'}}>Price Tracking</h3>
               <p className="opacity-80 mb-6" style={{color: 'var(--text)'}}>
                 Monitor price changes across Amazon, Target, and Walmart. Get notified when prices drop on items you're watching.
               </p>
-              <Link href="/search" className="btn-base px-4 py-2 text-sm" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>
+              <Link href="/search" className="btn-base px-6 py-2 text-sm w-full text-center" style={{background: 'var(--primary)', color: 'var(--text)'}}>
                 Start Tracking
               </Link>
             </div>
@@ -60,7 +57,7 @@ export default function Home() {
               <p className="opacity-80 mb-6" style={{color: 'var(--text)'}}>
                 Create custom shopping baskets to organize products and track total costs. Share baskets with family and friends.
               </p>
-              <Link href="/baskets" className="btn-base px-4 py-2 text-sm" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
+              <Link href="/baskets" className="btn-base px-6 py-2 text-sm w-full text-center" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
                 Create Basket
               </Link>
             </div>
@@ -73,7 +70,7 @@ export default function Home() {
               <p className="opacity-80 mb-6" style={{color: 'var(--text)'}}>
                 Customize alerts for price drops, back-in-stock events, and product changes. Get notified via email, push, or SMS.
               </p>
-              <Link href="/settings/notifications" className="btn-base px-4 py-2 text-sm" style={{background: 'var(--accent)', color: 'var(--button-text)'}}>
+              <Link href="/settings/notifications" className="btn-base px-6 py-2 text-sm w-full text-center" style={{background: 'var(--accent)', color: 'var(--button-text)'}}>
                 Set Up Alerts
               </Link>
             </div>
@@ -82,7 +79,7 @@ export default function Home() {
       </section>
 
       {/* Getting Started Section */}
-      <section className="py-20">
+      <section className="py-16">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="card-enhanced">
@@ -92,7 +89,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold mb-4" style={{color: 'var(--primary)'}}>How It Works</h3>
                   <ul className="space-y-3 opacity-80" style={{color: 'var(--text)'}}>
                     <li className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>1</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--text)'}}>1</span>
                       Search for products or browse categories
                     </li>
                     <li className="flex items-center gap-3">
@@ -104,7 +101,7 @@ export default function Home() {
                       Set up notifications for price alerts
                     </li>
                     <li className="flex items-center gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>4</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{background: 'var(--primary)', color: 'var(--text)'}}>4</span>
                       Save money by shopping at the best prices
                     </li>
                   </ul>
@@ -124,7 +121,7 @@ export default function Home() {
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'var(--primary)';
-                          e.currentTarget.style.color = 'var(--button-text)';
+                          e.currentTarget.style.color = 'var(--text)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'var(--surface)';
@@ -150,12 +147,12 @@ export default function Home() {
             Join thousands of smart shoppers who save money with TrackBasket's intelligent price tracking.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth/signup" className="btn-base px-8 py-4 text-lg" style={{background: 'var(--primary)', color: 'var(--button-text)'}}>
+            <Link href="/auth/signup" className="btn-base px-12 py-4 text-lg" style={{background: 'var(--primary)', color: 'var(--text)'}}>
               Create Account
             </Link>
             <Link 
               href="/about" 
-              className="btn-base px-8 py-4 text-lg border-2 hover:transform hover:-translate-y-1"
+              className="btn-base px-12 py-4 text-lg border-2 hover:transform hover:-translate-y-1"
               style={{
                 background: 'transparent',
                 color: 'var(--text)',
@@ -163,7 +160,7 @@ export default function Home() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--primary)';
-                e.currentTarget.style.color = 'var(--button-text)';
+                e.currentTarget.style.color = 'var(--text)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
