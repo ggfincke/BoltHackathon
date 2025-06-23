@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import CategoryCard from '~/components/CategoryCard';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
 
@@ -94,31 +95,7 @@ export default function CategoriesPage() {
           
           {/* Display regular categories */}
           {categories.map((category) => (
-            <Link 
-              key={category.id} 
-              href={`/categories/${category.slug}`}
-              className="bg-surface p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
-            >
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                {category.image_url ? (
-                  <img 
-                    src={category.image_url} 
-                    alt={category.name} 
-                    className="w-12 h-12 object-contain"
-                  />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-primary">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                  </svg>
-                )}
-              </div>
-              <h2 className="text-xl font-semibold">{category.name}</h2>
-              {category.description && (
-                <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                  {category.description}
-                </p>
-              )}
-            </Link>
+            <CategoryCard key={category.id} category={category} />
           ))}
         </div>
       ) : (

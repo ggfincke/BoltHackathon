@@ -9,8 +9,8 @@ type Product = {
   listings?: {
     id: string;
     price: number | null;
-    currency: string;
-    in_stock: boolean;
+    currency: string | null;
+    in_stock: boolean | null;
     url: string;
     image_url?: string | null;
     retailer: { name: string };
