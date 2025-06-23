@@ -355,44 +355,8 @@ function AuthenticatedHome() {
             </div>
           </div>
           
-          {/* Middle Column - Popular Categories */}
-          <div className="lg:col-span-1">
-            <div className="bg-surface rounded-lg shadow-sm p-6 h-full">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold" style={{ color: "var(--text)" }}>
-                  Your Popular Categories
-                </h2>
-                <Link
-                  href="/categories"
-                  className="text-sm flex items-center"
-                  style={{ color: "var(--primary)" }}
-                >
-                  View All <FaArrowRight className="ml-1" />
-                </Link>
-              </div>
-              
-              <div className="flex-1 flex flex-col space-y-4">
-                {popularCategories.map(category => (
-                  <Link
-                    key={category.name}
-                    href={`/categories/${category.name.toLowerCase()}`}
-                    className="flex justify-between items-center p-3 rounded-lg hover-primary-bg transition-colors"
-                  >
-                    <span style={{ color: "var(--text)" }}>{category.name}</span>
-                    <span
-                      className="text-xs px-2 py-1 rounded-full"
-                      style={{ background: "var(--primary)", color: "var(--dark-text)" }}
-                    >
-                      {category.count} items
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-          
           {/* Right Column - Price Changes */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="bg-surface rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold" style={{color: 'var(--text)'}}>Recent Price Changes</h2>
@@ -453,31 +417,60 @@ function AuthenticatedHome() {
               )}
             </div>
             
-            {/* Quick Actions */}
-            <div className="bg-surface rounded-lg shadow-sm p-6 mt-6">
-              <h2 className="text-xl font-bold mb-6" style={{color: 'var(--text)'}}>Quick Actions</h2>
-              <div className="space-y-4">
-                <Link href="/baskets" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
-                  <div className="flex items-center">
-                    <FaShoppingBasket className="mr-3 text-lg" style={{color: 'var(--secondary)'}} />
-                    <span style={{color: 'var(--text)'}}>Create New Basket</span>
-                  </div>
-                  <FaArrowRight style={{color: 'var(--text)'}} />
-                </Link>
-                <Link href="/search" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
-                  <div className="flex items-center">
-                    <FaSearch className="mr-3 text-lg" style={{color: 'var(--primary)'}} />
-                    <span style={{color: 'var(--text)'}}>Search Products</span>
-                  </div>
-                  <FaArrowRight style={{color: 'var(--text)'}} />
-                </Link>
-                <Link href="/best-deals" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
-                  <div className="flex items-center">
-                    <FaTag className="mr-3 text-lg" style={{color: 'var(--accent)'}} />
-                    <span style={{color: 'var(--text)'}}>Show Best Deals</span>
-                  </div>
-                  <FaArrowRight style={{color: 'var(--text)'}} />
-                </Link>
+            {/* Popular Categories and Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
+              {/* Popular Categories */}
+              <div className="bg-surface rounded-lg shadow-sm p-6 flex flex-col h-full">
+                <h2 className="text-xl font-bold mb-4" style={{ color: "var(--text)" }}>
+                  Your Popular Categories
+                </h2>
+
+                {/* same idea: fill remaining height & distribute rows */}
+                <div className="flex-1 flex flex-col justify-between">
+                  {popularCategories.map(category => (
+                    <Link
+                      key={category.name}
+                      href={`/categories/${category.name.toLowerCase()}`}
+                      className="flex justify-between items-center p-2 rounded-lg hover-primary-bg transition-colors"
+                    >
+                      <span style={{ color: "var(--text)" }}>{category.name}</span>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{ background: "var(--primary)", color: "var(--dark-text)" }}
+                      >
+                        {category.count} items
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Quick Actions */}
+              <div className="bg-surface rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-bold mb-6" style={{color: 'var(--text)'}}>Quick Actions</h2>
+                <div className="space-y-4">
+                  <Link href="/baskets" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
+                    <div className="flex items-center">
+                      <FaShoppingBasket className="mr-3 text-lg" style={{color: 'var(--secondary)'}} />
+                      <span style={{color: 'var(--text)'}}>Create New Basket</span>
+                    </div>
+                    <FaArrowRight style={{color: 'var(--text)'}} />
+                  </Link>
+                  <Link href="/search" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
+                    <div className="flex items-center">
+                      <FaSearch className="mr-3 text-lg" style={{color: 'var(--primary)'}} />
+                      <span style={{color: 'var(--text)'}}>Search Products</span>
+                    </div>
+                    <FaArrowRight style={{color: 'var(--text)'}} />
+                  </Link>
+                  <Link href="/best-deals" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
+                    <div className="flex items-center">
+                      <FaTag className="mr-3 text-lg" style={{color: 'var(--accent)'}} />
+                      <span style={{color: 'var(--text)'}}>Show Best Deals</span>
+                    </div>
+                    <FaArrowRight style={{color: 'var(--text)'}} />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
