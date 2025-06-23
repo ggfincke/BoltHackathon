@@ -211,10 +211,46 @@ function AuthenticatedHome() {
       retailer: 'Target', 
       oldPrice: 3.99, 
       newPrice: 2.79, 
-      percentChange: -30,
-      imageUrl: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
-    }
-  ];
+              percentChange: -30,
+        imageUrl: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
+      },
+      { 
+        id: '5', 
+        productName: 'Greek Yogurt', 
+        retailer: 'Walmart', 
+        oldPrice: 5.49, 
+        newPrice: 4.49, 
+        percentChange: -18,
+        imageUrl: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
+      },
+      { 
+        id: '6', 
+        productName: 'Bread Loaf', 
+        retailer: 'Amazon', 
+        oldPrice: 2.99, 
+        newPrice: 3.49, 
+        percentChange: 17,
+        imageUrl: 'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=300'
+      },
+      { 
+        id: '7', 
+        productName: 'Chicken Breast', 
+        retailer: 'Target', 
+        oldPrice: 8.99, 
+        newPrice: 6.99, 
+        percentChange: -22,
+        imageUrl: 'https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=300'
+      },
+      { 
+        id: '8', 
+        productName: 'Olive Oil', 
+        retailer: 'Walmart', 
+        oldPrice: 7.99, 
+        newPrice: 6.49, 
+        percentChange: -19,
+        imageUrl: 'https://images.pexels.com/photos/33783/olive-oil-salad-dressing-cooking-olive.jpg?auto=compress&cs=tinysrgb&w=300'
+      }
+    ];
   
   const popularCategories = [
     { name: 'Beverages', count: 15 },
@@ -251,18 +287,18 @@ function AuthenticatedHome() {
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Column - Stats and Recent Baskets */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 flex flex-col">
             {/* User Stats */}
             <div className="bg-surface rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold mb-4" style={{color: 'var(--text)'}}>Your Stats</h2>
               
               <div className="space-y-4">
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
+                <div className="p-4 rounded-lg text-center" style={{background: 'var(--surface)', border: '1px solid var(--primary)'}}>
                   <p className="text-3xl font-bold" style={{color: 'var(--primary)'}}>25</p>
                   <p className="text-sm opacity-80" style={{color: 'var(--text)'}}>Tracked Items</p>
                 </div>
                 
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
+                <div className="p-4 rounded-lg text-center" style={{background: 'var(--surface)', border: '1px solid var(--secondary)'}}>
                   <p className="text-3xl font-bold" style={{color: 'var(--secondary)'}}>$2.50</p>
                   <p className="text-sm opacity-80" style={{color: 'var(--text)'}}>Potential Savings</p>
                 </div>
@@ -270,7 +306,7 @@ function AuthenticatedHome() {
             </div>
             
             {/* Recent Baskets */}
-            <div className="bg-surface rounded-lg shadow-sm p-6">
+            <div className="bg-surface rounded-lg shadow-sm p-6 flex-1">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold" style={{color: 'var(--text)'}}>Your Recent Baskets</h2>
                 <Link href="/baskets" className="text-sm flex items-center" style={{color: 'var(--primary)'}}>
@@ -282,7 +318,7 @@ function AuthenticatedHome() {
                 <div className="space-y-3">
                   {recentBaskets.map(basket => (
                     <Link key={basket.id} href={`/basket/${basket.id}`}>
-                      <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div className="basket-item-hover border border-gray-200 dark:border-gray-700 rounded-lg p-3 transition-colors">
                         <div className="flex justify-between items-center">
                           <h3 className="font-medium text-sm" style={{color: 'var(--text)'}}>{basket.name}</h3>
                           <span className="text-sm font-bold" style={{color: 'var(--primary)'}}>
@@ -324,43 +360,41 @@ function AuthenticatedHome() {
               </div>
               
               {priceAlerts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {priceAlerts.map(alert => (
-                    <div key={alert.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                      <div className="flex">
-                        <div className="w-1/3">
-                          <img 
-                            src={alert.imageUrl} 
-                            alt={alert.productName}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="w-2/3 p-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-medium text-sm line-clamp-1" style={{color: 'var(--text)'}}>{alert.productName}</h3>
-                              <p className="text-xs opacity-70" style={{color: 'var(--text)'}}>{alert.retailer}</p>
-                            </div>
-                            <div className={`text-xs font-bold px-2 py-1 rounded-full ${
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {priceAlerts.slice(0, 8).map(alert => (
+                    <div key={alert.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden h-32 flex">
+                      <div className="w-20 flex-shrink-0">
+                        <img 
+                          src={alert.imageUrl} 
+                          alt={alert.productName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 p-2 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-1">
+                            <h3 className="font-medium text-xs line-clamp-2 pr-1" style={{color: 'var(--text)'}}>{alert.productName}</h3>
+                            <div className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                               alert.percentChange < 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
                               'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                             }`}>
                               {alert.percentChange < 0 ? '↓' : '↑'} {Math.abs(alert.percentChange)}%
                             </div>
                           </div>
-                          <div className="flex justify-between items-center mt-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs line-through opacity-70" style={{color: 'var(--text)'}}>
-                                ${alert.oldPrice.toFixed(2)}
-                              </span>
-                              <span className="text-sm font-bold" style={{color: 'var(--text)'}}>
-                                ${alert.newPrice.toFixed(2)}
-                              </span>
-                            </div>
-                            <Link href={`/product/${alert.id}`} className="text-xs px-2 py-0.5 rounded-full" style={{background: 'var(--secondary)', color: 'var(--button-text)'}}>
-                              View
-                            </Link>
+                          <p className="text-xs opacity-70 mb-1" style={{color: 'var(--text)'}}>{alert.retailer}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs line-through opacity-70" style={{color: 'var(--text)'}}>
+                              ${alert.oldPrice.toFixed(2)}
+                            </span>
+                            <span className="text-sm font-bold" style={{color: 'var(--text)'}}>
+                              ${alert.newPrice.toFixed(2)}
+                            </span>
                           </div>
+                          <Link href={`/product/${alert.id}`} className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
+                            View
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -386,9 +420,9 @@ function AuthenticatedHome() {
                   <div className="space-y-2">
                     {popularCategories.map(category => (
                       <Link key={category.name} href={`/categories/${category.name.toLowerCase()}`}>
-                        <div className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex justify-between items-center p-2 rounded-lg hover-primary-bg transition-colors">
                           <span style={{color: 'var(--text)'}}>{category.name}</span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-700" style={{color: 'var(--text)'}}>
+                          <span className="text-xs px-2 py-1 rounded-full" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
                             {category.count} items
                           </span>
                         </div>
@@ -406,21 +440,21 @@ function AuthenticatedHome() {
               <div className="bg-surface rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-bold mb-4" style={{color: 'var(--text)'}}>Quick Actions</h2>
                 <div className="space-y-2">
-                  <Link href="/baskets" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full">
+                  <Link href="/baskets" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
                       <FaShoppingBasket className="mr-2" style={{color: 'var(--secondary)'}} />
                       <span style={{color: 'var(--text)'}}>Create New Basket</span>
                     </div>
                     <FaArrowRight style={{color: 'var(--text)'}} />
                   </Link>
-                  <Link href="/search" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full">
+                  <Link href="/search" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
                       <FaSearch className="mr-2" style={{color: 'var(--primary)'}} />
                       <span style={{color: 'var(--text)'}}>Search Products</span>
                     </div>
                     <FaArrowRight style={{color: 'var(--text)'}} />
                   </Link>
-                  <Link href="/settings/notifications" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full">
+                  <Link href="/settings/notifications" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
                       <FaRegBell className="mr-2" style={{color: 'var(--accent)'}} />
                       <span style={{color: 'var(--text)'}}>Manage Notifications</span>
