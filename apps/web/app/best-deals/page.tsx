@@ -2,18 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { supabase } from '~/lib/supabaseClient';
 import { FaArrowDown, FaArrowUp, FaFilter } from 'react-icons/fa';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface Deal {
+  id: string;
+  name: string;
+  category: string;
+  bestPrice: number;
+  bestRetailer: string;
+  worstPrice: number;
+  worstRetailer: string;
+  savings: number; // percentage
+  imageUrl: string;
+}
+
+type SortBy = 'savings' | 'price' | 'name';
+
+interface Filters {
+  minSavings: number;
+  retailer: string;
+  category: string;
+  sortBy: SortBy;
+}
+
 export default function BestDealsPage() {
-  const [loading, setLoading] = useState(true);
-  const [deals, setDeals] = useState([]);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const [loading, setLoading] = useState<boolean>(true);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
+  const [filters, setFilters] = useState<Filters>({
     minSavings: 10, // minimum percentage savings
     retailer: 'all',
     category: 'all',
-    sortBy: 'savings' // savings, price, name
+    sortBy: 'savings'
   });
 
   useEffect(() => {
@@ -199,7 +223,7 @@ export default function BestDealsPage() {
     }
   };
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -280,7 +304,7 @@ export default function BestDealsPage() {
               <label className="block text-sm font-medium mb-1">Sort By</label>
               <select 
                 value={filters.sortBy}
-                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value as SortBy)}
                 className="w-full p-2 rounded-md bg-background border border-gray-300 dark:border-gray-700"
               >
                 <option value="savings">Biggest Savings</option>

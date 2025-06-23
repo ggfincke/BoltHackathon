@@ -139,9 +139,12 @@ export default function ProductPage() {
                 return [];
               }
               
-              return historyData.map(item => ({
+              // historyData can include error types in its union; cast to any[] for safe spreading
+              const safeHistory: any[] = (historyData ?? []) as any[];
+              
+              return safeHistory.map((item: any) => ({
                 ...item,
-                retailer: item.retailer?.retailer || { id: '', name: 'Unknown' }
+                retailer: item?.retailer?.retailer || { id: '', name: 'Unknown' }
               }));
             })
           );
@@ -188,9 +191,9 @@ export default function ProductPage() {
             setTrackingPreferences({
               id: trackingData.id,
               target_price: trackingData.target_price,
-              notify_on_price_drop: trackingData.notify_on_price_drop,
-              notify_on_availability: trackingData.notify_on_availability,
-              notify_on_changes: trackingData.notify_on_changes
+              notify_on_price_drop: trackingData.notify_on_price_drop ?? false,
+              notify_on_availability: trackingData.notify_on_availability ?? false,
+              notify_on_changes: trackingData.notify_on_changes ?? false
             });
           }
         }
@@ -437,7 +440,18 @@ export default function ProductPage() {
       {/* Price Comparison Table */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Price Comparison</h2>
-        <PriceComparisonTable listings={product.listings} />
+        <PriceComparisonTable listings={product.listings.map(listing => ({
+          id: listing.id,
+          retailer_id: listing.retailer_id,
+          price: listing.sale_price ?? listing.price,
+          original_price: (listing.sale_price !== null && listing.price !== null && listing.sale_price < listing.price) ? listing.price : null,
+          currency: listing.currency || '',
+          in_stock: listing.in_stock ?? false,
+          availability_status: listing.availability_status,
+          url: listing.url,
+          image_url: listing.image_url,
+          retailer: listing.retailer
+        }))} />
       </div>
 
       {/* Price History Chart */}
