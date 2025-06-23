@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '~/lib/auth'
-import { UserIcon } from './Icons'
+import { UserIcon } from '../ui/Icons'
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)

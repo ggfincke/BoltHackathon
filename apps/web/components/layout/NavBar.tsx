@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import ThemeToggle from './ThemeToggle';
-import { HomeIcon, SearchIcon, CategoriesIcon, BasketsIcon, UserIcon, LogoIcon } from './Icons';
+import ThemeToggle from '../ui/ThemeToggle';
+import { HomeIcon, SearchIcon, CategoriesIcon, BasketsIcon, UserIcon, LogoIcon } from '../ui/Icons';
 import ProfileDropdown from './ProfileDropdown';
 import { useAuth } from '~/lib/auth';
 import SearchOverlay from './SearchOverlay';
-import NotificationCenter from './NotificationCenter';
+import NotificationCenter from '../shared/NotificationCenter';
 
 export default function NavBar() {
   const pathname = usePathname();

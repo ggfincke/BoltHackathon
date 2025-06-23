@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import CategoryCard from '~/components/CategoryCard';
+import CategoryCard from '~/components/shared/CategoryCard';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
 

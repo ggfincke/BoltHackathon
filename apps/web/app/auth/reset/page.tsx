@@ -1,6 +1,6 @@
 'use client';
 
-import AuthForm from '~/components/AuthForm';
+import AuthForm from '~/components/shared/AuthForm';
 
 export default function ResetPassword() {
   return (

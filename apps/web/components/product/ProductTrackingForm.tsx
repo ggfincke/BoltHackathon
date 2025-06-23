@@ -10,7 +10,13 @@ interface ProductTrackingFormProps {
     notify_on_availability: boolean;
     notify_on_changes: boolean;
   };
-  onSubmit: (preferences: any) => Promise<void>;
+  onSubmit: (preferences: {
+    id?: string;
+    target_price: number | null;
+    notify_on_price_drop: boolean;
+    notify_on_availability: boolean;
+    notify_on_changes: boolean;
+  }) => Promise<void>;
   isLoading: boolean;
   isLoggedIn: boolean;
   currentPrice: number | null;
@@ -104,7 +110,7 @@ export default function ProductTrackingForm({
           )}
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          We'll notify you when the price drops below this amount
+          We&apos;ll notify you when the price drops below this amount
         </p>
       </div>
       
@@ -174,7 +180,7 @@ export default function ProductTrackingForm({
       
       {!isLoggedIn && (
         <p className="text-sm text-center mt-2 text-gray-600 dark:text-gray-400">
-          You'll need to sign in to track products
+          You&apos;ll need to sign in to track products
         </p>
       )}
     </form>

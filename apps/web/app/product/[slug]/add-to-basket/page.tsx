@@ -62,7 +62,7 @@ export default function AddToBasketPage() {
       const { data: basketUsers, error: basketUsersError } = await supabase
         .from('basket_users')
         .select('basket_id, role')
-        .eq('user_id', user?.id);
+        .eq('user_id', user!.id);
       
       if (basketUsersError) throw basketUsersError;
       
@@ -72,7 +72,10 @@ export default function AddToBasketPage() {
         return;
       }
       
-      const basketIds = basketUsers.map(bu => bu.basket_id);
+      // Filter out any null basket IDs to satisfy the `string[]` requirement
+      const basketIds = basketUsers
+        .map((bu) => bu.basket_id)
+        .filter((id): id is string => !!id);
       
       // Get basket details with item count
       const { data, error } = await supabase
@@ -126,7 +129,7 @@ export default function AddToBasketPage() {
       // Check if product already exists in the basket
       const { data: existingItems, error: checkError } = await supabase
         .from('basket_items')
-        .select('id, quantity')
+        .select('id, quantity, notes')
         .eq('basket_id', selectedBasketId)
         .eq('product_id', product.id);
       
@@ -147,13 +150,15 @@ export default function AddToBasketPage() {
       if (existingItems && existingItems.length > 0) {
         // Update existing item quantity
         const existingItem = existingItems[0];
-        const newQuantity = existingItem.quantity + quantity;
+        // `quantity` can be null in the DB – default to 0 when adding
+        const newQuantity = (existingItem.quantity ?? 0) + quantity;
         
         const { error: updateError } = await supabase
           .from('basket_items')
           .update({
             quantity: newQuantity,
-            notes: notes || existingItem.notes,
+            // Preserve existing notes when none are supplied in the form
+            notes: notes || existingItem.notes || null,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingItem.id);

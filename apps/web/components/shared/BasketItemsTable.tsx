@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
 
 type BasketItem = {
   id: string;

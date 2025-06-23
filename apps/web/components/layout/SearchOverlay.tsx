@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
-import { SearchIcon } from '~/components/Icons';
+import { SearchIcon } from '~/components/ui/Icons';
 import { FiX } from 'react-icons/fi';
 
 type SearchResult = {
@@ -42,12 +42,12 @@ export default function SearchOverlay({
   
   // Close on escape key
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
+    const handleEsc = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     
-    document.addEventListener('keydown', handleEsc as any);
-    return () => document.removeEventListener('keydown', handleEsc as any);
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
   }, [onClose]);
   
   // Debounced search
@@ -189,7 +189,7 @@ export default function SearchOverlay({
               ) : (
                 query.length > 2 && (
                   <div className="py-8 text-center text-white animate-slide-up">
-                    <p className="text-lg mb-2">No results found for "{query}"</p>
+                    <p className="text-lg mb-2">No results found for &quot;{query}&quot;</p>
                     <p className="text-sm opacity-80">Try a different search term or browse categories</p>
                   </div>
                 )

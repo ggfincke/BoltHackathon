@@ -11,14 +11,14 @@ type Notification = {
   user_id: string;
   title: string;
   message: string;
-  notification_type: 'price_drop' | 'availability' | 'changes' | 'general';
-  status: 'read' | 'unread';
+  notification_type: string;
+  status: string;
   created_at: string;
   listing_id?: string;
   product?: {
     name: string;
     slug: string;
-  };
+  } | null;
 };
 
 export default function NotificationCenter() {
@@ -71,7 +71,7 @@ export default function NotificationCenter() {
         subscription.unsubscribe();
       };
     }
-  }, [user]);
+  }, [user]); // fetchNotifications is stable as it doesn't depend on external props
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -88,16 +88,16 @@ export default function NotificationCenter() {
             product:products(name, slug)
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
         .limit(10);
       
       if (error) throw error;
       
       // Format notifications
-      const formattedNotifications = data.map(notification => ({
+      const formattedNotifications: Notification[] = data.map((notification: any) => ({
         ...notification,
-        product: notification.product?.[0]?.product || null
+        product: Array.isArray(notification.product) ? notification.product[0]?.product || null : notification.product || null
       }));
       
       setNotifications(formattedNotifications);
@@ -140,7 +140,7 @@ export default function NotificationCenter() {
       const { error } = await supabase
         .from('notifications')
         .update({ status: 'read' })
-        .eq('user_id', user?.id)
+        .eq('user_id', user!.id)
         .eq('status', 'unread');
       
       if (error) throw error;

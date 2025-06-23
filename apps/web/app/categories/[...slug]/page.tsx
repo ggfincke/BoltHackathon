@@ -5,9 +5,9 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
-import Breadcrumbs from '~/components/Breadcrumbs';
-import Pagination from '~/components/Pagination';
-import ProductGrid from '~/components/ProductGrid';
+import Breadcrumbs from '~/components/layout/Breadcrumbs';
+import Pagination from '~/components/ui/Pagination';
+import ProductGrid from '~/components/product/ProductGrid';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type Product = {

@@ -24,6 +24,9 @@ export default function Settings() {
   }, [user]);
 
   const fetchUserProfile = async () => {
+    // ensure valid user id
+    if (!user?.id) return;
+
     try {
       setIsLoading(true);
       
@@ -31,7 +34,7 @@ export default function Settings() {
       const { data, error } = await supabase
         .from('users')
         .select('first_name, last_name, username, email')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
       
       if (error) throw error;
@@ -51,6 +54,7 @@ export default function Settings() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) return;
     
     try {
       setIsSaving(true);
@@ -64,7 +68,7 @@ export default function Settings() {
           last_name: lastName,
           username: username
         })
-        .eq('id', user?.id);
+        .eq('id', user.id);
       
       if (error) throw error;
       
