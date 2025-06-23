@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
 import Breadcrumbs from '~/components/Breadcrumbs';
-import ProductCard from '~/components/ProductCard';
+import Pagination from '~/components/Pagination';
+import ProductGrid from '~/components/ProductGrid';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type Product = {
@@ -17,8 +18,8 @@ type Product = {
   listings?: {
     id: string;
     price: number | null;
-    currency: string | null;
-    in_stock: boolean | null;
+    currency: string;
+    in_stock: boolean;
     url: string;
     image_url?: string | null;
     retailer: { name: string };
@@ -149,7 +150,7 @@ export default function CategoryPage() {
               }
               
               console.log(`Successfully loaded ${allProducts.length} products`);
-              setProducts(allProducts);
+              setProducts(allProducts as unknown as Product[]);
             } else {
               setProducts([]);
             }
@@ -329,61 +330,15 @@ export default function CategoryPage() {
               </div>
               
               {/* Products grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} compact={true} />
-                ))}
-              </div>
+              <ProductGrid products={products} />
               
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handlePageChange(page - 1)}
-                      disabled={page === 1}
-                      className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      // Show pages around current page
-                      let pageNum;
-                      if (totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
-                      
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                            page === pageNum 
-                              ? 'bg-primary text-buttonText' 
-                              : 'bg-surface border border-gray-300 dark:border-gray-700'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                    
-                    <button
-                      onClick={() => handlePageChange(page + 1)}
-                      disabled={page === totalPages}
-                      className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
+                <Pagination 
+                  currentPage={page} 
+                  totalPages={totalPages} 
+                  onPageChange={handlePageChange} 
+                />
               )}
             </>
           ) : (

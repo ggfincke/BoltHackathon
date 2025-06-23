@@ -4,24 +4,25 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
-import ProductCard from '~/components/ProductCard';
+import Pagination from '~/components/Pagination';
+import ProductGrid from '~/components/ProductGrid';
 
 type Product = {
   id: string;
   name: string;
   slug: string;
-  description?: string;
-  brand_id?: string;
+  description?: string | null;
+  brand_id?: string | null;
   brand?: {
     name: string;
-  };
+  } | null;
   listings?: {
     id: string;
-    price: number;
-    currency: string;
-    in_stock: boolean;
+    price: number | null;
+    currency: string | null;
+    in_stock: boolean | null;
     url: string;
-    image_url?: string;
+    image_url?: string | null;
     retailer: {
       name: string;
     };
@@ -87,7 +88,7 @@ export default function Search() {
           .range(from, to);
         
         if (error) throw error;
-        setProducts(data || []);
+        setProducts((data ?? []) as unknown as Product[]);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -101,15 +102,15 @@ export default function Search() {
   // Sort products based on selected option
   const sortedProducts = [...products].sort((a, b) => {
     // Get the lowest price listing for each product
-    const aPrice = a.listings?.reduce((min, listing) => 
-      listing.price < min ? listing.price : min, 
-      a.listings?.[0]?.price || Infinity
-    );
+    const aPrice = a.listings?.reduce((min, listing) => {
+      if (listing.price === null) return min;
+      return min === null || listing.price < min ? listing.price : min;
+    }, null as number | null);
     
-    const bPrice = b.listings?.reduce((min, listing) => 
-      listing.price < min ? listing.price : min, 
-      b.listings?.[0]?.price || Infinity
-    );
+    const bPrice = b.listings?.reduce((min, listing) => {
+      if (listing.price === null) return min;
+      return min === null || listing.price < min ? listing.price : min;
+    }, null as number | null);
     
     switch (sortOption) {
       case 'price_asc':
@@ -196,61 +197,15 @@ export default function Search() {
         </div>
       ) : sortedProducts.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {sortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} compact={true} />
-            ))}
-          </div>
+          <ProductGrid products={sortedProducts} />
           
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1}
-                  className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  // Show pages around current page
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    pageNum = i + 1;
-                  } else if (page >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                        page === pageNum 
-                          ? 'bg-primary text-buttonText' 
-                          : 'bg-surface border border-gray-300 dark:border-gray-700'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-                
-                <button
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page === totalPages}
-                  className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+            <Pagination 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={handlePageChange} 
+            />
           )}
         </>
       ) : query ? (
