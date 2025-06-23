@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
 import { HomeIcon, SearchIcon, CategoriesIcon, BasketsIcon, UserIcon, LogoIcon } from './Icons';
 import ProfileDropdown from './ProfileDropdown';
@@ -14,6 +14,9 @@ export default function NavBar() {
   const pathname = usePathname();
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   
   const navItems = [
     { name: 'Home', href: '/', icon: HomeIcon },
@@ -22,19 +25,54 @@ export default function NavBar() {
     { name: 'Baskets', href: '/baskets', icon: BasketsIcon },
   ];
 
+  // Handle scroll effect for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 bg-background border-b border-surface z-50">
+      <header 
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{
+          backgroundColor: scrolled ? 'rgba(var(--background-rgb), 0.95)' : 'var(--background)',
+          backdropFilter: scrolled ? 'blur(8px)' : 'none',
+          borderBottom: '1px solid rgba(133, 209, 231, 0.2)',
+          boxShadow: scrolled ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'
+        }}
+      >
         <div className="container mx-auto">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center">
-              <Link href="/" className="flex items-center gap-2 text-primary font-bold text-xl">
-                <LogoIcon className="w-6 h-6" />
-                <span>TrackBasket</span>
+              <Link href="/" className="flex items-center gap-2 font-bold text-xl" style={{color: 'var(--text)'}}>
+                <LogoIcon className="w-7 h-7" />
+                <span className="hidden sm:inline">TrackBasket</span>
               </Link>
             </div>
             
-            <nav className="hidden md:flex space-x-4">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -45,7 +83,14 @@ export default function NavBar() {
                     <button
                       key={item.name}
                       onClick={() => setSearchOpen(true)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface`}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-md ${isActive ? 'active-nav-item' : ''}`}
+                      style={{
+                        color: 'var(--text)',
+                        backgroundColor: 'transparent'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      aria-label="Search"
                     >
                       <Icon className="w-5 h-5" />
                       <span>{item.name}</span>
@@ -57,11 +102,22 @@ export default function NavBar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors ${
-                      isActive 
-                        ? 'bg-primary text-buttonText font-medium' 
-                        : 'hover:bg-surface'
-                    }`}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md ${isActive ? 'active-nav-item' : ''}`}
+                    style={{
+                      backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                      color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                      fontWeight: isActive ? '500' : '400'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     <Icon className="w-5 h-5" />
                     <span>{item.name}</span>
@@ -70,102 +126,255 @@ export default function NavBar() {
               })}
             </nav>
             
+            {/* Right Side Actions */}
             <div className="flex items-center gap-2">
+              {/* Search Button (Mobile) */}
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-md hover:bg-surface transition-colors md:hidden"
+                className="p-2 rounded-md md:hidden"
+                style={{color: 'var(--text)'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 aria-label="Search"
               >
                 <SearchIcon className="w-5 h-5" />
               </button>
               
-              {user && <NotificationCenter />}
+              {/* Notification Center (if logged in) */}
+              {user && (
+                <div style={{color: 'var(--text)'}}>
+                  <NotificationCenter />
+                </div>
+              )}
               
-              <ThemeToggle />
+              {/* Theme Toggle */}
+              <div style={{color: 'var(--text)'}}>
+                <ThemeToggle />
+              </div>
               
+              {/* User Profile / Login */}
               {user ? (
-                <ProfileDropdown />
+                <div style={{color: 'var(--text)'}}>
+                  <ProfileDropdown />
+                </div>
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-md transition-colors hover:bg-surface"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md"
+                  style={{color: 'var(--text)'}}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <UserIcon className="w-5 h-5" />
                   <span className="hidden md:inline">Login</span>
                 </Link>
               )}
               
-              {/* Mobile menu button - only shown on small screens */}
-              <div className="md:hidden">
-                <button className="p-2 rounded-md hover:bg-surface">
-                  <CategoriesIcon className="w-6 h-6" />
-                </button>
-              </div>
+              {/* Mobile Menu Button */}
+              <button 
+                className="md:hidden p-2 rounded-md"
+                style={{color: 'var(--text)'}}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
         </div>
         
-        {/* Mobile navigation - fixed at bottom */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-surface">
-          <div className="flex justify-around">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              
-              // Special case for search - opens overlay instead of navigating
-              if (item.name === 'Search') {
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div 
+            ref={mobileMenuRef}
+            className="md:hidden border-t shadow-lg"
+            style={{
+              backgroundColor: 'var(--surface)',
+              borderTopColor: 'rgba(133, 209, 231, 0.2)'
+            }}
+          >
+            <div className="container mx-auto px-4 py-3 space-y-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                
+                // Special case for search - opens overlay instead of navigating
+                if (item.name === 'Search') {
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setSearchOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </button>
+                  );
+                }
+                
                 return (
-                  <button
+                  <Link
                     key={item.name}
-                    onClick={() => setSearchOpen(true)}
-                    className={`flex flex-col items-center py-3 ${
-                      isActive ? 'text-primary' : 'text-text'
-                    }`}
+                    href={item.href}
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                    style={{
+                      backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                      color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                      fontWeight: isActive ? '500' : '400'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                    onClick={() => setMobileMenuOpen(false)}
                   >
-                    <Icon className="w-6 h-6" />
-                    <span className="text-xs mt-1">{item.name}</span>
-                  </button>
+                    <Icon className="w-5 h-5" />
+                    <span>{item.name}</span>
+                  </Link>
                 );
-              }
+              })}
               
+              {/* Additional mobile menu items */}
+              <div className="border-t pt-2 mt-2" style={{borderTopColor: 'rgba(133, 209, 231, 0.2)'}}>
+                {user ? (
+                  <>
+                    <Link
+                      href="/profile"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <UserIcon className="w-5 h-5" />
+                      <span>My Profile</span>
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                      style={{color: 'var(--text)'}}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>Settings</span>
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-md"
+                    style={{color: 'var(--text)'}}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(133, 209, 231, 0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserIcon className="w-5 h-5" />
+                    <span>Login / Sign Up</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+      
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 border-t z-40" style={{backgroundColor: 'var(--surface)', borderTopColor: 'rgba(133, 209, 231, 0.2)'}}>
+        <div className="flex justify-around">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            
+            // Special case for search - opens overlay instead of navigating
+            if (item.name === 'Search') {
               return (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
-                  className={`flex flex-col items-center py-3 ${
-                    isActive ? 'text-primary' : 'text-text'
-                  }`}
+                  onClick={() => setSearchOpen(true)}
+                  className="flex flex-col items-center py-3"
+                  style={{
+                    color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                    backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                    opacity: isActive ? 1 : 0.8
+                  }}
                 >
                   <Icon className="w-6 h-6" />
                   <span className="text-xs mt-1">{item.name}</span>
-                </Link>
+                </button>
               );
-            })}
+            }
             
-            {user ? (
+            return (
               <Link
-                href="/profile"
-                className={`flex flex-col items-center py-3 ${
-                  pathname === '/profile' ? 'text-primary' : 'text-text'
-                }`}
+                key={item.name}
+                href={item.href}
+                className="flex flex-col items-center py-3"
+                style={{
+                  color: isActive ? 'var(--dark-text)' : 'var(--text)',
+                  backgroundColor: isActive ? 'var(--primary)' : 'transparent',
+                  opacity: isActive ? 1 : 0.8
+                }}
               >
-                <UserIcon className="w-6 h-6" />
-                <span className="text-xs mt-1">Profile</span>
+                <Icon className="w-6 h-6" />
+                <span className="text-xs mt-1">{item.name}</span>
               </Link>
-            ) : (
-              <Link
-                href="/auth/login"
-                className={`flex flex-col items-center py-3 ${
-                  pathname === '/auth/login' ? 'text-primary' : 'text-text'
-                }`}
-              >
-                <UserIcon className="w-6 h-6" />
-                <span className="text-xs mt-1">Login</span>
-              </Link>
-            )}
-          </div>
+            );
+          })}
+          
+          {user ? (
+            <Link
+              href="/profile"
+              className="flex flex-col items-center py-3"
+              style={{
+                color: pathname === '/profile' ? 'var(--dark-text)' : 'var(--text)',
+                backgroundColor: pathname === '/profile' ? 'var(--primary)' : 'transparent',
+                opacity: pathname === '/profile' ? 1 : 0.8
+              }}
+            >
+              <UserIcon className="w-6 h-6" />
+              <span className="text-xs mt-1">Profile</span>
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="flex flex-col items-center py-3"
+              style={{
+                color: pathname === '/auth/login' ? 'var(--dark-text)' : 'var(--text)',
+                backgroundColor: pathname === '/auth/login' ? 'var(--primary)' : 'transparent',
+                opacity: pathname === '/auth/login' ? 1 : 0.8
+              }}
+            >
+              <UserIcon className="w-6 h-6" />
+              <span className="text-xs mt-1">Login</span>
+            </Link>
+          )}
         </div>
-      </header>
+      </div>
       
       {/* Search Overlay */}
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

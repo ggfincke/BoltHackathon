@@ -75,6 +75,24 @@ export default function CategoriesPage() {
       
       {categories.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {/* Add Best Deals as the first category */}
+          <Link 
+            href="/best-deals"
+            className="bg-surface p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center"
+          >
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-primary">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold">Best Deals</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+              Find the biggest savings across retailers
+            </p>
+          </Link>
+          
+          {/* Display regular categories */}
           {categories.map((category) => (
             <Link 
               key={category.id} 

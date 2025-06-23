@@ -8,6 +8,7 @@
   --secondary: #c65b82;
   --accent: #6f506f;
   --button-text: #ffffff;
+  --dark-text: #1F2937;
 }
 
 .dark {
@@ -18,15 +19,358 @@
   --secondary: #c65b82;
   --accent: #6f506f;
   --button-text: #fdfdfd;
+  --dark-text: #1F2937;
 }
 
 body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: var(--text);
   background: var(--background);
+  line-height: 1.6;
+  transition: all 0.3s ease;
 }
 
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* Enhanced container with better responsive padding */
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+}
+
+/* Primary button text color override for accessibility */
+[style*="background: var(--primary)"], 
+[style*="background:var(--primary)"],
+.bg-primary,
+[class*="bg-blue-"] {
+  color: var(--dark-text) !important;
+}
+
+/* Active navigation item styling */
+a[style*="background: var(--primary)"],
+a[style*="background:var(--primary)"],
+a.bg-primary,
+.active-nav-item {
+  color: var(--dark-text) !important;
+}
+
+/* Beautiful gradient backgrounds */
+.gradient-bg-primary {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.gradient-bg-surface {
+  background: linear-gradient(135deg, var(--surface), var(--background));
+}
+
+.gradient-bg-accent {
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+}
+
+/* Enhanced focus states for better accessibility */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Enhanced button base styles */
+.btn-base {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-all duration-300 cursor-pointer relative overflow-hidden;
+  position: relative;
+}
+
+.btn-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-base:hover::before {
+  left: 100%;
+}
+
+.btn-base:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.btn-base:active {
+  transform: translateY(0);
+}
+
+/* Enhanced card styles */
+.card-enhanced {
+  background: var(--background);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+}
+
+.card-enhanced:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+/* Enhanced form inputs */
+.input-enhanced {
+  @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
+  background: var(--background);
+  border-color: var(--surface);
+  color: var(--text);
+}
+
+.input-enhanced:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(133, 209, 231, 0.1);
+}
+
+.input-enhanced::placeholder {
+  color: var(--text);
+  opacity: 0.6;
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--surface) 0px, var(--background) 40px, var(--surface) 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Enhanced transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Ripple effect for interactive elements */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.8s ease forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.8s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.8s ease forwards;
+}
+
+/* Delay utilities */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Enhanced selection */
+::selection {
+  background: var(--primary);
+  color: var(--dark-text);
+}
+
+::-moz-selection {
+  background: var(--primary);
+  color: var(--dark-text);
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  .card-enhanced {
+    padding: 20px;
+  }
+  
+  /* Reduce motion for mobile users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Dark mode enhancements */
+.dark .card-enhanced {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.dark .card-enhanced:hover {
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.dark .input-enhanced {
+  border-color: var(--accent);
+}
+
+.dark .input-enhanced:focus {
+  box-shadow: 0 0 0 3px rgba(133, 209, 231, 0.2);
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Primary hover background */
+.hover-primary-bg:hover {
+  background: rgba(133, 209, 231, 0.15) !important;
 }
