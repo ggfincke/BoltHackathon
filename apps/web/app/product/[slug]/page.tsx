@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
-import Breadcrumbs from '~/components/Breadcrumbs';
-import PriceHistoryChart from '~/components/PriceHistoryChart';
-import PriceComparisonTable from '~/components/PriceComparisonTable';
-import ProductTrackingForm from '~/components/ProductTrackingForm';
-import AddToBasketModal from '~/components/AddToBasketModal';
+import Breadcrumbs from '~/components/layout/Breadcrumbs';
+import PriceHistoryChart from '~/components/product/PriceHistoryChart';
+import PriceComparisonTable from '~/components/product/PriceComparisonTable';
+import ProductTrackingForm from '~/components/product/ProductTrackingForm';
+import AddToBasketModal from '~/components/shared/AddToBasketModal';
 
 type Product = {
   id: string;

@@ -5,28 +5,28 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
 import { format } from 'date-fns';
-import BasketItemsTable from '~/components/BasketItemsTable';
-import BasketShareModal from '~/components/BasketShareModal';
-import BasketTrackingModal from '~/components/BasketTrackingModal';
-import ConfirmationModal from '~/components/ConfirmationModal';
+import BasketItemsTable from '~/components/shared/BasketItemsTable';
+import BasketShareModal from '~/components/shared/BasketShareModal';
+import BasketTrackingModal from '~/components/shared/BasketTrackingModal';
+import ConfirmationModal from '~/components/shared/ConfirmationModal';
 
 type Basket = {
   id: string;
   name: string;
   description: string | null;
-  is_public: boolean;
-  created_at: string;
-  updated_at: string;
+  is_public: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 type BasketItem = {
   id: string;
   basket_id: string;
   product_id: string;
-  quantity: number;
+  quantity: number | null;
   price_at_add: number | null;
-  added_at: string;
-  updated_at: string;
+  added_at: string | null;
+  updated_at: string | null;
   notes: string | null;
   product: {
     id: string;
@@ -50,12 +50,12 @@ type BasketItem = {
 
 type BasketUser = {
   id: string;
-  basket_id: string;
+  basket_id: string | null;
   user_id: string;
-  role: string;
+  role: string | null;
   user: {
     email: string;
-    username?: string;
+    username?: string | null;
   };
 };
 
@@ -79,7 +79,7 @@ export default function BasketDetail() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
-        router.push('/auth/login?redirectedFrom=/basket/' + id);
+        router.push('/auth/login?redirectedFrom=/basket/' + (id as string));
         return;
       }
       
@@ -95,7 +95,7 @@ export default function BasketDetail() {
       const { data: basketData, error: basketError } = await supabase
         .from('baskets')
         .select('*')
-        .eq('id', id)
+        .eq('id', id as string)
         .single();
       
       if (basketError) throw basketError;
@@ -105,8 +105,8 @@ export default function BasketDetail() {
       const { data: userRoleData, error: userRoleError } = await supabase
         .from('basket_users')
         .select('role')
-        .eq('basket_id', id)
-        .eq('user_id', user?.id)
+        .eq('basket_id', id as string)
+        .eq('user_id', user!.id)
         .single();
       
       if (userRoleError && userRoleError.code !== 'PGRST116') {
@@ -149,11 +149,11 @@ export default function BasketDetail() {
             )
           )
         `)
-        .eq('basket_id', id)
+        .eq('basket_id', id as string)
         .order('added_at', { ascending: false });
       
       if (itemsError) throw itemsError;
-      setBasketItems(itemsData || []);
+      setBasketItems((itemsData || []) as BasketItem[]);
       
       // Calculate total cost
       let total = 0;
@@ -184,10 +184,10 @@ export default function BasketDetail() {
               username
             )
           `)
-          .eq('basket_id', id);
+          .eq('basket_id', id as string);
         
         if (usersError) throw usersError;
-        setBasketUsers(usersData || []);
+        setBasketUsers((usersData || []) as BasketUser[]);
       }
       
     } catch (error) {
@@ -205,7 +205,7 @@ export default function BasketDetail() {
       const { error } = await supabase
         .from('baskets')
         .delete()
-        .eq('id', id);
+        .eq('id', id as string);
       
       if (error) throw error;
       
@@ -233,11 +233,13 @@ export default function BasketDetail() {
       // Add user as owner
       const { error: userError } = await supabase
         .from('basket_users')
-        .insert({
-          basket_id: newBasket.id,
-          user_id: user?.id,
-          role: 'owner'
-        });
+        .insert([
+          {
+            basket_id: newBasket.id,
+            user_id: user!.id,
+            role: 'owner'
+          }
+        ] as any);
       
       if (userError) throw userError;
       
@@ -253,7 +255,7 @@ export default function BasketDetail() {
       if (itemsToClone.length > 0) {
         const { error: itemsError } = await supabase
           .from('basket_items')
-          .insert(itemsToClone);
+          .insert(itemsToClone as any);
         
         if (itemsError) throw itemsError;
       }
@@ -315,12 +317,12 @@ export default function BasketDetail() {
       const { error } = await supabase
         .from('basket_items')
         .insert({
-          basket_id: id,
+          basket_id: id as string,
           product_id: productId,
           quantity,
           price_at_add: currentPrice,
           notes
-        });
+        } as any);
       
       if (error) throw error;
       
@@ -390,7 +392,7 @@ export default function BasketDetail() {
             <p className="text-gray-600 dark:text-gray-400 mt-1">{basket.description}</p>
           )}
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Last updated: {format(new Date(basket.updated_at), 'PPP')}
+            Last updated: {format(new Date(basket.updated_at || ''), 'PPP')}
           </p>
         </div>
         
@@ -454,7 +456,7 @@ export default function BasketDetail() {
       </div>
       
       <BasketItemsTable
-        items={basketItems}
+        items={basketItems as any}
         canEdit={canEdit}
         onUpdateItem={handleUpdateItem}
         onRemoveItem={handleRemoveItem}
@@ -465,7 +467,7 @@ export default function BasketDetail() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         basketId={basket.id}
-        basketUsers={basketUsers}
+        basketUsers={basketUsers as any}
         onUsersUpdated={fetchBasketDetails}
       />
       

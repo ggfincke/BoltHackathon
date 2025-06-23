@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
 import Link from 'next/link';
-import CreateBasketModal from '~/components/CreateBasketModal';
+import CreateBasketModal from '~/components/shared/CreateBasketModal';
 
 type Basket = {
   id: string;

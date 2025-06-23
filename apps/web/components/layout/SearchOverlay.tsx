@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
-import { SearchIcon } from '~/components/Icons';
+import { SearchIcon } from '~/components/ui/Icons';
 import { FiX } from 'react-icons/fi';
 
 type SearchResult = {

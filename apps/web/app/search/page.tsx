@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
-import Pagination from '~/components/Pagination';
-import ProductGrid from '~/components/ProductGrid';
+import Pagination from '~/components/ui/Pagination';
+import ProductGrid from '~/components/product/ProductGrid';
 
 type Product = {
   id: string;
