@@ -7,12 +7,12 @@ import { FaShoppingBasket, FaRegBell, FaSearch, FaChartLine, FaUsers, FaArrowRig
 export default function Home() {
   const { user } = useAuth();
   
-  // If user is logged in, show the authenticated home page
+  // if logged in, show the authenticated home page
   if (user) {
     return <AuthenticatedHome />;
   }
   
-  // Otherwise show the landing page for non-authenticated users
+  // o/w show the landing page
   return (
     <div className="min-h-screen">
       {/* Hero Section - Smaller height */}
@@ -306,46 +306,52 @@ function AuthenticatedHome() {
             </div>
             
             {/* Recent Baskets */}
-            <div className="bg-surface rounded-lg shadow-sm p-6 flex-1">
+            <div className="bg-surface rounded-lg shadow-sm p-6 flex flex-col h-full">
+              {/* header */}
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold" style={{color: 'var(--text)'}}>Your Recent Baskets</h2>
-                <Link href="/baskets" className="text-sm flex items-center" style={{color: 'var(--primary)'}}>
+                <h2 className="text-xl font-bold" style={{ color: "var(--text)" }}>
+                  Your Recent Baskets
+                </h2>
+                <Link
+                  href="/baskets"
+                  className="text-sm flex items-center"
+                  style={{ color: "var(--primary)" }}
+                >
                   View All <FaArrowRight className="ml-1" />
                 </Link>
               </div>
-              
-              {recentBaskets.length > 0 ? (
-                <div className="space-y-3">
-                  {recentBaskets.map(basket => (
-                    <Link key={basket.id} href={`/basket/${basket.id}`}>
-                      <div className="basket-item-hover border border-gray-200 dark:border-gray-700 rounded-lg p-3 transition-colors">
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium text-sm" style={{color: 'var(--text)'}}>{basket.name}</h3>
-                          <span className="text-sm font-bold" style={{color: 'var(--primary)'}}>
-                            ${basket.totalCost.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between mt-1">
-                          <span className="text-xs opacity-70" style={{color: 'var(--text)'}}>
-                            {basket.itemCount} items
-                          </span>
-                          <span className="text-xs px-2 py-0.5 rounded-full" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
-                            View Details
-                          </span>
-                        </div>
+
+              {/* list – take all remaining height and spread children out */}
+              <div className="flex-1 flex flex-col justify-between">
+                {recentBaskets.map(basket => (
+                  <Link key={basket.id} href={`/basket/${basket.id}`} className="block">
+                    <div className="basket-item-hover border border-gray-200 dark:border-gray-700 rounded-lg p-4 transition-colors">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-medium text-sm" style={{ color: "var(--text)" }}>
+                          {basket.name}
+                        </h3>
+                        <span
+                          className="text-sm font-bold"
+                          style={{ color: "var(--primary)" }}
+                        >
+                          ${basket.totalCost.toFixed(2)}
+                        </span>
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
-                  <FaShoppingBasket className="mx-auto text-3xl mb-2 opacity-50" style={{color: 'var(--text)'}} />
-                  <p className="mb-3 text-sm" style={{color: 'var(--text)'}}>No baskets yet</p>
-                  <Link href="/baskets" className="btn-base text-sm px-4 py-1.5" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
-                    Create Basket
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs opacity-70" style={{ color: "var(--text)" }}>
+                          {basket.itemCount} items
+                        </span>
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: "var(--primary)", color: "var(--dark-text)" }}
+                        >
+                          View Details
+                        </span>
+                      </div>
+                    </div>
                   </Link>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           </div>
           
@@ -412,51 +418,54 @@ function AuthenticatedHome() {
             </div>
             
             {/* Popular Categories and Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
               {/* Popular Categories */}
-              <div className="bg-surface rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4" style={{color: 'var(--text)'}}>Your Popular Categories</h2>
-                {popularCategories.length > 0 ? (
-                  <div className="space-y-2">
-                    {popularCategories.map(category => (
-                      <Link key={category.name} href={`/categories/${category.name.toLowerCase()}`}>
-                        <div className="flex justify-between items-center p-2 rounded-lg hover-primary-bg transition-colors">
-                          <span style={{color: 'var(--text)'}}>{category.name}</span>
-                          <span className="text-xs px-2 py-1 rounded-full" style={{background: 'var(--primary)', color: 'var(--dark-text)'}}>
-                            {category.count} items
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center py-4 opacity-70" style={{color: 'var(--text)'}}>
-                    No categories tracked yet
-                  </p>
-                )}
+              <div className="bg-surface rounded-lg shadow-sm p-6 flex flex-col h-full">
+                <h2 className="text-xl font-bold mb-4" style={{ color: "var(--text)" }}>
+                  Your Popular Categories
+                </h2>
+
+                {/* same idea: fill remaining height & distribute rows */}
+                <div className="flex-1 flex flex-col justify-between">
+                  {popularCategories.map(category => (
+                    <Link
+                      key={category.name}
+                      href={`/categories/${category.name.toLowerCase()}`}
+                      className="flex justify-between items-center p-2 rounded-lg hover-primary-bg transition-colors"
+                    >
+                      <span style={{ color: "var(--text)" }}>{category.name}</span>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{ background: "var(--primary)", color: "var(--dark-text)" }}
+                      >
+                        {category.count} items
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
               
               {/* Quick Actions */}
               <div className="bg-surface rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4" style={{color: 'var(--text)'}}>Quick Actions</h2>
-                <div className="space-y-2">
-                  <Link href="/baskets" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
+                <h2 className="text-xl font-bold mb-6" style={{color: 'var(--text)'}}>Quick Actions</h2>
+                <div className="space-y-4">
+                  <Link href="/baskets" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
-                      <FaShoppingBasket className="mr-2" style={{color: 'var(--secondary)'}} />
+                      <FaShoppingBasket className="mr-3 text-lg" style={{color: 'var(--secondary)'}} />
                       <span style={{color: 'var(--text)'}}>Create New Basket</span>
                     </div>
                     <FaArrowRight style={{color: 'var(--text)'}} />
                   </Link>
-                  <Link href="/search" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
+                  <Link href="/search" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
-                      <FaSearch className="mr-2" style={{color: 'var(--primary)'}} />
+                      <FaSearch className="mr-3 text-lg" style={{color: 'var(--primary)'}} />
                       <span style={{color: 'var(--text)'}}>Search Products</span>
                     </div>
                     <FaArrowRight style={{color: 'var(--text)'}} />
                   </Link>
-                  <Link href="/settings/notifications" className="flex items-center justify-between p-2 rounded-lg hover-primary-bg transition-colors w-full">
+                  <Link href="/settings/notifications" className="flex items-center justify-between p-4 rounded-lg hover-primary-bg transition-colors w-full">
                     <div className="flex items-center">
-                      <FaRegBell className="mr-2" style={{color: 'var(--accent)'}} />
+                      <FaRegBell className="mr-3 text-lg" style={{color: 'var(--accent)'}} />
                       <span style={{color: 'var(--text)'}}>Manage Notifications</span>
                     </div>
                     <FaArrowRight style={{color: 'var(--text)'}} />
