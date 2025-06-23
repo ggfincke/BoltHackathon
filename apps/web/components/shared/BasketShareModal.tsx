@@ -48,7 +48,7 @@ export default function BasketShareModal({
             .single();
           
           if (error) throw error;
-          setIsPublic(data.is_public);
+          setIsPublic(Boolean(data.is_public));
         } catch (error) {
           console.error('Error fetching basket public status:', error);
         }

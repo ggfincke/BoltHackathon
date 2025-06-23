@@ -48,7 +48,7 @@ export default function AddToBasketModal({
       const { data: basketUsers, error: basketUsersError } = await supabase
         .from('basket_users')
         .select('basket_id, role')
-        .eq('user_id', user?.id);
+        .eq('user_id', user!.id);
       
       if (basketUsersError) throw basketUsersError;
       
@@ -58,7 +58,10 @@ export default function AddToBasketModal({
         return;
       }
       
-      const basketIds = basketUsers.map(bu => bu.basket_id);
+      // Filter out any null/undefined ids to satisfy strict typings
+      const basketIds = basketUsers
+        .map((bu) => bu.basket_id)
+        .filter((id): id is string => Boolean(id));
       
       // Get basket details with item count
       const { data, error } = await supabase
@@ -113,7 +116,7 @@ export default function AddToBasketModal({
       // Check if product already exists in the basket
       const { data: existingItems, error: checkError } = await supabase
         .from('basket_items')
-        .select('id, quantity')
+        .select('id, quantity, notes')
         .eq('basket_id', selectedBasketId)
         .eq('product_id', productId);
       
@@ -134,7 +137,7 @@ export default function AddToBasketModal({
       if (existingItems && existingItems.length > 0) {
         // Update existing item quantity
         const existingItem = existingItems[0];
-        const newQuantity = existingItem.quantity + quantity;
+        const newQuantity = (existingItem.quantity ?? 0) + quantity;
         
         const { error: updateError } = await supabase
           .from('basket_items')
@@ -222,7 +225,7 @@ export default function AddToBasketModal({
           </div>
         ) : baskets.length === 0 ? (
           <div className="text-center py-4">
-            <p className="mb-4">You don't have any baskets yet.</p>
+            <p className="mb-4">You don&apos;t have any baskets yet.</p>
             <Link
               href="/baskets"
               className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"

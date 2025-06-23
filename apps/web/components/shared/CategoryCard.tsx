@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Database } from '~/lib/database.types';
 
 type Category = Database['public']['Tables']['categories']['Row'];
@@ -16,9 +17,11 @@ export default function CategoryCard({ category, productCount }: CategoryCardPro
     >
       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3">
         {category.image_url ? (
-          <img 
+          <Image 
             src={category.image_url} 
             alt={category.name} 
+            width={40}
+            height={40}
             className="w-10 h-10 object-contain"
           />
         ) : (

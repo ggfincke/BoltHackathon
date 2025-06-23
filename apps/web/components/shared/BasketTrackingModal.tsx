@@ -62,9 +62,9 @@ export default function BasketTrackingModal({
         setIsTracking(true);
         setPreferences({
           id: data.id,
-          notify_on_price_drop: data.notify_on_price_drop,
-          notify_on_availability: data.notify_on_availability,
-          notify_on_changes: data.notify_on_changes
+          notify_on_price_drop: Boolean(data.notify_on_price_drop),
+          notify_on_availability: Boolean(data.notify_on_availability),
+          notify_on_changes: Boolean(data.notify_on_changes)
         });
       } else {
         setIsTracking(false);
@@ -100,7 +100,7 @@ export default function BasketTrackingModal({
             notify_on_availability: preferences.notify_on_availability,
             notify_on_changes: preferences.notify_on_changes
           })
-          .eq('id', preferences.id);
+          .eq('id', preferences.id!);
         
         if (error) throw error;
         setSuccess('Tracking preferences updated');
@@ -139,7 +139,7 @@ export default function BasketTrackingModal({
       const { error } = await supabase
         .from('basket_trackings')
         .delete()
-        .eq('id', preferences.id);
+        .eq('id', preferences.id!);
       
       if (error) throw error;
       

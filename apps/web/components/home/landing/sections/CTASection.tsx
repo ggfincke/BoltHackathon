@@ -13,7 +13,7 @@ export default function CTASection() {
           className="text-xl mb-8 opacity-80 max-w-2xl mx-auto"
           style={{ color: 'var(--text)' }}
         >
-          Join thousands of smart shoppers who save money with TrackBasket's
+          Join thousands of smart shoppers who save money with TrackBasket&apos;s
           intelligent price tracking.
         </p>
         <div className="flex justify-center">

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Database } from '~/lib/database.types';
+import Image from 'next/image';
 
 type Product = {
   id: string;
@@ -78,9 +78,11 @@ export default function ProductGrid({ products, emptyMessage = "No products foun
         return (
           <div key={product.id} className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
             <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-              <img 
+              <Image 
                 src={imageUrl} 
                 alt={product.name}
+                width={300}
+                height={300}
                 className="w-full h-full object-contain"
               />
             </div>

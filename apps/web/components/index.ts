@@ -1,7 +1,13 @@
-// UI Components
-export { default as Icons } from './ui/Icons';
+// Re-export all icons as a namespace
+export * as Icons from './ui/Icons';
+
+// Components with default exports
 export { default as Pagination } from './ui/Pagination';
-export { default as ThemeProvider } from './ui/ThemeProvider';
+
+// ThemeProvider is a named export
+export { ThemeProvider } from './ui/ThemeProvider';
+
+// UI Components
 export { default as ThemeToggle } from './ui/ThemeToggle';
 
 // Layout Components

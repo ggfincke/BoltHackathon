@@ -27,7 +27,7 @@ export default function FeaturesSection() {
             </h3>
             <p className="opacity-80 mb-6" style={{ color: 'var(--text)' }}>
               Monitor price changes across Amazon, Target, and Walmart. Get
-              notified when prices drop on items you're watching.
+              notified when prices drop on items you&apos;re watching.
             </p>
             <Link
               href="/search"
