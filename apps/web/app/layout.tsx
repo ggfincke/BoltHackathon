@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '~/styles/globals.css';
 import NavBar from '~/components/layout/NavBar';
+import Sidebar from '~/components/layout/Sidebar';
 import { ThemeProvider } from '~/components/ui/ThemeProvider';
 import { AuthProvider } from '~/lib/auth';
 
@@ -24,16 +25,14 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <NavBar />
-            <main className="pt-16 pb-16 md:pb-0 min-h-screen">
-              {children}
-            </main>
-            {/* <footer className="py-6" style={{backgroundColor: 'var(--surface)', color: 'var(--text)'}}>
-              <div className="container mx-auto px-4">
-                <div className="text-center text-sm opacity-80" style={{color: 'var(--text)'}}>
-                  <p>&copy; {new Date().getFullYear()} TrackBasket. All rights reserved.</p>
+            <div className="flex">
+              <Sidebar variant="home" />
+f              <main className="flex-1 ml-64 pt-16">
+                <div className="p-6">
+                  {children}
                 </div>
-              </div>
-            </footer> */}
+              </main>
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>

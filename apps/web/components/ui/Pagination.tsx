@@ -8,54 +8,55 @@ interface PaginationProps {
 
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   if (totalPages <= 1) return null;
-  
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const showPages = 5; // Number of page buttons to show
+    
+    let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
+    let endPage = Math.min(totalPages, startPage + showPages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < showPages) {
+      startPage = Math.max(1, endPage - showPages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
+
   return (
-    <div className="mt-8 flex justify-center">
-      <div className="flex items-center space-x-2">
+    <div className="flex items-center justify-center space-x-2 mt-8">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="pagination-button"
+      >
+        Previous
+      </button>
+      
+      {getPageNumbers().map((page) => (
         <button
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
+          key={page}
+          onClick={() => onPageChange(page)}
+          className={`pagination-button ${
+            page === currentPage ? 'active' : ''
+          }`}
         >
-          Previous
+          {page}
         </button>
-        
-        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-          // Show pages around current page
-          let pageNum;
-          if (totalPages <= 5) {
-            pageNum = i + 1;
-          } else if (currentPage <= 3) {
-            pageNum = i + 1;
-          } else if (currentPage >= totalPages - 2) {
-            pageNum = totalPages - 4 + i;
-          } else {
-            pageNum = currentPage - 2 + i;
-          }
-          
-          return (
-            <button
-              key={pageNum}
-              onClick={() => onPageChange(pageNum)}
-              className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                currentPage === pageNum 
-                  ? 'bg-primary text-buttonText' 
-                  : 'bg-surface border border-gray-300 dark:border-gray-700'
-              }`}
-            >
-              {pageNum}
-            </button>
-          );
-        })}
-        
-        <button
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded-md bg-surface border border-gray-300 dark:border-gray-700 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      ))}
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="pagination-button"
+      >
+        Next
+      </button>
     </div>
   );
 }

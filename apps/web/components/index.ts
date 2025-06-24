@@ -14,7 +14,7 @@ export { default as ThemeToggle } from './ui/ThemeToggle';
 export { default as NavBar } from './layout/NavBar';
 export { default as ProfileDropdown } from './layout/ProfileDropdown';
 export { default as Breadcrumbs } from './layout/Breadcrumbs';
-export { default as SearchOverlay } from './layout/SearchOverlay';
+export { default as SearchDropdown } from './layout/SearchDropdown';
 
 // Home Components
 export { default as CategoryGrid } from './home/CategoryGrid';

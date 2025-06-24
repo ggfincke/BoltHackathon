@@ -1,111 +1,111 @@
 import React from 'react';
 
-type Listing = {
+interface Listing {
   id: string;
-  retailer_id: string;
   price: number | null;
-  original_price: number | null;
   currency: string;
   in_stock: boolean;
-  availability_status: string | null;
   url: string;
-  image_url: string | null;
   retailer: {
-    id: string;
     name: string;
+    logo_url?: string | null;
   };
-};
+}
 
 interface PriceComparisonTableProps {
   listings: Listing[];
+  productName: string;
 }
 
-export default function PriceComparisonTable({ listings }: PriceComparisonTableProps) {
-  // Sort listings by price (lowest first), then by in_stock (in stock first)
-  const sortedListings = [...listings].sort((a, b) => {
-    // In stock items first
-    if (a.in_stock && !b.in_stock) return -1;
-    if (!a.in_stock && b.in_stock) return 1;
-    
-    // Then by price (null prices last)
-    if (a.price === null && b.price !== null) return 1;
-    if (a.price !== null && b.price === null) return -1;
-    if (a.price !== null && b.price !== null) return a.price - b.price;
-    
-    // If both prices are null, sort by retailer name
-    return a.retailer.name.localeCompare(b.retailer.name);
-  });
-
-  if (listings.length === 0) {
+export default function PriceComparisonTable({ listings, productName }: PriceComparisonTableProps) {
+  if (!listings || listings.length === 0) {
     return (
-      <div className="bg-surface p-6 rounded-lg shadow-sm text-center">
-        <p className="text-gray-600 dark:text-gray-400">
-          No listings available for this product.
+      <div className="bg-surface rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">Price Comparison</h3>
+        <p className="text-muted">
+          No price listings available for this product yet.
         </p>
       </div>
     );
   }
 
+  // Sort listings by price (in stock first, then by price)
+  const sortedListings = [...listings].sort((a, b) => {
+    // Prioritize in-stock items
+    if (a.in_stock && !b.in_stock) return -1;
+    if (!a.in_stock && b.in_stock) return 1;
+    
+    // Then sort by price
+    if (a.price === null && b.price === null) return 0;
+    if (a.price === null) return 1;
+    if (b.price === null) return -1;
+    return a.price - b.price;
+  });
+
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-lg overflow-hidden">
+      <div className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Price Comparison</h3>
+      </div>
+      
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="min-w-full">
           <thead>
-            <tr className="bg-gray-100 dark:bg-gray-800">
-              <th className="px-4 py-3 text-left text-sm font-semibold">Retailer</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Price</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Availability</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold"></th>
+            <tr className="table-header">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Retailer</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Stock</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y table-divider">
             {sortedListings.map((listing) => (
               <tr 
                 key={listing.id} 
-                className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                  listing.in_stock ? '' : 'text-gray-500 dark:text-gray-400'
+                className={`table-row ${
+                  listing.in_stock ? '' : 'text-secondary'
                 }`}
               >
-                <td className="px-4 py-3 text-sm">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {listing.retailer.name}
+                    {listing.retailer.logo_url && (
+                      <img 
+                        src={listing.retailer.logo_url} 
+                        alt={listing.retailer.name}
+                        className="h-8 w-8 rounded mr-3 object-contain"
+                      />
+                    )}
+                    <div className="text-sm font-medium">
+                      {listing.retailer.name}
+                    </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-sm">
-                  {listing.price !== null ? (
-                    <div>
-                      <span className="font-medium">${listing.price.toFixed(2)}</span>
-                      {listing.original_price && listing.original_price > listing.price && (
-                        <span className="ml-2 text-gray-500 line-through text-xs">
-                          ${listing.original_price.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">Not available</span>
-                  )}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-semibold">
+                    {listing.price !== null ? `$${listing.price.toFixed(2)}` : 'N/A'}
+                  </div>
                 </td>
-                <td className="px-4 py-3 text-sm">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full status-badge ${
                     listing.in_stock 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      ? 'success'
+                      : 'error'
                   }`}>
                     {listing.in_stock ? 'In Stock' : 'Out of Stock'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-sm text-right">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <a
                     href={listing.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-block px-3 py-1 rounded-md text-xs font-medium ${
-                      listing.in_stock
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      listing.in_stock && listing.price !== null
                         ? 'bg-primary text-buttonText hover:bg-opacity-90'
-                        : 'bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-opacity-90'
-                    } transition-colors`}
+                        : 'bg-secondary text-text hover:bg-opacity-90'
+                    }`}
                   >
-                    View Deal
+                    {listing.in_stock && listing.price !== null ? 'Buy Now' : 'View Page'}
                   </a>
                 </td>
               </tr>
