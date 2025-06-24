@@ -12,12 +12,12 @@ interface PopularCategoriesProps {
 }
 
 const DEFAULT_CATEGORIES: Category[] = [
-  { name: 'Beverages', count: 15 },
-  { name: 'Snacks', count: 12 },
-  { name: 'Dairy', count: 8 },
-  { name: 'Produce', count: 6 },
-  { name: 'Frozen Foods', count: 10 },
-  { name: 'Bakery', count: 7 },
+  { name: 'Fresh & Perishable', count: 15 },
+  { name: 'Frozen Foods', count: 12 },
+  { name: 'Bakery & Bread', count: 8 },
+  { name: 'Beverages', count: 10 },
+  { name: 'Pantry Staples', count: 14 },
+  { name: 'Snacks', count: 7 },
 ];
 
 export default function PopularCategories({ categories = DEFAULT_CATEGORIES }: PopularCategoriesProps) {

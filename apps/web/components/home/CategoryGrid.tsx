@@ -7,12 +7,12 @@ interface CategoryGridProps {
 }
 
 const DEFAULT_CATEGORIES = [
-  'Beverages',
-  'Snacks',
-  'Dairy',
-  'Produce',
+  'Fresh & Perishable',
   'Frozen Foods',
-  'Bakery',
+  'Bakery & Bread',
+  'Beverages',
+  'Pantry Staples',
+  'Snacks',
 ];
 
 export default function CategoryGrid({ categories = DEFAULT_CATEGORIES }: CategoryGridProps) {

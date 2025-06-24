@@ -3,7 +3,7 @@
 import { useAuth } from '~/lib/auth';
 import WelcomeBanner from './sections/WelcomeBanner';
 import UserStats from './sections/UserStats';
-import PriceAlerts from './sections/PriceAlerts';
+import BestDeals from './sections/BestDeals';
 import PopularCategories from './sections/PopularCategories';
 
 export default function AuthenticatedHome() {
@@ -13,8 +13,8 @@ export default function AuthenticatedHome() {
   return (
     <div className="space-y-0">
       <WelcomeBanner username={username} />
-      {/* Price Alerts - Full Width */}
-      <PriceAlerts />
+      {/* Best Deals - Full Width */}
+      <BestDeals />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Left Column - Stats */}
