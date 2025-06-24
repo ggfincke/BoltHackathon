@@ -10,6 +10,7 @@
   --accent: #6f506f;
   --button-text: #ffffff;
   --dark-text: #1F2937;
+  --highlighted-text: color-mix(in srgb, var(--text) 60%, var(--background));
   --nav-bg-start: #ffffff;
   --nav-bg-end: #fafbfc;
   --dropdown-bg: rgba(255, 255, 255, 0.98);
@@ -49,6 +50,7 @@
   --accent: #6f506f;
   --button-text: #fdfdfd;
   --dark-text: #1F2937;
+  --highlighted-text: color-mix(in srgb, var(--text) 60%, var(--background));
   --nav-bg-start: #161b22;
   --nav-bg-end: #0d1117;
   --dropdown-bg: rgba(22, 27, 34, 0.98);
@@ -59,7 +61,7 @@
   --border-primary: #374151;
   --border-secondary: #4b5563;
   --text-muted: #9ca3af;
-  --text-secondary: #6b7280;
+  --text-secondary: #9ca3af;
   --bg-muted: #1f2937;
   --bg-secondary: #374151;
   --bg-tertiary: #1a1a1a;
@@ -130,6 +132,11 @@ a[style*="background:var(--primary)"],
 a.bg-primary,
 .active-nav-item {
   color: var(--dark-text) !important;
+}
+
+/* Sidebar active items should use highlighted text */
+.sidebar .bg-primary {
+  color: var(--highlighted-text) !important;
 }
 
 /* Navbar styling */
@@ -857,6 +864,7 @@ a.bg-primary,
   margin-top: 0.5rem;
   font-size: 0.75rem;
   background-color: var(--bg-secondary);
+  color: var(--dark-text);
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
 }

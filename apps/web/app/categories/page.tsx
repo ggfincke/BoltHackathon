@@ -88,9 +88,9 @@ export default function CategoriesPage() {
               </svg>
             </div>
             <h2 className="text-xl font-semibold">Best Deals</h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+            {/* <p className="text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
               Find the biggest savings across retailers
-            </p>
+            </p> */}
           </Link>
           
           {/* Display regular categories */}
