@@ -57,9 +57,9 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
   const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
   
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden transition-transform hover:scale-[1.02]">
+    <div className="product-card">
       <Link href={`/product/${product.slug}`} className="block">
-        <div className="aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
+        <div className="product-image-container">
           <Image 
             src={imageUrl} 
             alt={product.name}
@@ -77,7 +77,7 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
         </Link>
         
         {product.brand && (
-          <p className={`${compact ? "text-xs mb-1" : "text-sm mb-2"} text-gray-600 dark:text-gray-400`}>
+          <p className={`${compact ? "text-xs mb-1" : "text-sm mb-2"} text-muted`}>
             {product.brand.name}
           </p>
         )}
@@ -90,7 +90,7 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
                   ? `$${bestListing.price.toFixed(2)}`
                   : 'N/A'}
               </span>
-              <span className={`text-xs bg-gray-200 dark:bg-gray-700 ${compact ? "px-1.5 py-0.5" : "px-2 py-1"} rounded`}>
+              <span className={`product-retailer-badge ${compact ? "text-xs px-1.5 py-0.5" : "text-xs px-2 py-1"}`}>
                 {bestListing.retailer.name}
               </span>
             </div>
@@ -98,7 +98,7 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
             <div className="flex gap-2 mt-2">
               <Link 
                 href={`/product/${product.slug}`}
-                className={`flex-1 bg-gray-200 dark:bg-gray-700 text-center ${compact ? "py-1.5 text-xs" : "py-2 text-sm"} rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+                className={`flex-1 product-button ${compact ? "compact" : ""}`}
               >
                 Details
               </Link>
@@ -114,12 +114,12 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
           </div>
         ) : (
           <div className="mt-2">
-            <p className={`text-gray-500 dark:text-gray-400 italic ${compact ? "text-xs" : "text-sm"}`}>
+            <p className={`text-secondary italic ${compact ? "text-xs" : "text-sm"}`}>
               No listings available
             </p>
             <Link 
               href={`/product/${product.slug}`}
-              className={`block w-full bg-gray-200 dark:bg-gray-700 text-center ${compact ? "py-1.5 text-xs mt-2" : "py-2 text-sm mt-3"} rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+              className={`block w-full product-button ${compact ? "compact mt-2" : "mt-3"}`}
             >
               View Details
             </Link>

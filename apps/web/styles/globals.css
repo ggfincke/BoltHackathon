@@ -15,6 +15,28 @@
   --dropdown-bg: rgba(255, 255, 255, 0.98);
   --dropdown-header-start: #f8f9fa;
   --dropdown-header-end: #ffffff;
+  
+  /* Component specific colors */
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --text-muted: #6b7280;
+  --text-secondary: #9ca3af;
+  --bg-muted: #f3f4f6;
+  --bg-secondary: #e5e7eb;
+  --bg-tertiary: #f9fafb;
+  --bg-hover: #f3f4f6;
+  --bg-hover-secondary: #e5e7eb;
+  
+  /* Status colors */
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --success-border: #bbf7d0;
+  --error-bg: #fef2f2;
+  --error-text: #dc2626;
+  --error-border: #fecaca;
+  --warning-bg: #fffbeb;
+  --warning-text: #d97706;
+  --warning-border: #fed7aa;
 }
 
 .dark {
@@ -32,6 +54,28 @@
   --dropdown-bg: rgba(22, 27, 34, 0.98);
   --dropdown-header-start: #161b22;
   --dropdown-header-end: #0d1117;
+  
+  /* Component specific colors */
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-secondary: #6b7280;
+  --bg-muted: #1f2937;
+  --bg-secondary: #374151;
+  --bg-tertiary: #1a1a1a;
+  --bg-hover: #1f2937;
+  --bg-hover-secondary: #374151;
+  
+  /* Status colors */
+  --success-bg: #064e3b;
+  --success-text: #34d399;
+  --success-border: #10b981;
+  --error-bg: #7f1d1d;
+  --error-text: #f87171;
+  --error-border: #ef4444;
+  --warning-bg: #78350f;
+  --warning-text: #fbbf24;
+  --warning-border: #f59e0b;
 }
 
 body {
@@ -570,4 +614,273 @@ a.bg-primary,
   .dropdown-item:focus {
     outline: 3px solid;
   }
+}
+
+/* ===========================================
+   SEMANTIC COMPONENT CLASSES
+   =========================================== */
+
+/* Common borders */
+.border-primary {
+  border-color: var(--border-primary);
+}
+
+.border-secondary {
+  border-color: var(--border-secondary);
+}
+
+/* Common backgrounds */
+.bg-muted {
+  background-color: var(--bg-muted);
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+/* Text colors */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Product card styles */
+.product-card {
+  background: var(--surface);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: scale(1.02);
+}
+
+.product-image-container {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background-color: var(--bg-muted);
+}
+
+.product-retailer-badge {
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.product-button {
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.product-button:hover {
+  background-color: var(--bg-hover-secondary);
+}
+
+.product-button.compact {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Sidebar styles */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border-primary);
+}
+
+.sidebar-section {
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.sidebar-notification {
+  background-color: var(--bg-muted);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
+/* Form elements */
+.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.375rem;
+  background: var(--background);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(133, 209, 231, 0.1);
+}
+
+/* Confirmation modal styles */
+.modal-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.375rem;
+  background: var(--background);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.modal-button:hover {
+  background-color: var(--bg-hover);
+}
+
+.modal-button.danger {
+  border-color: var(--error-border);
+  color: var(--error-text);
+}
+
+.modal-button.danger:hover {
+  background-color: var(--error-bg);
+}
+
+/* Status badges */
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge.success {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+}
+
+.status-badge.error {
+  background-color: var(--error-bg);
+  color: var(--error-text);
+}
+
+.status-badge.warning {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+/* Table styles */
+.table-row {
+  transition: all 0.2s ease;
+}
+
+.table-row:hover {
+  background-color: var(--bg-hover);
+}
+
+.table-header {
+  background-color: var(--bg-muted);
+}
+
+.table-divider {
+  border-color: var(--border-primary);
+}
+
+/* Pagination styles */
+.pagination-button {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--surface);
+  border: 1px solid var(--border-primary);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover {
+  background-color: var(--bg-hover);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background: var(--primary);
+  color: var(--dark-text);
+  border-color: var(--primary);
+}
+
+/* Settings page styles */
+.settings-danger-zone {
+  background-color: var(--error-bg);
+  border-radius: 0.375rem;
+  padding: 1rem;
+}
+
+.settings-button {
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.settings-button:hover {
+  background-color: var(--bg-hover-secondary);
+}
+
+/* Category card styles */
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-primary);
+}
+
+.category-card:hover {
+  background-color: var(--bg-hover);
+}
+
+.category-count {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  background-color: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Search and filter styles */
+.filter-button {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  color: var(--text);
+}
+
+.filter-button:hover {
+  background-color: var(--bg-hover-secondary);
+}
+
+/* Loading and empty states */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  border: 2px dashed var(--border-secondary);
+  border-radius: 0.5rem;
+  color: var(--text-muted);
 }
