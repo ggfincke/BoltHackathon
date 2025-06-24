@@ -17,7 +17,7 @@ Example Usage:
 
 Normal usage:
     python scripts/update.py --retailer amazon 
-    python scripts/update.py --retailer target
+    python scripts/update.py --retailer target --use-safari
     python scripts/update.py --retailer walmart
 """
 
@@ -252,6 +252,7 @@ class ProductUpdater:
         try:
             listing_id = listing['id']
             product_name = listing['product']['name'] if listing['product'] else 'Unknown'
+            product_upc = listing['product']['upc'] if listing['product'] and listing['product'].get('upc') else 'N/A'
             retailer_slug = listing['retailer']['slug'] if listing['retailer'] else 'unknown'
             url = listing['url']
             current_price = listing['price']
@@ -264,23 +265,24 @@ class ProductUpdater:
                 self.stats['failed_updates'] += 1
                 return False
             
-            # extract updated fields
-            new_price = scraped_data.get('price')
-            new_title = scraped_data.get('title')
-            new_rating = scraped_data.get('rating')
-            new_review_count = scraped_data.get('review_count')
-            new_availability = scraped_data.get('availability', 'in_stock')
-            new_image_url = scraped_data.get('images', [None])[0]
-            new_upc = scraped_data.get('upc')
+            # extract updated fields - handle nested structure from scrapers
+            listing_data = scraped_data.get('listing_data', {})
+            product_data = scraped_data.get('product_data', {})
+            
+            new_price = listing_data.get('price')
+            new_title = product_data.get('name')
+            new_rating = listing_data.get('rating')
+            new_review_count = listing_data.get('review_count')
+            new_availability = listing_data.get('availability_status', 'in_stock')
+            new_image_url = listing_data.get('image_url')
+            new_upc = product_data.get('upc')
             
             # prepare update data
             update_data = {
                 'updated_at': datetime.now().isoformat()
             }
             
-            # only update fields that have values
-            if new_title:
-                update_data['title'] = new_title
+            # only update fields that have values (note: product name is stored in products table, not listings)
             if new_rating:
                 update_data['rating'] = float(new_rating)
             if new_review_count:
@@ -289,6 +291,17 @@ class ProductUpdater:
                 update_data['availability_status'] = new_availability
             if new_image_url:
                 update_data['image_url'] = new_image_url
+
+            # update product name if it has changed and we have a new title
+            if new_title and listing.get('product'):
+                existing_name = listing['product'].get('name', '')
+                if new_title != existing_name:
+                    try:
+                        product_update_data = {'name': new_title}
+                        self.supabase.table('products').update(product_update_data).eq('id', listing['product_id']).execute()
+                        self.logger.info(f"Updated product name for {listing['product_id']}: '{existing_name}' → '{new_title}'")
+                    except Exception as e:
+                        self.logger.error(f"Failed to update product name for {listing['product_id']}: {e}")
 
             # handle UPC reconciliation
             existing_upc = listing['product'].get('upc') if listing.get('product') else None
@@ -343,6 +356,14 @@ class ProductUpdater:
                 except (ValueError, TypeError) as e:
                     self.logger.warning(f"Could not parse price '{new_price}': {e}")
             
+            # determine if any data has changed (not just price)
+            data_changed = False
+            
+            # check if we have meaningful updates beyond just updated_at timestamp
+            if len(update_data) > 1:  # more than just 'updated_at'
+                data_changed = True
+                self.logger.debug(f"Data updated: {list(update_data.keys())}")
+            
             # update listing in database
             try:
                 self.supabase.table('listings').update(update_data).eq('id', listing_id).execute()
@@ -368,7 +389,9 @@ class ProductUpdater:
                 else:
                     self.logger.warning(f"Failed to insert price history for listing {listing_id}")
             
-            if price_changed:
+            # track stats properly - count as successful if any data changed
+            self.stats['total_processed'] += 1
+            if data_changed:
                 self.stats['successful_updates'] += 1
             else:
                 self.stats['no_change'] += 1
@@ -423,10 +446,11 @@ class ProductUpdater:
                 try:
                     listing_id = listing['id']
                     product_name = listing['product']['name'] if listing['product'] else 'Unknown'
+                    product_upc = listing['product']['upc'] if listing['product'] and listing['product'].get('upc') else 'N/A'
                     retailer_slug = listing['retailer']['slug'] if listing['retailer'] else 'unknown'
                     url = listing['url']
                     
-                    self.logger.info(f"Worker {batch_num}: Updating {retailer_slug} listing for: {product_name}")
+                    self.logger.info(f"Worker {batch_num}: Updating {retailer_slug} listing for: {product_name} (UPC: {product_upc})")
                     
                     # get or create scraper for this retailer in this worker thread
                     if retailer_slug not in worker_scrapers:
@@ -603,7 +627,13 @@ async def main():
     
     # setup supabase
     supabase_url = args.supabase_url or os.getenv('SUPABASE_URL')
-    supabase_key = args.supabase_key or os.getenv('SUPABASE_ANON_KEY')
+    supabase_key = args.supabase_key or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+    # prefer service-role key if available
+    # supabase_key = (
+    #     args.supabase_key
+    #     # or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+    #     or os.getenv('SUPABASE_ANON_KEY')
+    # )
     
     if not supabase_url or not supabase_key:
         logger.error("Supabase URL and API key must be provided via arguments or environment variables")
@@ -652,7 +682,8 @@ async def main():
             # show first 5 products
             for product in products[:5]:
                 product_name = product['product']['name'] if product['product'] else 'Unknown'
-                logger.info(f"  - {product_name} (ID: {product['id']})")
+                product_upc = product['product']['upc'] if product['product'] and product['product'].get('upc') else 'N/A'
+                logger.info(f"  - {product_name} (UPC: {product_upc}, ID: {product['id']})")
             if len(products) > 5:
                 logger.info(f"  ... and {len(products) - 5} more")
             continue
