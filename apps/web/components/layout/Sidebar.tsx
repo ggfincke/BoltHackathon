@@ -117,7 +117,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
             <div className="mb-3">
               <div className="flex items-center gap-3 p-3">
                 <BasketsIcon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && <span className="font-medium">Basket Quick Actions</span>}
+                {!isCollapsed && <span className="font-medium">Baskets</span>}
               </div>
             </div>
 

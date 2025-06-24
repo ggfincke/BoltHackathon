@@ -7,7 +7,7 @@ import CTASection from './sections/CTASection';
 
 export default function LandingPage() {
   return (
-    <div className="space-y-0 -m-6">
+    <div className="space-y-0">
       <HeroSection />
       <FeaturesSection />
       <GettingStartedSection />

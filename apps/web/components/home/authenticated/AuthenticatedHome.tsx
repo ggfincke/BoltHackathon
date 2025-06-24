@@ -11,10 +11,12 @@ export default function AuthenticatedHome() {
   const username = user?.email?.split('@')[0] || 'there';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
       <WelcomeBanner username={username} />
+      {/* Price Alerts - Full Width */}
+      <PriceAlerts />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Left Column - Stats */}
         <div className="lg:col-span-1">
           <UserStats />
@@ -25,9 +27,6 @@ export default function AuthenticatedHome() {
           <PopularCategories />
         </div>
       </div>
-
-      {/* Price Alerts - Full Width */}
-      <PriceAlerts />
     </div>
   );
 }
