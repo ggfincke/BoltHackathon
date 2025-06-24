@@ -1,13 +1,17 @@
+'use client';
+
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '~/lib/auth'
+import { supabase } from '~/lib/supabaseClient'
 
 type AuthFormProps = {
   type: 'login' | 'signup' | 'reset'
+  onToggle?: (type: 'login' | 'signup' | 'reset') => void
 }
 
-export default function AuthForm({ type }: AuthFormProps) {
+export default function AuthForm({ type, onToggle }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -31,22 +35,30 @@ export default function AuthForm({ type }: AuthFormProps) {
           throw new Error('Passwords do not match')
         }
         
-        const { error } = await signUp(email, password)
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        })
         if (error) throw error
         
-        setMessage('Check your email for the confirmation link')
+        setMessage('Check your email for a confirmation link!')
       } else if (type === 'login') {
-        const { error } = await signIn(email, password)
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
         if (error) throw error
         
         // Check if there's a redirect parameter
         const redirectTo = searchParams.get('redirectedFrom') || '/'
         router.push(redirectTo)
       } else if (type === 'reset') {
-        const { error } = await resetPassword(email)
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/update-password`,
+        })
         if (error) throw error
         
-        setMessage('Check your email for the password reset link')
+        setMessage('Check your email for a password reset link!')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -55,102 +67,141 @@ export default function AuthForm({ type }: AuthFormProps) {
     }
   }
 
+  const getTitle = () => {
+    switch (type) {
+      case 'login': return 'Sign In'
+      case 'signup': return 'Create Account'
+      case 'reset': return 'Reset Password'
+    }
+  }
+
+  const getButtonText = () => {
+    if (loading) return 'Loading...'
+    switch (type) {
+      case 'login': return 'Sign In'
+      case 'signup': return 'Create Account'
+      case 'reset': return 'Send Reset Link'
+    }
+  }
+
   return (
-    <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="bg-surface p-8 rounded-lg shadow-sm">
+    <div className="max-w-md w-full space-y-8">
+      <div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold">{getTitle()}</h2>
+      </div>
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="email" className="sr-only">Email address</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              className="form-input"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          
+          {type !== 'reset' && (
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete={type === 'login' ? 'current-password' : 'new-password'}
+                required
+                className="form-input"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
+          
+          {type === 'signup' && (
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="form-input"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
             {error}
           </div>
         )}
-        
+
         {message && (
-          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
             {message}
           </div>
         )}
-        
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
-            required
-          />
+
+        <div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+          >
+            {getButtonText()}
+          </button>
         </div>
-        
-        {type !== 'reset' && (
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
-              required
-            />
-          </div>
-        )}
-        
-        {type === 'signup' && (
-          <div className="mb-4">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
-              required
-            />
-          </div>
-        )}
-        
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-primary text-buttonText py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50"
-        >
-          {loading ? 'Processing...' : type === 'login' ? 'Sign In' : type === 'signup' ? 'Sign Up' : 'Reset Password'}
-        </button>
-        
-        <div className="mt-4 text-center text-sm">
-          {type === 'login' ? (
+
+        <div className="text-center space-y-2">
+          {type === 'login' && onToggle && (
             <>
-              <Link href="/auth/reset" className="text-primary hover:underline">
-                Forgot password?
-              </Link>
-              <div className="mt-2">
-                Don&apos;t have an account?{' '}
-                <Link href="/auth/signup" className="text-primary hover:underline">
-                  Sign up
-                </Link>
-              </div>
+              <button
+                type="button"
+                onClick={() => onToggle('signup')}
+                className="text-primary hover:underline"
+              >
+                Don't have an account? Sign up
+              </button>
+              <br />
+              <button
+                type="button"
+                onClick={() => onToggle('reset')}
+                className="text-primary hover:underline"
+              >
+                Forgot your password?
+              </button>
             </>
-          ) : type === 'signup' ? (
-            <div>
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
-          ) : (
-            <div>
-              Remember your password?{' '}
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
+          )}
+          
+          {type === 'signup' && onToggle && (
+            <button
+              type="button"
+              onClick={() => onToggle('login')}
+              className="text-primary hover:underline"
+            >
+              Already have an account? Sign in
+            </button>
+          )}
+          
+          {type === 'reset' && onToggle && (
+            <button
+              type="button"
+              onClick={() => onToggle('login')}
+              className="text-primary hover:underline"
+            >
+              Back to sign in
+            </button>
           )}
         </div>
       </form>

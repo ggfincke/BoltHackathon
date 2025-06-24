@@ -154,13 +154,13 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
 
   return (
     <aside 
-      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-surface border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-30 ${
+      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] sidebar transition-all duration-300 z-30 ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
       <div className="flex flex-col h-full">
         {/* Collapse Toggle */}
-        <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-2 sidebar-section">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="w-full flex items-center justify-center p-1 rounded-md hover-primary-bg transition-colors"
@@ -180,7 +180,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
 
         <div className="flex-1 overflow-y-auto">
           {/* Home Section */}
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-3 sidebar-section">
             <Link
               href="/"
               className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
@@ -195,7 +195,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
           </div>
 
           {/* Categories Section */}
-          <div className="px-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-3 pb-3 sidebar-section">
             <div className="mb-2 mt-3">
               <Link
                 href="/categories"
@@ -257,8 +257,8 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
             {!isCollapsed && (
               <div className="ml-3 space-y-1.5">
                 {!user ? (
-                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <div className="sidebar-notification">
+                    <p className="text-sm text-muted mb-2">
                       Sign in to manage your baskets
                     </p>
                     <Link
@@ -287,12 +287,12 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                     
                     {/* Recent Baskets */}
                     <div className="mt-2">
-                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                      <h4 className="text-xs font-medium text-secondary mb-1.5 uppercase tracking-wide">
                         Recent Baskets
                       </h4>
                       <div className="space-y-1">
                         {loadingBaskets ? (
-                          <div className="p-1.5 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="p-1.5 text-sm text-secondary">
                             Loading...
                           </div>
                         ) : recentBaskets.length > 0 ? (
@@ -309,7 +309,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                             </Link>
                           ))
                         ) : (
-                          <div className="p-1.5 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="p-1.5 text-sm text-secondary">
                             No recent baskets
                           </div>
                         )}
