@@ -77,22 +77,9 @@ export default function ProfileDropdown() {
           <div className="fixed inset-0 z-40 md:hidden bg-black/40 backdrop-blur-md" onClick={() => setIsOpen(false)} />
           
           {/* Dropdown menu */}
-          <div 
-            className="absolute right-0 top-full mt-2 w-64 border rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
-            style={{
-              background: 'rgba(var(--background-rgb), 0.85)',
-              borderColor: 'var(--surface)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(var(--background-rgb), 0.05)'
-            }}
-          >
+          <div className="absolute right-0 top-full mt-2 w-64 border rounded-xl shadow-2xl z-50 overflow-hidden profile-dropdown">
             {/* User info header */}
-            <div 
-              className="px-4 py-4 border-b"
-              style={{
-                background: `linear-gradient(135deg, var(--surface), var(--background))`,
-                borderBottomColor: 'var(--surface)'
-              }}
-            >
+            <div className="px-4 py-4 border-b profile-dropdown-header">
               <div className="flex items-center gap-3">
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center font-semibold shadow-lg text-white"
@@ -113,19 +100,7 @@ export default function ProfileDropdown() {
             <div className="py-2">
               <Link 
                 href="/profile" 
-                className="flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 hover:translate-x-1 hover:shadow-md border-l-2 border-transparent group"
-                style={{
-                  background: 'var(--surface)',
-                  color: 'var(--text)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
-                  e.currentTarget.style.borderLeftColor = 'var(--primary)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--surface)'
-                  e.currentTarget.style.borderLeftColor = 'transparent'
-                }}
+                className="flex items-center gap-3 px-4 py-3 text-sm hover:translate-x-1 hover:shadow-md border-l-2 border-transparent profile-dropdown-item"
                 onClick={() => setIsOpen(false)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,19 +111,7 @@ export default function ProfileDropdown() {
               
               <Link 
                 href="/settings" 
-                className="flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 hover:translate-x-1 hover:shadow-md border-l-2 border-transparent group"
-                style={{
-                  background: 'var(--surface)',
-                  color: 'var(--text)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
-                  e.currentTarget.style.borderLeftColor = 'var(--primary)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--surface)'
-                  e.currentTarget.style.borderLeftColor = 'transparent'
-                }}
+                className="flex items-center gap-3 px-4 py-3 text-sm hover:translate-x-1 hover:shadow-md border-l-2 border-transparent profile-dropdown-item"
                 onClick={() => setIsOpen(false)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,19 +123,7 @@ export default function ProfileDropdown() {
               
               <Link 
                 href="/settings/notifications" 
-                className="flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 hover:translate-x-1 hover:shadow-md border-l-2 border-transparent group"
-                style={{
-                  background: 'var(--surface)',
-                  color: 'var(--text)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
-                  e.currentTarget.style.borderLeftColor = 'var(--primary)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--surface)'
-                  e.currentTarget.style.borderLeftColor = 'transparent'
-                }}
+                className="flex items-center gap-3 px-4 py-3 text-sm hover:translate-x-1 hover:shadow-md border-l-2 border-transparent profile-dropdown-item"
                 onClick={() => setIsOpen(false)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,17 +135,7 @@ export default function ProfileDropdown() {
               {/* Special "Show Best Deals" item */}
               <Link 
                 href="/best-deals" 
-                className="flex items-center justify-between px-4 py-3 text-sm transition-all duration-200 hover:translate-x-1 hover:shadow-md border-l-2 group"
-                style={{
-                  background: `linear-gradient(90deg, rgba(111, 80, 111, 0.15), rgba(133, 209, 231, 0.15))`,
-                  borderLeftColor: 'var(--accent)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `linear-gradient(90deg, rgba(111, 80, 111, 0.25), rgba(133, 209, 231, 0.25))`
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = `linear-gradient(90deg, rgba(111, 80, 111, 0.15), rgba(133, 209, 231, 0.15))`
-                }}
+                className="flex items-center justify-between px-4 py-3 text-sm hover:translate-x-1 hover:shadow-md border-l-2 profile-dropdown-special"
                 onClick={() => setIsOpen(false)}
               >
                 <div className="flex items-center gap-3">
@@ -216,19 +157,7 @@ export default function ProfileDropdown() {
             <div className="py-2">
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-3 w-full px-4 py-3 text-sm transition-all duration-200 hover:translate-x-1 hover:shadow-md border-l-2 border-transparent group"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.2))'
-                  e.currentTarget.style.borderLeftColor = '#ef4444'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
-                  e.currentTarget.style.borderLeftColor = 'transparent'
-                }}
+                className="flex items-center gap-3 w-full px-4 py-3 text-sm hover:translate-x-1 hover:shadow-md border-l-2 border-transparent profile-dropdown-signout"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

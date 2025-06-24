@@ -163,7 +163,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
         <div className="p-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full flex items-center justify-center p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="w-full flex items-center justify-center p-1 rounded-md hover-primary-bg transition-colors"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <svg 
@@ -186,7 +186,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                 isActiveLink('/') 
                   ? 'bg-primary text-buttonText' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                  : 'hover-primary-bg'
               }`}
             >
               <HomeIcon className="w-5 h-5 flex-shrink-0" />
@@ -202,7 +202,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                 className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                   isActiveLink('/categories') 
                     ? 'bg-primary text-buttonText' 
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'hover-primary-bg'
                 }`}
               >
                 <CategoriesIcon className="w-5 h-5 flex-shrink-0" />
@@ -217,7 +217,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                   className={`block p-1.5 text-sm rounded-md transition-colors font-medium ${
                     isActiveLink('/best-deals') 
                       ? 'bg-primary text-buttonText' 
-                      : 'text-primary hover:bg-gray-100 dark:hover:bg-gray-800'
+                      : 'text-primary hover-primary-bg'
                   }`}
                 >
                   Best Deals
@@ -229,7 +229,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                     className={`block p-1.5 text-sm rounded-md transition-colors ${
                       pathname === `/categories/${category.slug}`
                         ? 'bg-primary text-buttonText font-medium'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        : 'hover-primary-bg'
                     }`}
                   >
                     {category.name}
@@ -237,7 +237,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                 ))}
                 <Link
                   href="/categories"
-                  className="block p-1.5 text-sm text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="block p-1.5 text-sm text-primary hover-primary-bg rounded-md transition-colors"
                 >
                   View All Categories →
                 </Link>
@@ -272,14 +272,14 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                   <>
                     <Link
                       href="/baskets"
-                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
                     >
                       <span>➕</span>
                       Create New Basket
                     </Link>
                     <Link
                       href="/baskets"
-                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
                     >
                       <span>📋</span>
                       Manage Baskets
@@ -300,7 +300,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                             <Link
                               key={basket.id}
                               href={`/basket/${basket.id}`}
-                              className="block p-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                              className="block p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
                             >
                               <div className="font-medium">{basket.name}</div>
                               <div className="text-xs text-gray-500">
