@@ -389,3 +389,94 @@ a.bg-primary,
     margin-left: 0;
   }
 }
+
+/* Enhanced dropdown positioning and z-index management */
+.dropdown-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.dropdown-menu {
+  position: absolute;
+  z-index: 1001;
+  min-width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark .dropdown-menu {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Search dropdown specific styles */
+.search-dropdown {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Profile dropdown specific styles */
+.profile-dropdown {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Prevent layout shift during dropdown animations */
+.dropdown-trigger {
+  position: relative;
+}
+
+/* Enhanced focus management for dropdowns */
+.dropdown-item:focus,
+.dropdown-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  background-color: var(--surface);
+}
+
+/* Keyboard navigation highlighting */
+.dropdown-item.keyboard-selected {
+  background-color: var(--surface);
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* Mobile-specific dropdown adjustments */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    max-width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .profile-dropdown {
+    right: 0;
+    left: auto;
+    transform: none;
+    max-width: 280px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu {
+    transition: none;
+  }
+  
+  .dropdown-item {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .dropdown-menu {
+    border: 2px solid;
+  }
+  
+  .dropdown-item:hover,
+  .dropdown-item:focus {
+    outline: 3px solid;
+  }
+}
