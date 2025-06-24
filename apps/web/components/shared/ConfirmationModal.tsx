@@ -1,49 +1,46 @@
 'use client';
 
+import React from 'react';
+
 interface ConfirmationModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
-  confirmButtonClass?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  variant?: 'default' | 'danger';
 }
 
 export default function ConfirmationModal({
   isOpen,
-  onClose,
-  onConfirm,
   title,
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  confirmButtonClass = 'bg-primary hover:bg-opacity-90'
+  onConfirm,
+  onCancel,
+  variant = 'default'
 }: ConfirmationModalProps) {
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-background rounded-lg shadow-lg w-full max-w-md p-6">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
-        <p className="mb-6 text-gray-600 dark:text-gray-400">{message}</p>
+      <div className="bg-surface p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 className="text-lg font-semibold mb-4">{title}</h3>
+        <p className="mb-6 text-muted">{message}</p>
         
-        <div className="flex justify-end space-x-3">
+        <div className="flex gap-3 justify-end">
           <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={onCancel}
+            className="modal-button"
           >
             {cancelText}
           </button>
           <button
-            onClick={handleConfirm}
-            className={`px-4 py-2 text-white rounded-md transition-colors ${confirmButtonClass}`}
+            onClick={onConfirm}
+            className={`modal-button ${variant === 'danger' ? 'danger' : ''}`}
           >
             {confirmText}
           </button>

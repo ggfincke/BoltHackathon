@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 
-interface PriceAlert {
+interface BestDeal {
   id: string;
   productName: string;
   retailer: string;
@@ -13,11 +13,11 @@ interface PriceAlert {
   imageUrl: string;
 }
 
-interface PriceAlertsProps {
-  alerts?: PriceAlert[];
+interface BestDealsProps {
+  deals?: BestDeal[];
 }
 
-const DEFAULT_ALERTS: PriceAlert[] = [
+const DEFAULT_DEALS: BestDeal[] = [
   {
     id: '1',
     productName: 'Organic Milk',
@@ -92,34 +92,34 @@ const DEFAULT_ALERTS: PriceAlert[] = [
   },
 ];
 
-export default function PriceAlerts({ alerts = DEFAULT_ALERTS }: PriceAlertsProps) {
+export default function BestDeals({ deals = DEFAULT_DEALS }: BestDealsProps) {
   return (
     <div className="bg-surface rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>
-          Recent Price Changes
+          Best Deals
         </h2>
         <Link
           href="/best-deals"
           className="text-sm flex items-center"
           style={{ color: 'var(--primary)' }}
         >
-          Show Best Deals <FaArrowRight className="ml-1" />
+          View All Deals <FaArrowRight className="ml-1" />
         </Link>
       </div>
 
-      {alerts.length > 0 ? (
+      {deals.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {alerts.slice(0, 8).map((alert) => (
+          {deals.slice(0, 8).map((deal) => (
             <div
-              key={alert.id}
+              key={deal.id}
               className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden h-32 flex"
             >
               <div className="w-20 flex-shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={alert.imageUrl}
-                  alt={alert.productName}
+                  src={deal.imageUrl}
+                  alt={deal.productName}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -130,21 +130,21 @@ export default function PriceAlerts({ alerts = DEFAULT_ALERTS }: PriceAlertsProp
                       className="font-medium text-xs line-clamp-2 pr-1"
                       style={{ color: 'var(--text)' }}
                     >
-                      {alert.productName}
+                      {deal.productName}
                     </h3>
                     <div
                       className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                        alert.percentChange < 0
+                        deal.percentChange < 0
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                           : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       }`}
                     >
-                      {alert.percentChange < 0 ? '↓' : '↑'}{' '}
-                      {Math.abs(alert.percentChange)}%
+                      {deal.percentChange < 0 ? '↓' : '↑'}{' '}
+                      {Math.abs(deal.percentChange)}%
                     </div>
                   </div>
                   <p className="text-xs opacity-70 mb-1" style={{ color: 'var(--text)' }}>
-                    {alert.retailer}
+                    {deal.retailer}
                   </p>
                 </div>
                 <div className="flex justify-between items-center">
@@ -153,14 +153,14 @@ export default function PriceAlerts({ alerts = DEFAULT_ALERTS }: PriceAlertsProp
                       className="text-xs line-through opacity-70"
                       style={{ color: 'var(--text)' }}
                     >
-                      ${alert.oldPrice.toFixed(2)}
+                      ${deal.oldPrice.toFixed(2)}
                     </span>
                     <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>
-                      ${alert.newPrice.toFixed(2)}
+                      ${deal.newPrice.toFixed(2)}
                     </span>
                   </div>
                   <Link
-                    href={`/product/${alert.id}`}
+                    href={`/product/${deal.id}`}
                     className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
                   >

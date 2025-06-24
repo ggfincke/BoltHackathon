@@ -107,6 +107,7 @@ class TargetScraper(BaseScraper):
     # extract UPC from specifications section
     def get_upc(self, driver):
         try:
+            self.logger.info("Starting UPC extraction")
             # expand the specifications accordion if needed
             try:
                 spec_btn = driver.find_element(
@@ -125,6 +126,7 @@ class TargetScraper(BaseScraper):
                 lambda d: "UPC" in d.page_source
             )
 
+            self.logger.debug("Scanning div elements for UPC text ...")
             # scan all div elements for UPC row
             for div in driver.find_elements(By.CSS_SELECTOR, "div"):
                 text = div.text.strip()
@@ -132,11 +134,15 @@ class TargetScraper(BaseScraper):
                     m = re.search(r'UPC[:\s-]*([0-9]{12,})', text)
                     if m:
                         upc_value = m.group(1)
+                        self.logger.info(f"Pattern matched! UPC string: '{upc_value}'")
+                        self.logger.info(f"Successfully extracted UPC={upc_value}")
                         return upc_value
 
+            self.logger.warning("UPC pattern not found in any div")
             return None
 
         except Exception as e:
+            self.logger.error(f"Unexpected error extracting UPC: {e}")
             return None
 
     # check if sold by Target

@@ -180,13 +180,22 @@ class WalmartScraper(BaseScraper):
     # get UPC/GTIN string from Walmart's schema-org script tag
     def get_upc(self, driver):
         try:
+            self.logger.info("Starting UPC extraction")
             script_tag = driver.find_element(
                 By.CSS_SELECTOR,
                 "script[data-seo-id='schema-org-product'][type='application/ld+json']"
             )
+            self.logger.debug("Found schema-org JSON script tag; parsing ...")
             data = json.loads(script_tag.get_attribute("innerHTML"))
-            return str(data.get("gtin13") or data.get("sku"))
-        except Exception:
+            upc_val = str(data.get("gtin13") or data.get("sku") or "")
+            if upc_val:
+                self.logger.info(f"Successfully extracted UPC={upc_val}")
+                return upc_val
+            else:
+                self.logger.warning("UPC value not found in schema-org JSON")
+                return None
+        except Exception as e:
+            self.logger.error(f"Unexpected error extracting UPC: {e}")
             return None
 
     # scrape a product from Walmart
@@ -233,8 +242,8 @@ class WalmartScraper(BaseScraper):
                 "upc":    upc,
             }
             
-            # return data for testing (instead of mapping to database)
-            return product_data
+            # return data mapped to database structure
+            return self.map_to_database(product_data, self.retailer_id)
             
         except Exception as e:
             self.logger.error(f"Error scraping Walmart product: {e}")
@@ -253,16 +262,41 @@ if __name__ == "__main__":
         if product_data:
             print("\nProduct Details:")
             try:
-                print(f"Name: {product_data.get('name', 'Not found')}")
-                print(f"Price: ${product_data.get('price', 'Not found')}")
-                print(f"Image URL: {product_data.get('image_url', 'Not found')}")
-                print(f"In Stock: {'Yes' if product_data.get('in_stock') else 'No'}")
-                print(f"Third Party Seller: {'Yes' if product_data.get('third_party_seller') else 'No'}")
-                print(f"Rating: {product_data.get('rating', 'Not found')}")
-                print(f"Review Count: {product_data.get('review_count', 'Not found')}")
-                print(f"UPC: {product_data.get('upc', 'Not found')}")
-            except Exception as ke:
-                print(f"Error displaying data: {ke}")
+                print(f"Name: {product_data['product_data']['name']}")
+                
+                if product_data['listing_data'].get('price'):
+                    print(f"Price: ${product_data['listing_data']['price']}")
+                else:
+                    print("Price: Not found")
+                    
+                print(f"In Stock: {'Yes' if product_data['listing_data'].get('in_stock') else 'No'}")
+                
+                if product_data['listing_data'].get('image_url'):
+                    print(f"Image URL: {product_data['listing_data']['image_url']}")
+                else:
+                    print("Image URL: Not found")
+                
+                # display rating if available
+                if product_data['listing_data'].get('rating'):
+                    print(f"Rating: {product_data['listing_data']['rating']} out of 5")
+                else:
+                    print("Rating: Not found")
+                
+                # display review count if available
+                if product_data['listing_data'].get('review_count'):
+                    print(f"Review Count: {product_data['listing_data']['review_count']}")
+                else:
+                    print("Review Count: Not found")
+                
+                # display UPC if available
+                if product_data['product_data'].get('upc'):
+                    print(f"UPC: {product_data['product_data']['upc']}")
+                else:
+                    print("UPC: Not found")
+                    
+                print(f"Third Party Seller: {'Yes' if product_data['listing_data'].get('third_party_seller') else 'No'}")
+            except KeyError as ke:
+                print(f"Missing expected data field: {ke}")
                 print(f"Available data: {product_data}")
         else:
             print("Failed to fetch product data")

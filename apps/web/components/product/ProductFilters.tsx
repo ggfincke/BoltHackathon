@@ -50,7 +50,7 @@ export default function ProductFilters({
                 {retailer.name}
               </label>
               {retailer.count !== undefined && (
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-secondary">
                   ({retailer.count})
                 </span>
               )}
@@ -77,7 +77,7 @@ export default function ProductFilters({
                   {brand.name}
                 </label>
                 {brand.count !== undefined && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-secondary">
                     ({brand.count})
                   </span>
                 )}
@@ -127,7 +127,7 @@ export default function ProductFilters({
           selectedRetailers.forEach(id => onRetailerChange(id));
           selectedBrands.forEach(id => onBrandChange(id));
         }}
-        className="w-full py-2 text-sm bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        className="filter-button"
       >
         Clear All Filters
       </button>
