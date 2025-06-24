@@ -10,11 +10,11 @@ export default function UserStats({
   potentialSavings = 2.50 
 }: UserStatsProps) {
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6 mb-6">
+    <div className="bg-surface rounded-lg shadow-sm p-6">
       <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text)' }}>
         Your Stats
       </h2>
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
         <div
           className="p-4 rounded-lg text-center"
           style={{
@@ -22,7 +22,7 @@ export default function UserStats({
             border: '1px solid var(--primary)',
           }}
         >
-          <p className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>
+          <p className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
             {trackedItems}
           </p>
           <p className="text-sm opacity-80" style={{ color: 'var(--text)' }}>
@@ -37,7 +37,7 @@ export default function UserStats({
             border: '1px solid var(--secondary)',
           }}
         >
-          <p className="text-3xl font-bold" style={{ color: 'var(--secondary)' }}>
+          <p className="text-2xl font-bold" style={{ color: 'var(--secondary)' }}>
             ${potentialSavings.toFixed(2)}
           </p>
           <p className="text-sm opacity-80" style={{ color: 'var(--text)' }}>
@@ -47,4 +47,4 @@ export default function UserStats({
       </div>
     </div>
   );
-} 
+}

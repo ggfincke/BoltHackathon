@@ -3,6 +3,7 @@
 :root {
   --text: #11090e;
   --background: #ffffff;
+  --background-rgb: 255, 255, 255;
   --surface: #f8f9fa;
   --primary: #85d1e7;
   --secondary: #c65b82;
@@ -14,6 +15,7 @@
 .dark {
   --text: #f6eef3;
   --background: #0d1117;
+  --background-rgb: 13, 17, 23;
   --surface: #161b22;
   --primary: #85d1e7;
   --secondary: #c65b82;
@@ -373,4 +375,17 @@ a.bg-primary,
 /* Primary hover background */
 .hover-primary-bg:hover {
   background: rgba(133, 209, 231, 0.15) !important;
+}
+
+/* Responsive sidebar adjustments */
+@media (max-width: 1024px) {
+  .ml-64 {
+    margin-left: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .ml-64 {
+    margin-left: 0;
+  }
 }
