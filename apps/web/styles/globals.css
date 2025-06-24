@@ -55,14 +55,14 @@ html {
   background: var(--secondary);
 }
 
-/* Enhanced container with better responsive padding */
+/* Container */
 @layer components {
   .container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
 
-/* Primary button text color override for accessibility */
+/* Primary button text color */
 [style*="background: var(--primary)"], 
 [style*="background:var(--primary)"],
 .bg-primary,
@@ -70,7 +70,7 @@ html {
   color: var(--dark-text) !important;
 }
 
-/* Active navigation item styling */
+/* Active navigation item */
 a[style*="background: var(--primary)"],
 a[style*="background:var(--primary)"],
 a.bg-primary,
@@ -78,7 +78,7 @@ a.bg-primary,
   color: var(--dark-text) !important;
 }
 
-/* Beautiful gradient backgrounds */
+/* Gradient backgrounds */
 .gradient-bg-primary {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
@@ -91,7 +91,7 @@ a.bg-primary,
   background: linear-gradient(135deg, var(--accent), var(--primary));
 }
 
-/* Enhanced focus states for better accessibility */
+/* Focus */
 *:focus {
   outline: none;
 }
@@ -102,7 +102,7 @@ a.bg-primary,
   border-radius: 4px;
 }
 
-/* Enhanced button base styles */
+/* Button base styles */
 .btn-base {
   @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-all duration-300 cursor-pointer relative overflow-hidden;
   position: relative;
@@ -132,7 +132,7 @@ a.bg-primary,
   transform: translateY(0);
 }
 
-/* Enhanced card styles */
+/* Card styles */
 .card-enhanced {
   background: var(--background);
   border-radius: 16px;
@@ -158,7 +158,7 @@ a.bg-primary,
   box-shadow: 0 20px 40px rgba(0,0,0,0.12);
 }
 
-/* Enhanced form inputs */
+/* Form inputs */
 .input-enhanced {
   @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
   background: var(--background);
@@ -192,12 +192,12 @@ a.bg-primary,
   animation: shimmer 1.5s infinite;
 }
 
-/* Enhanced transitions for theme switching */
+/* Transitions for theme switching */
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Ripple effect for interactive elements */
+/* Ripple effect */
 @keyframes ripple {
   to {
     transform: scale(4);
@@ -214,7 +214,7 @@ a.bg-primary,
   pointer-events: none;
 }
 
-/* Enhanced hover effects */
+/* Hover effects */
 .hover-lift {
   transition: all 0.3s ease;
 }
@@ -241,7 +241,7 @@ a.bg-primary,
   background-clip: text;
 }
 
-/* Enhanced animations */
+/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -286,7 +286,7 @@ a.bg-primary,
   }
 }
 
-/* Animation utility classes */
+/* Animation utility */
 .animate-fade-in-up {
   animation: fadeInUp 0.8s ease forwards;
 }
@@ -310,7 +310,7 @@ a.bg-primary,
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
 
-/* Enhanced selection */
+/* Selection */
 ::selection {
   background: var(--primary);
   color: var(--dark-text);
@@ -321,7 +321,7 @@ a.bg-primary,
   color: var(--dark-text);
 }
 
-/* Enhanced mobile responsiveness */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
   .container {
     @apply px-4;
@@ -331,7 +331,7 @@ a.bg-primary,
     padding: 20px;
   }
   
-  /* Reduce motion for mobile users who prefer it */
+  /* Reduce motion */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -343,7 +343,7 @@ a.bg-primary,
   }
 }
 
-/* Dark mode enhancements */
+/* Dark mode */
 .dark .card-enhanced {
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
@@ -390,7 +390,7 @@ a.bg-primary,
   }
 }
 
-/* Enhanced dropdown positioning and z-index management */
+/* Dropdown */
 .dropdown-container {
   position: relative;
   z-index: 1000;
@@ -410,24 +410,24 @@ a.bg-primary,
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Search dropdown specific styles */
+/* Search dropdown */
 .search-dropdown {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Profile dropdown specific styles */
+/* Profile dropdown */
 .profile-dropdown {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* Prevent layout shift during dropdown animations */
+/* Dropdown trigger */
 .dropdown-trigger {
   position: relative;
 }
 
-/* Enhanced focus management for dropdowns */
+/* Dropdown item */
 .dropdown-item:focus,
 .dropdown-item:focus-visible {
   outline: 2px solid var(--primary);
@@ -435,14 +435,14 @@ a.bg-primary,
   background-color: var(--surface);
 }
 
-/* Keyboard navigation highlighting */
+/* Keyboard navigation */
 .dropdown-item.keyboard-selected {
   background-color: var(--surface);
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 
-/* Mobile-specific dropdown adjustments */
+/* Mobile dropdown */
 @media (max-width: 768px) {
   .dropdown-menu {
     max-width: calc(100vw - 2rem);
@@ -458,7 +458,7 @@ a.bg-primary,
   }
 }
 
-/* Accessibility improvements */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .dropdown-menu {
     transition: none;
@@ -469,7 +469,7 @@ a.bg-primary,
   }
 }
 
-/* High contrast mode support */
+/* High contrast mode */
 @media (prefers-contrast: high) {
   .dropdown-menu {
     border: 2px solid;
