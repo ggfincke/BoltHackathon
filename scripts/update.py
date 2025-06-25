@@ -32,6 +32,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from dotenv import load_dotenv
 from decimal import Decimal
 import re
+from collections import defaultdict
 
 # load environment variables
 load_dotenv(override=True)
@@ -267,6 +268,8 @@ class ProductUpdater:
 
     # synchronous version of update_single_listing for use in worker threads
     def _update_single_listing_sync(self, listing: Dict, scraper) -> bool:
+        # count every attempt so success-rate denominator is accurate
+        self.stats['total_processed'] += 1
         try:
             listing_id = listing['id']
             product_name = listing['product']['name'] if listing['product'] else 'Unknown'
@@ -407,8 +410,7 @@ class ProductUpdater:
                 else:
                     self.logger.warning(f"Failed to insert price history for listing {listing_id}")
             
-            # track stats properly - count as successful if any data changed
-            self.stats['total_processed'] += 1
+            # track stats properly – mark success vs. no-change (total already counted)
             if data_changed:
                 self.stats['successful_updates'] += 1
             else:
@@ -420,8 +422,6 @@ class ProductUpdater:
             self.logger.error(f"Error updating listing {listing.get('id', 'unknown')}: {e}")
             self.stats['failed_updates'] += 1
             return False
-
-
 
     # update multiple listings w/ proper concurrency control using worker pool
     async def update_listings_batch(self, listings: List[Dict]) -> None:
@@ -457,6 +457,8 @@ class ProductUpdater:
         
         # create scrapers for this worker thread
         worker_scrapers = {}
+        # track how many listings each scraper has processed so we can recycle drivers
+        scraper_counts = defaultdict(int)
         processed_count = 0
         
         try:
@@ -482,6 +484,18 @@ class ProductUpdater:
                         self.active_scrapers.append(worker_scrapers[retailer_slug])
                     
                     scraper = worker_scrapers[retailer_slug]
+                    
+                    # increment usage counter and recycle driver every 500 listings to avoid Chrome "tab crashed" errors
+                    scraper_counts[retailer_slug] += 1
+                    if scraper_counts[retailer_slug] % 500 == 0:
+                        self.logger.info(
+                            f"Worker {batch_num}: Re-initialising {retailer_slug} driver after {scraper_counts[retailer_slug]} listings"
+                        )
+                        try:
+                            # on next use get_driver() will spawn a fresh browser
+                            scraper.close_driver()
+                        except Exception:
+                            pass
                     
                     # call the synchronous version of update_single_listing
                     success = self._update_single_listing_sync(listing, scraper)
