@@ -278,7 +278,26 @@ class WalmartScraper(BaseScraper):
 
             driver.get(url)
             
-            # check if this is a real product page
+            # FIRST: Check if Walmart detected automation and presented a blocking page
+            current = driver.current_url.lower()
+            page_source = driver.page_source.lower()
+            
+            # Check for CAPTCHA/blocked page indicators in URL or page content
+            captcha_indicators = ["blocked", "challenge", "captcha", "robot", "human"]
+            if (any(keyword in current for keyword in captcha_indicators) or 
+                any(keyword in page_source for keyword in captcha_indicators) or
+                "press & hold" in page_source or
+                "activate and hold the button" in page_source):
+                
+                self.logger.info("Encountered Walmart CAPTCHA – attempting automated solve ...")
+                if not captcha_solver.solve_captcha():
+                    self.logger.error("Unable to solve Walmart CAPTCHA. Aborting scrape.")
+                    return None
+                    
+                # Wait a moment for page to reload after CAPTCHA solve
+                time.sleep(2)
+            
+            # THEN: Check if this is a real product page
             if not self._is_real_pdp(driver):
                 self.logger.warning("Stub or redirect page – skipping")
                 # abort the scrape gracefully
@@ -286,14 +305,6 @@ class WalmartScraper(BaseScraper):
             
             # optionally switch to shipping fulfillment
             self.switch_to_shipping_if_present(driver)
-                    
-            # if Walmart detected automation and presented a blocking page, attempt to solve
-            current = driver.current_url.lower()
-            if any(keyword in current for keyword in ["blocked", "challenge", "captcha"]):
-                self.logger.info("Encountered Walmart CAPTCHA – attempting automated solve ...")
-                if not captcha_solver.solve_captcha():
-                    self.logger.error("Unable to solve Walmart CAPTCHA. Aborting scrape.")
-                    return None
 
             # product details
             product_name = self.get_product_name(driver)
