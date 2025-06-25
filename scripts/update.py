@@ -16,9 +16,9 @@ Example Usage:
     python scripts/update.py --all-retailers --priority-only --track-only
 
 Normal usage:
-    python scripts/update.py --retailer amazon 
-    python scripts/update.py --retailer target --use-safari
-    python scripts/update.py --retailer walmart
+    python scripts/update.py --retailer amazon --all
+    python scripts/update.py --retailer target --use-safari --all
+    python scripts/update.py --retailer walmart --scraper-concurrency 1 --all
 """
 
 import sys
@@ -138,16 +138,19 @@ class ProductUpdater:
             return None
 
     # get products to update (from supabase)
-    def get_products_to_update(self, 
-                             retailer: Optional[str] = None,
-                             category: Optional[str] = None,
-                             brand: Optional[str] = None,
-                             product_id: Optional[str] = None,
-                             max_products: Optional[int] = None,
-                             days_since_update: int = 1,
-                             stale_only: bool = False,
-                             priority_only: bool = False,
-                             track_only: bool = False) -> List[Dict]:
+    def get_products_to_update(
+        self,
+        retailer: Optional[str] = None,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        product_id: Optional[str] = None,
+        max_products: Optional[int] = None,
+        days_since_update: int = 1,
+        stale_only: bool = False,
+        priority_only: bool = False,
+        track_only: bool = False,
+        all_products: bool = False
+    ) -> List[Dict]:
         self.logger.info("querying products for update...")
         
         try:
@@ -230,18 +233,33 @@ class ProductUpdater:
             
             # apply limit & ordering
             query = query.order('updated_at', desc=False)
-            if max_products:
+            if not all_products and max_products:
                 query = query.limit(max_products)
             
-            # execute query
-            result = query.execute()
-            
-            if result.data:
-                self.logger.info(f"Found {len(result.data)} products to update")
-                return result.data
+            # 2️⃣  Paginate when --all is used (PostgREST caps each call at 1000 rows)
+            if all_products:
+                page_size = 1000
+                offset = 0
+                rows: List[Dict] = []
+                while True:
+                    page = query.range(offset, offset + page_size - 1).execute()
+                    if not page.data:
+                        break
+                    rows.extend(page.data)
+                    if len(page.data) < page_size:
+                        break
+                    offset += page_size
+                self.logger.info(f"Found {len(rows)} products to update")
+                return rows
             else:
-                self.logger.warning("No products found matching criteria")
-                return []
+                result = query.execute()
+                
+                if result.data:
+                    self.logger.info(f"Found {len(result.data)} products to update")
+                    return result.data
+                else:
+                    self.logger.warning("No products found matching criteria")
+                    return []
                 
         except Exception as e:
             self.logger.error(f"Error querying products: {e}")
@@ -607,6 +625,14 @@ async def main():
         help="Preview what would be updated without making changes"
     )
 
+    # 3️⃣  CLI flag definition (just after --max-products block)
+    parser.add_argument(
+        "--all",
+        dest="all_products",
+        action="store_true",
+        help="Process ALL listings for the selected retailer(s), overriding the 1 000-row API cap"
+    )
+
     args = parser.parse_args()
     
     # setup logging
@@ -623,6 +649,11 @@ async def main():
     
     if args.retailer and args.all_retailers:
         logger.error("Cannot specify both --retailer and --all-retailers")
+        sys.exit(1)
+    
+    # 4️⃣  basic validation
+    if args.all_products and args.max_products:
+        logger.error("Cannot use --all together with --max-products")
         sys.exit(1)
     
     # setup supabase
@@ -670,7 +701,8 @@ async def main():
             days_since_update=args.days_since_update,
             stale_only=args.stale_only,
             priority_only=args.priority_only,
-            track_only=args.track_only
+            track_only=args.track_only,
+            all_products=args.all_products
         )
         
         if not products:
