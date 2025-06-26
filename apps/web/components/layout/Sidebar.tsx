@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '~/lib/auth';
+import { useAuthModal } from '../shared/AuthModalProvider';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, CategoriesIcon, BasketsIcon } from '../ui/Icons';
 import { supabase } from '~/lib/supabaseClient';
@@ -20,6 +21,7 @@ interface RecentBasket {
 
 export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
@@ -152,6 +154,10 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     return pathname.startsWith(href);
   };
 
+  const handleSignInClick = () => {
+    openAuthModal('login');
+  };
+
   return (
     <aside 
       className={`fixed left-0 top-16 h-[calc(100vh-4rem)] sidebar transition-all duration-300 z-30 ${
@@ -261,12 +267,12 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                     <p className="text-sm text-muted mb-2">
                       Sign in to manage your baskets
                     </p>
-                    <Link
-                      href="/auth/login"
+                    <button
+                      onClick={handleSignInClick}
                       className="text-sm text-primary hover:underline"
                     >
                       Sign In / Sign Up
-                    </Link>
+                    </button>
                   </div>
                 ) : (
                   <>

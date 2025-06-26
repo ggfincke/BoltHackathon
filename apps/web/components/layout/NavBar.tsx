@@ -5,12 +5,14 @@ import { useState, useEffect } from 'react';
 import { LogoIcon } from '../ui/Icons';
 import ProfileDropdown from './ProfileDropdown';
 import { useAuth } from '~/lib/auth';
+import { useAuthModal } from '../shared/AuthModalProvider';
 import SearchDropdown from './SearchDropdown';
 import NotificationCenter from '../shared/NotificationCenter';
 import ThemeToggle from '../ui/ThemeToggle';
 
 export default function NavBar() {
   const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const [scrolled, setScrolled] = useState(false);
 
   // Handle scroll effect for navbar
@@ -26,6 +28,10 @@ export default function NavBar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignInClick = () => {
+    openAuthModal('login');
+  };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 navbar transition-all duration-300 ${scrolled ? 'scrolled' : ''}`}>
@@ -63,12 +69,12 @@ export default function NavBar() {
               <ProfileDropdown />
             </div>
           ) : (
-            <Link
-              href="/auth/login"
+            <button
+              onClick={handleSignInClick}
               className="flex items-center gap-1.5 px-3 py-2 rounded-md hover-primary-bg transition-colors navbar-login"
             >
               <span className="hidden md:inline">Login</span>
-            </Link>
+            </button>
           )}
         </div>
       </div>
