@@ -26,6 +26,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
   const [loadingBaskets, setLoadingBaskets] = useState(false);
+  const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
 
   const categories = [
     { name: 'Fresh & Perishable', slug: 'fresh-perishable' },
@@ -44,7 +45,21 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     } else {
       setRecentBaskets([]);
     }
-  }, [user?.id]);
+  }, [user?.id, basketUpdateTrigger]);
+
+  // Listen for basket updates from other components
+  useEffect(() => {
+    const handleBasketUpdate = () => {
+      setBasketUpdateTrigger(prev => prev + 1);
+    };
+
+    // Listen for custom basket update events
+    window.addEventListener('basketUpdated', handleBasketUpdate);
+    
+    return () => {
+      window.removeEventListener('basketUpdated', handleBasketUpdate);
+    };
+  }, []);
 
   const fetchRecentBaskets = async () => {
     if (!user?.id) return;

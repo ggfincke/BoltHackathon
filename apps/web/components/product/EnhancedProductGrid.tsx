@@ -18,7 +18,10 @@ type Product = {
     in_stock: boolean | null;
     url: string;
     image_url?: string | null;
-    retailer: { name: string };
+    retailer: { 
+      id: string;
+      name: string;
+    };
   }[];
 };
 
@@ -62,6 +65,26 @@ export default function EnhancedProductGrid({
       (best, current) => (current.price! < best.price! ? current : best),
       validListings[0]
     );
+  };
+
+  const getBestImage = (product: Product) => {
+    if (!product.listings?.length) return 'https://via.placeholder.com/300x300?text=No+Image';
+
+    // Sort listings by retailer ID (1 = Amazon, 2 = Target, 3 = Walmart)
+    // Lower retailer ID = higher precedence
+    const listingsWithImages = product.listings
+      .filter(listing => listing.image_url)
+      .sort((a, b) => {
+        const aRetailerId = parseInt(a.retailer.id) || 999;
+        const bRetailerId = parseInt(b.retailer.id) || 999;
+        return aRetailerId - bRetailerId;
+      });
+
+    if (listingsWithImages.length > 0) {
+      return listingsWithImages[0].image_url!;
+    }
+
+    return 'https://via.placeholder.com/300x300?text=No+Image';
   };
 
   const handleProductClick = (productId: string, e: React.MouseEvent) => {
@@ -158,6 +181,9 @@ export default function EnhancedProductGrid({
         onProductAdded();
       }
 
+      // Dispatch custom event for sidebar to listen to
+      window.dispatchEvent(new CustomEvent('basketUpdated'));
+
       // Show success feedback
       const productElement = document.querySelector(`[data-product-id="${productId}"]`);
       if (productElement) {
@@ -202,7 +228,7 @@ export default function EnhancedProductGrid({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => {
           const bestListing = getBestListing(product);
-          const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
+          const imageUrl = getBestImage(product);
           const isAdding = addingProducts.has(product.id);
           
           return (
@@ -270,15 +296,15 @@ export default function EnhancedProductGrid({
                           ? `$${bestListing.price.toFixed(2)}`
                           : 'N/A'}
                       </span>
-                      <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded font-medium">
                         {bestListing.retailer.name}
                       </span>
                     </div>
                     
-                    <div className={`text-xs px-2 py-1 rounded-full text-center ${
+                    <div className={`text-xs px-2 py-1 rounded-full text-center font-medium ${
                       bestListing.in_stock
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                     }`}>
                       {bestListing.in_stock ? 'In Stock' : 'Out of Stock'}
                     </div>

@@ -148,9 +148,13 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div className={`bg-surface border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl transition-all duration-300 ${
+      {/* Background overlay for proper layering */}
+      <div className={`bg-background border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl backdrop-blur-sm transition-all duration-300 ${
         isMinimized ? 'w-64 h-16' : 'w-80 max-h-96'
-      }`}>
+      }`} style={{ 
+        background: 'var(--background)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+      }}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">

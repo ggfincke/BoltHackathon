@@ -114,11 +114,30 @@ export default function ProductDetailOverlay({
       
       // Select the best listing by default
       if (data.listings && data.listings.length > 0) {
-        const bestListing = data.listings
-          .filter(l => l.price !== null && l.in_stock)
+        // Sort listings by retailer ID (1 = Amazon, 2 = Target, 3 = Walmart)
+        const sortedListings = [...data.listings].sort((a, b) => {
+          const aRetailerId = parseInt(a.retailer.id) || 999;
+          const bRetailerId = parseInt(b.retailer.id) || 999;
+          return aRetailerId - bRetailerId;
+        });
+        
+        // First try to find in-stock listings with images
+        const bestListing = sortedListings
+          .filter(l => l.price !== null && l.in_stock && l.image_url)
           .sort((a, b) => (a.price || 0) - (b.price || 0))[0];
         
-        setSelectedListing(bestListing?.id || data.listings[0].id);
+        if (bestListing) {
+          setSelectedListing(bestListing.id);
+        } else {
+          // Fallback to any listing with an image
+          const listingWithImage = sortedListings.find(l => l.image_url);
+          if (listingWithImage) {
+            setSelectedListing(listingWithImage.id);
+          } else {
+            // Last resort: just use the first listing
+            setSelectedListing(sortedListings[0].id);
+          }
+        }
       }
       
     } catch (error) {
@@ -195,25 +214,28 @@ export default function ProductDetailOverlay({
                   </div>
                   
                   {/* Thumbnail listings */}
-                  {product.listings.length > 1 && (
+                  {product.listings.filter(l => l.image_url).length > 1 && (
                     <div className="grid grid-cols-4 gap-2">
-                      {product.listings.slice(0, 4).map(listing => (
-                        <button
-                          key={listing.id}
-                          onClick={() => setSelectedListing(listing.id)}
-                          className={`aspect-square bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden border-2 transition-colors ${
-                            selectedListing === listing.id
-                              ? 'border-primary'
-                              : 'border-transparent hover:border-gray-300'
-                          }`}
-                        >
-                          <img
-                            src={listing.image_url || 'https://via.placeholder.com/100x100?text=No+Image'}
-                            alt={`${product.name} at ${listing.retailer.name}`}
-                            className="w-full h-full object-contain"
-                          />
-                        </button>
-                      ))}
+                      {product.listings
+                        .filter(l => l.image_url)
+                        .slice(0, 4)
+                        .map(listing => (
+                          <button
+                            key={listing.id}
+                            onClick={() => setSelectedListing(listing.id)}
+                            className={`aspect-square bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden border-2 transition-colors ${
+                              selectedListing === listing.id
+                                ? 'border-primary'
+                                : 'border-transparent hover:border-gray-300'
+                            }`}
+                          >
+                            <img
+                              src={listing.image_url || 'https://via.placeholder.com/100x100?text=No+Image'}
+                              alt={`${product.name} at ${listing.retailer.name}`}
+                              className="w-full h-full object-contain"
+                            />
+                          </button>
+                        ))}
                     </div>
                   )}
                 </div>
@@ -280,8 +302,8 @@ export default function ProductDetailOverlay({
                         <div className="text-right">
                           <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
                             getSelectedListing()?.in_stock
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                           }`}>
                             {getSelectedListing()?.in_stock ? 'In Stock' : 'Out of Stock'}
                           </div>
@@ -330,10 +352,10 @@ export default function ProductDetailOverlay({
                             >
                               <div className="flex items-center gap-3">
                                 <span className="font-medium">{listing.retailer.name}</span>
-                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                                   listing.in_stock
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                                 }`}>
                                   {listing.in_stock ? 'In Stock' : 'Out of Stock'}
                                 </span>
