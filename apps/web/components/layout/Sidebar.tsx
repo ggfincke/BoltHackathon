@@ -306,6 +306,14 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                       Manage Baskets
                     </Link>
                     
+                    <Link
+                      href="/chat-to-basket"
+                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
+                    >
+                      <span>💬</span>
+                      Chat to Basket
+                    </Link>
+                    
                     {/* Recent Baskets */}
                     <div className="mt-2">
                       <h4 className="text-xs font-medium text-secondary mb-1.5 uppercase tracking-wide">
