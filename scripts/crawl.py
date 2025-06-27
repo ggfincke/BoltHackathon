@@ -411,8 +411,7 @@ Examples:
     parser.add_argument(
         "--enable-upc-lookup",
         action="store_true",
-        default=True,
-        help="Enable UPC lookup when using Supabase backend (default: enabled)"
+        help="Enable UPC lookup when using Supabase backend"
     )
     
     parser.add_argument(
@@ -564,7 +563,13 @@ Examples:
                         "SUPABASE_URL and SUPABASE_ANON_KEY environment variables")
     
     # determine UPC lookup setting
-    enable_upc_lookup = args.enable_upc_lookup and not args.disable_upc_lookup
+    if args.disable_upc_lookup:
+        enable_upc_lookup = False
+    elif args.enable_upc_lookup:
+        enable_upc_lookup = True
+    else:
+        # default behavior: enable UPC lookup when using the Supabase backend
+        enable_upc_lookup = (args.backend == "supabase")
     
     # set up logging
     logger = setup_logging(args.log_level)
