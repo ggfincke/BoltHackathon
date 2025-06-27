@@ -24,18 +24,77 @@ export default function NotificationSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Notification types and channels
   const notificationTypes = [
-    { id: 'price_drop', label: 'Price Drops', description: 'Get notified when prices drop for tracked products' },
-    { id: 'availability', label: 'Availability', description: 'Get notified when out-of-stock products become available' },
-    { id: 'changes', label: 'Product Changes', description: 'Get notified about changes to products you track' },
-    { id: 'general', label: 'General Updates', description: 'Get notified about system updates and new features' }
+    { 
+      id: 'price_drop', 
+      label: 'Price Drops', 
+      description: 'Get notified when prices drop for tracked products',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+        </svg>
+      )
+    },
+    { 
+      id: 'availability', 
+      label: 'Availability', 
+      description: 'Get notified when out-of-stock products become available',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      )
+    },
+    { 
+      id: 'changes', 
+      label: 'Product Changes', 
+      description: 'Get notified about changes to products you track',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      )
+    },
+    { 
+      id: 'general', 
+      label: 'General Updates', 
+      description: 'Get notified about system updates and new features',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    }
   ];
   
   const notificationChannels = [
-    { id: 'email', label: 'Email', icon: 'envelope' },
-    { id: 'push', label: 'Push Notifications', icon: 'bell' },
-    { id: 'sms', label: 'SMS', icon: 'phone' }
+    { 
+      id: 'email', 
+      label: 'Email', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'push', 
+      label: 'Push', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      )
+    },
+    { 
+      id: 'sms', 
+      label: 'SMS', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      )
+    }
   ];
 
   useEffect(() => {
@@ -62,7 +121,6 @@ export default function NotificationSettings() {
         throw error;
       }
       
-      // If no preferences exist yet, create default ones
       if (!data || data.length === 0) {
         await createDefaultPreferences();
         return;
@@ -86,7 +144,6 @@ export default function NotificationSettings() {
         throw new Error('User ID is required');
       }
 
-      // First ensure user exists in users table
       const { error: userError } = await supabase
         .from('users')
         .upsert({
@@ -101,22 +158,20 @@ export default function NotificationSettings() {
 
       if (userError) {
         console.error('Error ensuring user exists:', userError);
-        // Continue anyway, user might already exist
       }
 
       const defaultPreferences = [];
       
-      // Create default preferences for all combinations
-              for (const type of notificationTypes) {
-          for (const channel of notificationChannels) {
-            defaultPreferences.push({
-              user_id: user.id,
-              notification_type: type.id as 'price_drop' | 'availability' | 'changes' | 'general',
-              channel: channel.id as 'email' | 'push' | 'sms',
-              is_enabled: channel.id === 'email'
-            });
-          }
+      for (const type of notificationTypes) {
+        for (const channel of notificationChannels) {
+          defaultPreferences.push({
+            user_id: user.id,
+            notification_type: type.id as 'price_drop' | 'availability' | 'changes' | 'general',
+            channel: channel.id as 'email' | 'push' | 'sms',
+            is_enabled: channel.id === 'email'
+          });
         }
+      }
       
       const { data, error } = await supabase
         .from('notification_preferences')
@@ -145,7 +200,6 @@ export default function NotificationSettings() {
       setIsSaving(true);
       setMessage(null);
       
-      // Find the preference to update
       const preference = preferences.find(
         p => p.notification_type === type && p.channel === channel
       );
@@ -154,7 +208,6 @@ export default function NotificationSettings() {
         throw new Error('Preference not found');
       }
       
-      // Update the preference
       const { error } = await supabase
         .from('notification_preferences')
         .update({ is_enabled: !currentValue })
@@ -162,7 +215,6 @@ export default function NotificationSettings() {
       
       if (error) throw error;
       
-      // Update local state
       setPreferences(preferences.map(p => 
         p.id === preference.id ? { ...p, is_enabled: !currentValue } : p
       ));
@@ -174,7 +226,6 @@ export default function NotificationSettings() {
     } finally {
       setIsSaving(false);
       
-      // Clear message after 3 seconds
       setTimeout(() => {
         setMessage(null);
       }, 3000);
@@ -183,147 +234,179 @@ export default function NotificationSettings() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Notification Settings</h1>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Notification Settings</h1>
+        <p className="text-muted">Choose how and when you want to be notified about your tracked products and baskets.</p>
+      </div>
       
       {message && (
-        <div className={`mb-6 p-4 rounded-md ${
-          message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        <div className={`mb-6 p-4 rounded-lg border ${
+          message.type === 'success' 
+            ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-200' 
+            : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200'
         }`}>
-          {message.text}
+          <div className="flex items-center gap-3">
+            {message.type === 'success' ? (
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            )}
+            <span className="font-medium">{message.text}</span>
+          </div>
         </div>
       )}
       
-      <div className="bg-surface p-6 rounded-lg shadow-sm mb-6">
-        <h2 className="text-xl font-semibold mb-4">Notification Preferences</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Choose how and when you want to be notified about your tracked products and baskets.
-        </p>
+      <div className="bg-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <h2 className="text-xl font-semibold">Notification Preferences</h2>
+          </div>
+        </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4">Notification Type</th>
-                {notificationChannels.map(channel => (
-                  <th key={channel.id} className="text-center py-3 px-4">
-                    <div className="flex flex-col items-center">
-                      <span className="mb-1">
-                        {channel.icon === 'envelope' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                        {channel.icon === 'bell' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                          </svg>
-                        )}
-                        {channel.icon === 'phone' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                        )}
-                      </span>
-                      {channel.label}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {notificationTypes.map(type => (
-                <tr key={type.id} className="border-b border-gray-200 dark:border-gray-700">
-                  <td className="py-4 px-4">
-                    <div>
-                      <div className="font-medium">{type.label}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{type.description}</div>
-                    </div>
-                  </td>
-                  {notificationChannels.map(channel => {
-                    const preference = preferences.find(
-                      p => p.notification_type === type.id && p.channel === channel.id
-                    );
-                    const isEnabled = preference?.is_enabled || false;
-                    
-                    return (
-                      <td key={`${type.id}-${channel.id}`} className="text-center py-4 px-4">
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only peer"
-                            checked={isEnabled}
-                            onChange={() => togglePreference(type.id, channel.id, isEnabled)}
-                            disabled={isSaving}
-                          />
-                          <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary ${isSaving ? 'opacity-50' : ''}`}></div>
-                        </label>
-                      </td>
-                    );
-                  })}
+        <div className="p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-4 px-2 font-medium">Notification Type</th>
+                  {notificationChannels.map(channel => (
+                    <th key={channel.id} className="text-center py-4 px-2 font-medium">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          {channel.icon}
+                        </span>
+                        <span className="text-sm">{channel.label}</span>
+                      </div>
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {notificationTypes.map(type => (
+                  <tr key={type.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="py-6 px-2">
+                      <div className="flex items-start gap-3">
+                        <span className="text-primary mt-1">
+                          {type.icon}
+                        </span>
+                        <div>
+                          <div className="font-medium mb-1">{type.label}</div>
+                          <div className="text-sm text-muted">{type.description}</div>
+                        </div>
+                      </div>
+                    </td>
+                    {notificationChannels.map(channel => {
+                      const preference = preferences.find(
+                        p => p.notification_type === type.id && p.channel === channel.id
+                      );
+                      const isEnabled = preference?.is_enabled || false;
+                      
+                      return (
+                        <td key={`${type.id}-${channel.id}`} className="text-center py-6 px-2">
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              className="sr-only peer"
+                              checked={isEnabled}
+                              onChange={() => togglePreference(type.id, channel.id, isEnabled)}
+                              disabled={isSaving}
+                            />
+                            <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary ${isSaving ? 'opacity-50' : ''}`}></div>
+                          </label>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       
-      <div className="bg-surface p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Additional Settings</h2>
-        
-        <div className="mb-6">
-          <h3 className="text-lg font-medium mb-2">Notification Frequency</h3>
-          <div className="flex items-center space-x-4">
-            <label className="inline-flex items-center">
-              <input type="radio" name="frequency" className="form-radio" defaultChecked />
-              <span className="ml-2">Real-time</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input type="radio" name="frequency" className="form-radio" />
-              <span className="ml-2">Daily digest</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input type="radio" name="frequency" className="form-radio" />
-              <span className="ml-2">Weekly summary</span>
-            </label>
+      <div className="bg-surface rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-gradient-to-r from-secondary/10 to-accent/10 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-xl font-semibold">Additional Settings</h2>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Note: Critical notifications like price drops will always be sent in real-time.
-          </p>
         </div>
         
-        <div>
-          <h3 className="text-lg font-medium mb-2">Quiet Hours</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Time</label>
-              <input 
-                type="time" 
-                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
-                defaultValue="22:00"
-              />
+        <div className="p-6 space-y-8">
+          <div>
+            <h3 className="text-lg font-medium mb-4">Notification Frequency</h3>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="frequency" className="w-4 h-4 text-primary" defaultChecked />
+                <div>
+                  <span className="font-medium">Real-time</span>
+                  <p className="text-sm text-muted">Get notified immediately when events occur</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="frequency" className="w-4 h-4 text-primary" />
+                <div>
+                  <span className="font-medium">Daily digest</span>
+                  <p className="text-sm text-muted">Receive a summary of all notifications once per day</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="frequency" className="w-4 h-4 text-primary" />
+                <div>
+                  <span className="font-medium">Weekly summary</span>
+                  <p className="text-sm text-muted">Get a weekly roundup of important notifications</p>
+                </div>
+              </label>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">End Time</label>
-              <input 
-                type="time" 
-                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
-                defaultValue="08:00"
-              />
-            </div>
+            <p className="text-sm text-muted mt-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              Critical notifications like price drops will always be sent in real-time.
+            </p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            We won't send notifications during your quiet hours, except for critical alerts you've opted into.
-          </p>
+          
+          <div>
+            <h3 className="text-lg font-medium mb-4">Quiet Hours</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Start Time</label>
+                <input 
+                  type="time" 
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  defaultValue="22:00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">End Time</label>
+                <input 
+                  type="time" 
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  defaultValue="08:00"
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted mt-3">
+              We won't send notifications during your quiet hours, except for critical alerts you've opted into.
+            </p>
+          </div>
         </div>
       </div>
     </div>

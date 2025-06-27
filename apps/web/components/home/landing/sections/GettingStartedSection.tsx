@@ -40,9 +40,9 @@ export default function GettingStartedSection() {
                         : 'var(--primary)';
                     const color =
                       bgColor === 'var(--accent)'
-                        ? 'var(--button-text)'
+                        ? 'var(--light-text)'
                         : step === 2
-                        ? 'var(--button-text)'
+                        ? 'var(--light-text)'
                         : 'var(--dark-text)';
                     return (
                       <li key={step} className="flex items-center gap-3">

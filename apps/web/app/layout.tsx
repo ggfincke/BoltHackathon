@@ -5,6 +5,8 @@ import NavBar from '~/components/layout/NavBar';
 import Sidebar from '~/components/layout/Sidebar';
 import { ThemeProvider } from '~/components/ui/ThemeProvider';
 import { AuthProvider } from '~/lib/auth';
+import { AuthModalProvider } from '~/components/shared/AuthModalProvider';
+import BasketPopup from '~/components/shared/BasketPopup';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,15 +26,18 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <NavBar />
-            <div className="flex">
-              <Sidebar variant="home" />
-f              <main className="flex-1 ml-64 pt-16">
-                <div className="p-6">
-                  {children}
-                </div>
-              </main>
-            </div>
+            <AuthModalProvider>
+              <NavBar />
+              <div className="flex">
+                <Sidebar variant="home" />
+                <main className="flex-1 ml-64 pt-16">
+                  <div className="p-6">
+                    {children}
+                  </div>
+                </main>
+              </div>
+              <BasketPopup />
+            </AuthModalProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -22,7 +22,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
               <span className="font-medium">{item.name}</span>
             ) : (
               <Link 
-                href={item.slug ? `/categories/${item.slug}` : '/'}
+                href={item.name === 'Categories' ? '/categories' : item.slug ? `/categories/${item.slug}` : '/'}
                 className="text-primary hover:underline"
               >
                 {item.name}

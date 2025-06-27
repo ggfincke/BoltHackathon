@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '~/lib/auth';
+import { useAuthModal } from '../shared/AuthModalProvider';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, CategoriesIcon, BasketsIcon } from '../ui/Icons';
 import { supabase } from '~/lib/supabaseClient';
@@ -20,10 +21,12 @@ interface RecentBasket {
 
 export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
   const [loadingBaskets, setLoadingBaskets] = useState(false);
+  const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
 
   const categories = [
     { name: 'Fresh & Perishable', slug: 'fresh-perishable' },
@@ -42,7 +45,21 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     } else {
       setRecentBaskets([]);
     }
-  }, [user?.id]);
+  }, [user?.id, basketUpdateTrigger]);
+
+  // Listen for basket updates from other components
+  useEffect(() => {
+    const handleBasketUpdate = () => {
+      setBasketUpdateTrigger(prev => prev + 1);
+    };
+
+    // Listen for custom basket update events
+    window.addEventListener('basketUpdated', handleBasketUpdate);
+    
+    return () => {
+      window.removeEventListener('basketUpdated', handleBasketUpdate);
+    };
+  }, []);
 
   const fetchRecentBaskets = async () => {
     if (!user?.id) return;
@@ -150,6 +167,10 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
       return pathname === '/categories';
     }
     return pathname.startsWith(href);
+  };
+
+  const handleSignInClick = () => {
+    openAuthModal('login');
   };
 
   return (
@@ -261,12 +282,12 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                     <p className="text-sm text-muted mb-2">
                       Sign in to manage your baskets
                     </p>
-                    <Link
-                      href="/auth/login"
+                    <button
+                      onClick={handleSignInClick}
                       className="text-sm text-primary hover:underline"
                     >
                       Sign In / Sign Up
-                    </Link>
+                    </button>
                   </div>
                 ) : (
                   <>

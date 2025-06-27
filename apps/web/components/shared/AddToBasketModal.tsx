@@ -10,6 +10,7 @@ interface AddToBasketModalProps {
   onClose: () => void;
   productId: string;
   productName: string;
+  onProductAdded?: () => void;
 }
 
 type Basket = {
@@ -22,7 +23,8 @@ export default function AddToBasketModal({
   isOpen,
   onClose,
   productId,
-  productName
+  productName,
+  onProductAdded
 }: AddToBasketModalProps) {
   const { user, loading: authLoading } = useAuth();
   const [baskets, setBaskets] = useState<Basket[]>([]);
@@ -171,6 +173,11 @@ export default function AddToBasketModal({
       // Reset form
       setQuantity(1);
       setNotes('');
+      
+      // Call the callback to notify parent component
+      if (onProductAdded) {
+        onProductAdded();
+      }
     } catch (error) {
       console.error('Error adding item to basket:', error);
       setError('Failed to add item to basket');
@@ -214,7 +221,7 @@ export default function AddToBasketModal({
             <p className="mb-4">You need to be logged in to add items to a basket.</p>
             <Link
               href={`/auth/login?redirectedFrom=/product/${productId}`}
-              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+              className="bg-primary text-lightText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
             >
               Sign In
             </Link>
@@ -228,7 +235,7 @@ export default function AddToBasketModal({
             <p className="mb-4">You don&apos;t have any baskets yet.</p>
             <Link
               href="/baskets"
-              className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+              className="bg-primary text-lightText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
             >
               Create a Basket
             </Link>
@@ -295,7 +302,7 @@ export default function AddToBasketModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !selectedBasketId}
-                className="px-4 py-2 bg-primary text-buttonText rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-primary text-lightText rounded-md hover:bg-opacity-90 transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Adding...' : 'Add to Basket'}
               </button>
