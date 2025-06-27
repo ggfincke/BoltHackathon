@@ -16,9 +16,13 @@ Example Usage:
     python scripts/update.py --all-retailers --priority-only --track-only
 
 Normal usage:
-    python scripts/update.py --retailer amazon 
-    python scripts/update.py --retailer target --use-safari
-    python scripts/update.py --retailer walmart
+    python scripts/update.py --retailer amazon --all
+    python scripts/update.py --retailer target --use-safari --all
+    python scripts/update.py --retailer walmart --scraper-concurrency 1 --all
+
+With logging:
+    python scripts/update.py --retailer amazon --all --log-file logs/update_amazon.log
+    python scripts/update.py --all-retailers --priority-only --log-file logs/priority_update.log --log-level DEBUG
 """
 
 import sys
@@ -32,6 +36,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from dotenv import load_dotenv
 from decimal import Decimal
 import re
+from collections import defaultdict
 
 # load environment variables
 load_dotenv(override=True)
@@ -50,19 +55,54 @@ def create_slug(name: str) -> str:
     slug = slug.strip('-')
     return slug[:255]
 
+# setup logging
+def setup_logging(log_level: str, log_file: Optional[str] = None) -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(getattr(logging, log_level))
+    
+    # clear any existing handlers
+    logger.handlers.clear()
+    
+    # create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # console handler (always present)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(getattr(logging, log_level))
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
+    # file handler (optional)
+    if log_file:
+        # ensure log directory exists
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        file_handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')
+        file_handler.setLevel(getattr(logging, log_level))
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
+        logger.info(f"Logging to file: {log_file}")
+    
+    return logger
+
+# product updater
 class ProductUpdater:
-    def __init__(self, supabase_client, logger: logging.Logger, scraper_concurrency: int = 1, use_safari: bool = False):
+    def __init__(self, supabase_client, logger: logging.Logger, scraper_concurrency: int = 1, use_safari: bool = False, validate_upcs: bool = True, log_file: Optional[str] = None):
         self.supabase = supabase_client
         self.logger = logger
         self.scraper_concurrency = scraper_concurrency
         self.use_safari = use_safari
+        self.validate_upcs = validate_upcs
+        self.log_file = log_file
         
-        # Safari driver allows only one concurrent session per machine
+        # safari driver allows only one concurrent session per machine
         if self.use_safari and self.scraper_concurrency > 1:
             self.logger.warning("Safari driver supports only one concurrent session; reducing scraper_concurrency to 1")
             self.scraper_concurrency = 1
         
-        # scraper classes (not instances) - instances will be created per worker
+        # scraper classes (not instances) - instances will be created per worker (TODO: move to scraper module)
         self.scraper_classes = {
             'amazon': AmazonScraper,
             'target': TargetScraper, 
@@ -71,18 +111,30 @@ class ProductUpdater:
         
         # store scraper instances for cleanup (will be populated during execution)
         self.active_scrapers = []
-        
-        # stats tracking
+
+        # enhanced stats tracking
         self.stats = {
             'total_processed': 0,
             'successful_updates': 0,
             'failed_updates': 0,
             'price_changes': 0,
             'new_price_histories': 0,
-            'no_change': 0
+            'no_change': 0,
+            # new UPC-related stats
+            'upc_consolidations': 0,
+            'upc_updates_in_place': 0,
+            'new_products_for_upc': 0,
+            'products_merged': 0,
+            'listings_consolidated': 0,
+            'invalid_upcs_skipped': 0
         }
+        
+        # track execution details for final summary
+        self.execution_start = datetime.now()
+        self.processed_listings = []
+        self.errors = []
 
-    # close scrapers
+    # close scrapers (TODO: move to scraper module)
     def close_scrapers(self):
         for scraper in self.active_scrapers:
             try:
@@ -137,17 +189,194 @@ class ProductUpdater:
             self.logger.error(f"Error cloning product {product_id}: {e}")
             return None
 
+    # validate UPC format & checksum
+    def _validate_upc(self, upc: str) -> bool:
+        if not upc or not isinstance(upc, str):
+            return False
+        
+        # remove any non-digit characters
+        upc_digits = ''.join(filter(str.isdigit, upc))
+        
+        # UPC-A should be 12 digits, UPC-E should be 8 digits (TODO: add support for UPC-E)
+        if len(upc_digits) not in [8, 12]:
+            return False
+        
+        # for UPC-A (12 digits), validate checksum
+        if len(upc_digits) == 12:
+            try:
+                # calc checksum
+                odd_sum = sum(int(upc_digits[i]) for i in range(0, 11, 2))
+                even_sum = sum(int(upc_digits[i]) for i in range(1, 11, 2))
+                checksum = (10 - ((odd_sum * 3 + even_sum) % 10)) % 10
+                return checksum == int(upc_digits[11])
+            except (ValueError, IndexError):
+                return False
+        
+        # for UPC-E (8 digits), basic format validation
+        return True
+
+    # create a new product w/ UPC
+    def _create_product_with_upc(self, base_product: Dict, upc: str) -> Optional[str]:
+        try:
+            new_data = {
+                'name': base_product['name'],
+                'slug': create_slug(f"{base_product['name']}-{upc}"),
+                'description': base_product.get('description'),
+                'brand_id': base_product.get('brand_id'),
+                'weight': base_product.get('weight'),
+                'dimensions': base_product.get('dimensions'),
+                'upc': upc,
+                'is_active': True
+            }
+
+            insert_res = self.supabase.table('products').insert(new_data).execute()
+            if not insert_res.data:
+                self.logger.error("Failed to insert new product with UPC")
+                return None
+
+            new_id = insert_res.data[0]['id']
+
+            # copy category assignments
+            cat_result = self.supabase.table('product_categories').select('category_id,is_primary').eq('product_id', base_product['id']).execute()
+            if cat_result.data:
+                for cat in cat_result.data:
+                    try:
+                        self.supabase.table('product_categories').insert({
+                            'product_id': new_id,
+                            'category_id': cat['category_id'],
+                            'is_primary': cat.get('is_primary', False)
+                        }).execute()
+                    except Exception as e:
+                        self.logger.error(f"Error copying category {cat['category_id']} to new product: {e}")
+
+            self.stats['new_products_for_upc'] += 1
+            return new_id
+        except Exception as e:
+            self.logger.error(f"Error creating product with UPC {upc}: {e}")
+            return None
+
+    # handle UPC reconciliation (consolidate products with same UPC)
+    def _handle_upc_reconciliation(self, listing: Dict, new_upc: str) -> Dict[str, Any]:
+        update_data = {}
+        
+        if not new_upc:
+            return update_data
+        
+        # validate UPC if validation is enabled 
+        if self.validate_upcs and not self._validate_upc(new_upc):
+            self.logger.warning(f"Invalid UPC format: {new_upc}, skipping UPC update")
+            self.stats['invalid_upcs_skipped'] += 1
+            return update_data
+        
+        existing_upc = listing['product'].get('upc') if listing.get('product') else None
+        
+        # if UPC hasn't changed, no action needed
+        if new_upc == existing_upc:
+            return update_data
+        
+        # check if another product already has this UPC
+        existing_product_result = self.supabase.table('products').select('id,name').eq('upc', new_upc).execute()
+        
+        if existing_product_result.data:
+            # another product already has this UPC - need to consolidate
+            existing_product = existing_product_result.data[0]
+            existing_product_id = existing_product['id']
+            
+            if existing_product_id != listing['product_id']:
+                # move this listing to the existing product with the UPC
+                update_data['product_id'] = existing_product_id
+                self.stats['upc_consolidations'] += 1
+                self.logger.info(f"Consolidated listing to existing product {existing_product_id} with UPC {new_upc}")
+                return update_data
+        
+        # check how many listings reference the current product
+        listing_count_res = self.supabase.table('listings').select('id').eq('product_id', listing['product_id']).execute()
+        listing_count = len(listing_count_res.data) if listing_count_res.data else 0
+        
+        if listing_count > 1:
+            # multiple listings reference this product - create new product for this UPC
+            new_product_id = self._create_product_with_upc(listing['product'], new_upc)
+            if new_product_id:
+                update_data['product_id'] = new_product_id
+                self.logger.info(f"Created new product {new_product_id} for UPC {new_upc}")
+        else:
+            # only one listing - update product UPC in place
+            try:
+                self.supabase.table('products').update({'upc': new_upc}).eq('id', listing['product_id']).execute()
+                self.stats['upc_updates_in_place'] += 1
+                self.logger.info(f"Updated UPC for product {listing['product_id']} to {new_upc}")
+            except Exception as e:
+                self.logger.error(f"Failed to update UPC for product {listing['product_id']}: {e}")
+        
+        return update_data
+
+    # batch UPC reconciliation
+    def _batch_upc_reconciliation(self, listings: List[Dict]) -> None:
+        self.logger.info(f"Running batch UPC reconciliation on {len(listings)} listings")
+        
+        # group products by UPC
+        upc_groups = defaultdict(list)
+        for listing in listings:
+            product = listing.get('product')
+            if product and product.get('upc'):
+                upc_groups[product['upc']].append(listing)
+        
+        # process groups w/ multiple products
+        for upc, group_listings in upc_groups.items():
+            if len(group_listings) > 1:
+                # get unique products in this UPC group
+                product_ids = list(set(listing['product_id'] for listing in group_listings))
+                
+                if len(product_ids) > 1:
+                    self.logger.info(f"Found {len(product_ids)} products with same UPC {upc}, consolidating...")
+                    
+                    # choose product w/ most listings as target
+                    product_listing_counts = defaultdict(int)
+                    for listing in group_listings:
+                        product_listing_counts[listing['product_id']] += 1
+                    
+                    target_product_id = max(product_listing_counts.keys(), key=lambda x: product_listing_counts[x])
+                    
+                    # move all listings to target product
+                    for listing in group_listings:
+                        if listing['product_id'] != target_product_id:
+                            try:
+                                self.supabase.table('listings').update({
+                                    'product_id': target_product_id
+                                }).eq('id', listing['id']).execute()
+                                
+                                self.stats['listings_consolidated'] += 1
+                                self.logger.info(f"Moved listing {listing['id']} to product {target_product_id}")
+                            except Exception as e:
+                                self.logger.error(f"Failed to move listing {listing['id']}: {e}")
+                    
+                    # mark duplicate products as inactive
+                    for product_id in product_ids:
+                        if product_id != target_product_id:
+                            try:
+                                self.supabase.table('products').update({
+                                    'is_active': False
+                                }).eq('id', product_id).execute()
+                                
+                                self.stats['products_merged'] += 1
+                                self.logger.info(f"Marked duplicate product {product_id} as inactive")
+                            except Exception as e:
+                                self.logger.error(f"Failed to deactivate product {product_id}: {e}")
+
     # get products to update (from supabase)
-    def get_products_to_update(self, 
-                             retailer: Optional[str] = None,
-                             category: Optional[str] = None,
-                             brand: Optional[str] = None,
-                             product_id: Optional[str] = None,
-                             max_products: Optional[int] = None,
-                             days_since_update: int = 1,
-                             stale_only: bool = False,
-                             priority_only: bool = False,
-                             track_only: bool = False) -> List[Dict]:
+    def get_products_to_update(
+        self,
+        retailer: Optional[str] = None,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        product_id: Optional[str] = None,
+        max_products: Optional[int] = None,
+        days_since_update: int = 1,
+        stale_only: bool = False,
+        priority_only: bool = False,
+        track_only: bool = False,
+        all_products: bool = False
+    ) -> List[Dict]:
         self.logger.info("querying products for update...")
         
         try:
@@ -230,18 +459,33 @@ class ProductUpdater:
             
             # apply limit & ordering
             query = query.order('updated_at', desc=False)
-            if max_products:
+            if not all_products and max_products:
                 query = query.limit(max_products)
             
-            # execute query
-            result = query.execute()
-            
-            if result.data:
-                self.logger.info(f"Found {len(result.data)} products to update")
-                return result.data
+            # 2️⃣  Paginate when --all is used (PostgREST caps each call at 1000 rows)
+            if all_products:
+                page_size = 1000
+                offset = 0
+                rows: List[Dict] = []
+                while True:
+                    page = query.range(offset, offset + page_size - 1).execute()
+                    if not page.data:
+                        break
+                    rows.extend(page.data)
+                    if len(page.data) < page_size:
+                        break
+                    offset += page_size
+                self.logger.info(f"Found {len(rows)} products to update")
+                return rows
             else:
-                self.logger.warning("No products found matching criteria")
-                return []
+                result = query.execute()
+                
+                if result.data:
+                    self.logger.info(f"Found {len(result.data)} products to update")
+                    return result.data
+                else:
+                    self.logger.warning("No products found matching criteria")
+                    return []
                 
         except Exception as e:
             self.logger.error(f"Error querying products: {e}")
@@ -249,6 +493,8 @@ class ProductUpdater:
 
     # synchronous version of update_single_listing for use in worker threads
     def _update_single_listing_sync(self, listing: Dict, scraper) -> bool:
+        # count every attempt so success-rate denominator is accurate
+        self.stats['total_processed'] += 1
         try:
             listing_id = listing['id']
             product_name = listing['product']['name'] if listing['product'] else 'Unknown'
@@ -303,31 +549,14 @@ class ProductUpdater:
                     except Exception as e:
                         self.logger.error(f"Failed to update product name for {listing['product_id']}: {e}")
 
-            # handle UPC reconciliation
-            existing_upc = listing['product'].get('upc') if listing.get('product') else None
-            if new_upc and new_upc != existing_upc:
-                # check how many listings reference this product
-                listing_count_res = self.supabase.table('listings').select('id').eq('product_id', listing['product_id']).execute()
-                listing_count = len(listing_count_res.data) if listing_count_res.data else 0
-
-                if listing_count > 1:
-                    # create new product and move listing
-                    new_product_id = self._clone_product_with_new_upc(listing['product_id'], new_upc)
-                    if new_product_id:
-                        update_data['product_id'] = new_product_id
-                        update_data['upc'] = new_upc
-                        listing['product_id'] = new_product_id
-                        self.logger.info(f"Created new product {new_product_id} for UPC {new_upc}")
-                else:
-                    # update product UPC in place
-                    try:
-                        self.supabase.table('products').update({'upc': new_upc}).eq('id', listing['product_id']).execute()
-                        update_data['upc'] = new_upc
-                        self.logger.info(f"Updated UPC for product {listing['product_id']} to {new_upc}")
-                    except Exception as e:
-                        self.logger.error(f"Failed to update UPC for product {listing['product_id']}: {e}")
-            elif new_upc:
-                update_data['upc'] = new_upc
+            # Handle UPC reconciliation with improved logic
+            if new_upc:
+                upc_updates = self._handle_upc_reconciliation(listing, new_upc)
+                update_data.update(upc_updates)
+                
+                # If product_id changed, we need to update our listing reference
+                if 'product_id' in upc_updates:
+                    listing['product_id'] = upc_updates['product_id']
             
             # handle price update
             price_changed = False
@@ -389,8 +618,7 @@ class ProductUpdater:
                 else:
                     self.logger.warning(f"Failed to insert price history for listing {listing_id}")
             
-            # track stats properly - count as successful if any data changed
-            self.stats['total_processed'] += 1
+            # track stats properly – mark success vs. no-change (total already counted)
             if data_changed:
                 self.stats['successful_updates'] += 1
             else:
@@ -402,8 +630,6 @@ class ProductUpdater:
             self.logger.error(f"Error updating listing {listing.get('id', 'unknown')}: {e}")
             self.stats['failed_updates'] += 1
             return False
-
-
 
     # update multiple listings w/ proper concurrency control using worker pool
     async def update_listings_batch(self, listings: List[Dict]) -> None:
@@ -439,6 +665,8 @@ class ProductUpdater:
         
         # create scrapers for this worker thread
         worker_scrapers = {}
+        # track how many listings each scraper has processed so we can recycle drivers
+        scraper_counts = defaultdict(int)
         processed_count = 0
         
         try:
@@ -464,6 +692,18 @@ class ProductUpdater:
                         self.active_scrapers.append(worker_scrapers[retailer_slug])
                     
                     scraper = worker_scrapers[retailer_slug]
+                    
+                    # increment usage counter and recycle driver every 500 listings to avoid Chrome "tab crashed" errors
+                    scraper_counts[retailer_slug] += 1
+                    if scraper_counts[retailer_slug] % 500 == 0:
+                        self.logger.info(
+                            f"Worker {batch_num}: Re-initialising {retailer_slug} driver after {scraper_counts[retailer_slug]} listings"
+                        )
+                        try:
+                            # on next use get_driver() will spawn a fresh browser
+                            scraper.close_driver()
+                        except Exception:
+                            pass
                     
                     # call the synchronous version of update_single_listing
                     success = self._update_single_listing_sync(listing, scraper)
@@ -491,9 +731,12 @@ class ProductUpdater:
 
     # print update summary statistics
     def print_summary(self):
+        execution_time = datetime.now() - self.execution_start
+        
         self.logger.info("="*50)
         self.logger.info("UPDATE SUMMARY")
         self.logger.info("="*50)
+        self.logger.info(f"Execution time: {execution_time}")
         self.logger.info(f"Total processed: {self.stats['total_processed']}")
         self.logger.info(f"Successful updates: {self.stats['successful_updates']}")
         self.logger.info(f"Failed updates: {self.stats['failed_updates']}")
@@ -501,10 +744,62 @@ class ProductUpdater:
         self.logger.info(f"Price changes detected: {self.stats['price_changes']}")
         self.logger.info(f"New price history entries: {self.stats['new_price_histories']}")
         
+        # UPC-related stats
+        if any(self.stats[key] > 0 for key in ['upc_consolidations', 'upc_updates_in_place', 'new_products_for_upc', 'products_merged', 'listings_consolidated', 'invalid_upcs_skipped']):
+            self.logger.info("="*50)
+            self.logger.info("UPC RECONCILIATION SUMMARY")
+            self.logger.info("="*50)
+            self.logger.info(f"UPC consolidations: {self.stats['upc_consolidations']}")
+            self.logger.info(f"UPC updates in place: {self.stats['upc_updates_in_place']}")
+            self.logger.info(f"New products for UPC: {self.stats['new_products_for_upc']}")
+            self.logger.info(f"Products merged: {self.stats['products_merged']}")
+            self.logger.info(f"Listings consolidated: {self.stats['listings_consolidated']}")
+            self.logger.info(f"Invalid UPCs skipped: {self.stats['invalid_upcs_skipped']}")
+        
         if self.stats['total_processed'] > 0:
             success_rate = (self.stats['successful_updates'] / self.stats['total_processed']) * 100
             self.logger.info(f"Success rate: {success_rate:.1f}%")
+        
+        # write detailed log summary to file if logging to file
+        if self.log_file:
+            self._write_log_summary()
 
+    # write detailed log summary to file
+    def _write_log_summary(self):
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write("\n" + "="*80 + "\n")
+                f.write("DETAILED EXECUTION SUMMARY\n")
+                f.write("="*80 + "\n")
+                f.write(f"Script: {__file__}\n")
+                f.write(f"Start time: {self.execution_start.isoformat()}\n")
+                f.write(f"End time: {datetime.now().isoformat()}\n")
+                f.write(f"Total execution time: {datetime.now() - self.execution_start}\n")
+                f.write(f"Scraper concurrency: {self.scraper_concurrency}\n")
+                f.write(f"Safari mode: {self.use_safari}\n")
+                f.write(f"UPC validation: {self.validate_upcs}\n")
+                f.write("\n")
+                
+                # detailed stats
+                f.write("PROCESSING STATISTICS:\n")
+                f.write("-" * 40 + "\n")
+                for key, value in self.stats.items():
+                    f.write(f"{key.replace('_', ' ').title()}: {value}\n")
+                
+                if self.stats['total_processed'] > 0:
+                    success_rate = (self.stats['successful_updates'] / self.stats['total_processed']) * 100
+                    f.write(f"Success Rate: {success_rate:.2f}%\n")
+                
+                f.write("\n" + "="*80 + "\n")
+                f.write("END OF SUMMARY\n")
+                f.write("="*80 + "\n")
+                
+            self.logger.info(f"Detailed log summary written to: {self.log_file}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to write log summary to file: {e}")
+
+# main function
 async def main():
     parser = argparse.ArgumentParser(description="Update existing product listings with fresh scraper data")
     
@@ -602,19 +897,41 @@ async def main():
     )
     
     parser.add_argument(
+        "--log-file",
+        help="Path to log file for detailed output (optional, logs to both console and file)"
+    )
+    
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Preview what would be updated without making changes"
     )
 
+    # CLI flag definition (just after --max-products block)
+    parser.add_argument(
+        "--all",
+        dest="all_products",
+        action="store_true",
+        help="Process ALL listings for the selected retailer(s), overriding the 1 000-row API cap"
+    )
+    
+    parser.add_argument(
+        "--batch-upc-reconciliation",
+        action="store_true",
+        help="Run batch UPC reconciliation to merge duplicate products"
+    )
+    
+    parser.add_argument(
+        "--upc-validation",
+        action="store_true",
+        default=True,
+        help="Validate UPC formats and checksums during updates (default: True)"
+    )
+
     args = parser.parse_args()
     
     # setup logging
-    logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    logger = logging.getLogger(__name__)
+    logger = setup_logging(args.log_level, args.log_file)
     
     # validate arguments
     if not args.retailer and not args.all_retailers:
@@ -625,15 +942,14 @@ async def main():
         logger.error("Cannot specify both --retailer and --all-retailers")
         sys.exit(1)
     
+    # basic validation
+    if args.all_products and args.max_products:
+        logger.error("Cannot use --all together with --max-products")
+        sys.exit(1)
+    
     # setup supabase
     supabase_url = args.supabase_url or os.getenv('SUPABASE_URL')
     supabase_key = args.supabase_key or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
-    # prefer service-role key if available
-    # supabase_key = (
-    #     args.supabase_key
-    #     # or os.getenv('SUPABASE_SERVICE_ROLE_KEY')
-    #     or os.getenv('SUPABASE_ANON_KEY')
-    # )
     
     if not supabase_url or not supabase_key:
         logger.error("Supabase URL and API key must be provided via arguments or environment variables")
@@ -646,8 +962,8 @@ async def main():
         logger.error(f"Failed to connect to Supabase: {e}")
         sys.exit(1)
     
-    # init updater
-    updater = ProductUpdater(supabase, logger, args.scraper_concurrency, args.use_safari)
+    # initialize updater
+    updater = ProductUpdater(supabase, logger, args.scraper_concurrency, args.use_safari, args.upc_validation, args.log_file)
     
     # determine retailers to process
     retailers_to_process = []
@@ -670,7 +986,8 @@ async def main():
             days_since_update=args.days_since_update,
             stale_only=args.stale_only,
             priority_only=args.priority_only,
-            track_only=args.track_only
+            track_only=args.track_only,
+            all_products=args.all_products
         )
         
         if not products:
@@ -692,9 +1009,68 @@ async def main():
         logger.info(f"Updating {len(products)} products for {retailer}")
         await updater.update_listings_batch(products)
     
-    # print final summary and clean up
+    # run batch UPC reconciliation if requested
+    if args.batch_upc_reconciliation:
+        logger.info("Running batch UPC reconciliation...")
+        for retailer in retailers_to_process:
+            logger.info(f"Batch reconciliation for {retailer}")
+            # get a sample of products for reconciliation
+            sample_products = updater.get_products_to_update(
+                retailer=retailer,
+                max_products=1000,  # Process in chunks
+                all_products=False
+            )
+            if sample_products:
+                updater._batch_upc_reconciliation(sample_products)
+    
+    # print final summary & clean up
     updater.print_summary()
     updater.close_scrapers()
+
+# standalone function to clean up UPC data across the database
+def clean_and_validate_upc_batch():
+    import argparse
+    import logging
+    
+    parser = argparse.ArgumentParser(description="Clean and validate UPC data")
+    parser.add_argument("--dry-run", action="store_true", help="Preview changes without applying")
+    parser.add_argument("--fix-invalid", action="store_true", help="Remove invalid UPC codes")
+    
+    args = parser.parse_args()
+    
+    # setup logging & database connection
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+    
+    # connect to supabase
+    supabase_url = os.getenv('SUPABASE_URL')
+    supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+    supabase = create_client(supabase_url, supabase_key)
+    
+    updater = ProductUpdater(supabase, logger)
+    
+    # get all products w/ UPCs
+    result = supabase.table('products').select('id, name, upc').not_.is_('upc', 'null').execute()
+    
+    invalid_count = 0
+    valid_count = 0
+    
+    for product in result.data:
+        upc = product['upc']
+        is_valid = updater._validate_upc(upc)
+        
+        if is_valid:
+            valid_count += 1
+        else:
+            invalid_count += 1
+            logger.warning(f"Invalid UPC for '{product['name']}': {upc}")
+            
+            if args.fix_invalid and not args.dry_run:
+                # Remove invalid UPC
+                supabase.table('products').update({'upc': None}).eq('id', product['id']).execute()
+                logger.info(f"Removed invalid UPC for product {product['id']}")
+    
+    logger.info(f"UPC Validation Summary: {valid_count} valid, {invalid_count} invalid")
 
 if __name__ == "__main__":
     asyncio.run(main())
