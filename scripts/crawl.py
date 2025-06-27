@@ -20,8 +20,8 @@ Usage:
 
 Main usage (supabase):
     python scripts/crawl.py --retailer amazon --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 4 --upc-concurrency 6
-    python scripts/crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 1 --upc-concurrency 6
-    python scripts/crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --max-pages 15 --crawler-concurrency 1 --upc-concurrency 4
+    python scripts/crawl.py --retailer target --from-hierarchy-file "" --mode full --backend supabase --max-pages 6 --crawler-concurrency 1 --disable-upc-lookup
+    python scripts/crawl.py --retailer walmart --from-hierarchy-file "" --mode full --backend supabase --max-pages 6 --crawler-concurrency 1 --disable-upc-lookup
 
 """
 
