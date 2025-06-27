@@ -8,7 +8,7 @@
   --primary: #85d1e7;
   --secondary: #c65b82;
   --accent: #6f506f;
-  --button-text: #ffffff;
+  --light-text: #ffffff;
   --dark-text: #1F2937;
   --highlighted-text: color-mix(in srgb, var(--text) 60%, var(--background));
   --nav-bg-start: #ffffff;
@@ -48,7 +48,7 @@
   --primary: #85d1e7;
   --secondary: #c65b82;
   --accent: #6f506f;
-  --button-text: #fdfdfd;
+  --light-text: #fdfdfd;
   --dark-text: #1F2937;
   --highlighted-text: color-mix(in srgb, var(--text) 60%, var(--background));
   --nav-bg-start: #161b22;
@@ -1249,6 +1249,16 @@ a.bg-primary,
 
 .add-to-basket-btn.success {
   animation: addToBasketSuccess 0.3s ease-in-out;
+}
+
+/* Product card hover overlay */
+.product-card .product-image-container .absolute {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.product-card:hover .product-image-container .absolute {
+  opacity: 1;
 }
 
 /* Mobile optimizations for basket popup */

@@ -38,7 +38,7 @@ interface ProductDetailOverlayProps {
   productId: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onAddToBasket: (productId: string) => void;
+  onAddToBasket?: (productId: string) => void;
 }
 
 export default function ProductDetailOverlay({ 
@@ -170,9 +170,105 @@ export default function ProductDetailOverlay({
     return product?.listings?.find(l => l.id === selectedListing) || getBestListing();
   };
 
-  const handleAddToBasket = () => {
-    if (product) {
+  const handleAddToBasket = async () => {
+    if (!product) return;
+    
+    if (onAddToBasket) {
       onAddToBasket(product.id);
+      return;
+    }
+
+    // Direct add to basket logic
+    if (!user) return;
+
+    try {
+      // Dispatch optimistic add event FIRST (before database operation)
+      const selectedListing = getSelectedListing();
+      window.dispatchEvent(new CustomEvent('basketUpdated', {
+        detail: {
+          type: 'optimisticAdd',
+          productId: product.id,
+          productName: product.name,
+          price: selectedListing?.price || null,
+          retailerName: selectedListing?.retailer?.name || null,
+          imageUrl: selectedListing?.image_url || null,
+          productSlug: product.slug
+        }
+      }));
+
+      // Get user's most recent basket
+      const { data: basketUsers, error: basketUsersError } = await supabase
+        .from('basket_users')
+        .select('basket_id, role')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (basketUsersError) throw basketUsersError;
+
+      if (!basketUsers || basketUsers.length === 0) {
+        return;
+      }
+
+      const basketId = basketUsers[0].basket_id;
+      if (!basketId) return;
+
+      // Check if product already exists in basket
+      const { data: existingItems, error: checkError } = await supabase
+        .from('basket_items')
+        .select('id, quantity')
+        .eq('basket_id', basketId)
+        .eq('product_id', product.id);
+
+      if (checkError) throw checkError;
+
+      // Get current price
+      const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select('price')
+        .eq('product_id', product.id)
+        .order('price', { ascending: true })
+        .limit(1);
+
+      if (listingsError) throw listingsError;
+
+      const currentPrice = listings?.[0]?.price || null;
+
+      if (existingItems && existingItems.length > 0) {
+        // Update existing item
+        const existingItem = existingItems[0];
+        const newQuantity = (existingItem.quantity ?? 0) + 1;
+
+        const { error: updateError } = await supabase
+          .from('basket_items')
+          .update({
+            quantity: newQuantity,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingItem.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Add new item
+        const { error: insertError } = await supabase
+          .from('basket_items')
+          .insert({
+            basket_id: basketId,
+            product_id: product.id,
+            quantity: 1,
+            price_at_add: currentPrice
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      // Close the overlay after successfully adding
+      onClose();
+
+    } catch (error) {
+      console.error('Error adding to basket:', error);
+      // On error, dispatch a regular basketUpdated event to refresh from database
+      window.dispatchEvent(new CustomEvent('basketUpdated'));
     }
   };
 
@@ -315,7 +411,7 @@ export default function ProductDetailOverlay({
                           href={getSelectedListing()?.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-1 bg-primary text-buttonText text-center py-3 rounded-lg hover:bg-opacity-90 transition-colors font-medium"
+                          className="flex-1 bg-primary text-lightText text-center py-3 rounded-lg hover:bg-opacity-90 transition-colors font-medium"
                         >
                           View at {getSelectedListing()?.retailer.name}
                         </a>
@@ -323,7 +419,7 @@ export default function ProductDetailOverlay({
                         {user && (
                           <button
                             onClick={handleAddToBasket}
-                            className="flex-1 bg-secondary text-buttonText py-3 rounded-lg hover:bg-opacity-90 transition-colors font-medium"
+                            className="flex-1 bg-secondary text-lightText py-3 rounded-lg hover:bg-opacity-90 transition-colors font-medium"
                           >
                             Add to Basket
                           </button>

@@ -7,8 +7,8 @@ import { supabase } from '~/lib/supabaseClient';
 import { Database } from '~/lib/database.types';
 import Breadcrumbs from '~/components/layout/Breadcrumbs';
 import Pagination from '~/components/ui/Pagination';
-import EnhancedProductGrid from '~/components/product/EnhancedProductGrid';
-import BasketPopup from '~/components/shared/BasketPopup';
+import ProductGrid from '~/components/product/ProductGrid';
+
 
 type Category = Database['public']['Tables']['categories']['Row'];
 type Product = {
@@ -157,25 +157,40 @@ export default function CategoryPage() {
   }, [currentSlug, page]);
 
   const buildBreadcrumbs = async (currentCategory: Category) => {
-    const breadcrumbsArray = [{ name: currentCategory.name, slug: currentCategory.slug }];
+    // Start with the current category
+    const categoryCrumbs: { name: string; slug: string }[] = [
+      { name: currentCategory.name, slug: currentCategory.slug },
+    ];
+
+    // Traverse up the hierarchy collecting parents, while omitting generic parents
     let parentId = currentCategory.parent_id;
-    
+    const GENERIC_PARENT_SLUGS = ['groceries', 'grocery-store'];
+
     while (parentId) {
       const { data: parent } = await supabase
         .from('categories')
         .select('id, name, slug, parent_id')
         .eq('id', parentId)
         .single();
-      
+
       if (parent) {
-        breadcrumbsArray.unshift({ name: parent.name, slug: parent.slug });
+        // Only include parent if it's not a generic grouping category
+        if (!GENERIC_PARENT_SLUGS.includes(parent.slug)) {
+          categoryCrumbs.unshift({ name: parent.name, slug: parent.slug });
+        }
         parentId = parent.parent_id;
       } else {
         break;
       }
     }
-    
-    breadcrumbsArray.unshift({ name: 'Home', slug: '' });
+
+    // Prepend fixed breadcrumbs: Home and Categories
+    const breadcrumbsArray = [
+      { name: 'Home', slug: '' },
+      { name: 'Categories', slug: '' }, // Handled specially in Breadcrumbs component
+      ...categoryCrumbs,
+    ];
+
     setBreadcrumbs(breadcrumbsArray);
   };
 
@@ -310,8 +325,8 @@ export default function CategoryPage() {
                   </div>
                 </div>
                 
-                {/* Enhanced Products grid */}
-                <EnhancedProductGrid 
+                {/* Products grid */}
+                <ProductGrid 
                   products={products} 
                   onProductAdded={handleProductAdded}
                 />
@@ -344,7 +359,7 @@ export default function CategoryPage() {
       </div>
 
       {/* Persistent Basket Popup */}
-      <BasketPopup key={basketUpdateTrigger} onProductAdded={handleProductAdded} />
+      
     </>
   );
 }

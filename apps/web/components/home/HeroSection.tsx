@@ -28,7 +28,7 @@ export default function HeroSection() {
             <Link
               href="/categories"
               className="btn-base px-12 py-3"
-              style={{ background: 'var(--secondary)', color: 'var(--button-text)' }}
+              style={{ background: 'var(--secondary)', color: 'var(--light-text)' }}
             >
               Browse Categories
             </Link>

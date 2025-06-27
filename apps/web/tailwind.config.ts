@@ -16,7 +16,7 @@ const config: Config = {
         primary: 'var(--primary)',
         secondary: 'var(--secondary)',
         accent: 'var(--accent)',
-        buttonText: 'var(--button-text)',
+        lightText: 'var(--light-text)',
       },
     },
   },

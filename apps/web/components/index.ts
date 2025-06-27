@@ -32,6 +32,7 @@ export { default as PriceHistoryChart } from './product/PriceHistoryChart';
 
 // Shared Components
 export { default as AddToBasketModal } from './shared/AddToBasketModal';
+export { default as BasketPopup } from './shared/BasketPopup';
 export { default as BasketShareModal } from './shared/BasketShareModal';
 export { default as BasketTrackingModal } from './shared/BasketTrackingModal';
 export { default as ConfirmationModal } from './shared/ConfirmationModal';

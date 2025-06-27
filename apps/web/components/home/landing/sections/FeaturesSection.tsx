@@ -42,7 +42,7 @@ export default function FeaturesSection() {
           <div className="card-enhanced text-center">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6"
-              style={{ background: 'var(--secondary)', color: 'var(--button-text)' }}
+              style={{ background: 'var(--secondary)', color: 'var(--light-text)' }}
             >
               <FaShoppingBasket />
             </div>
@@ -56,7 +56,7 @@ export default function FeaturesSection() {
             <Link
               href="/baskets"
               className="btn-base px-6 py-2 text-sm w-full text-center"
-              style={{ background: 'var(--secondary)', color: 'var(--button-text)' }}
+              style={{ background: 'var(--secondary)', color: 'var(--light-text)' }}
             >
               Create Basket
             </Link>
@@ -66,7 +66,7 @@ export default function FeaturesSection() {
           <div className="card-enhanced text-center">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-6"
-              style={{ background: 'var(--accent)', color: 'var(--button-text)' }}
+              style={{ background: 'var(--accent)', color: 'var(--light-text)' }}
             >
               <FaRegBell />
             </div>
@@ -80,7 +80,7 @@ export default function FeaturesSection() {
             <Link
               href="/settings/notifications"
               className="btn-base px-6 py-2 text-sm w-full text-center"
-              style={{ background: 'var(--accent)', color: 'var(--button-text)' }}
+              style={{ background: 'var(--accent)', color: 'var(--light-text)' }}
             >
               Set Up Alerts
             </Link>

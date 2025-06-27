@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
 import Pagination from '~/components/ui/Pagination';
-import EnhancedProductGrid from '~/components/product/EnhancedProductGrid';
-import BasketPopup from '~/components/shared/BasketPopup';
+import ProductGrid from '~/components/product/ProductGrid';
+
 
 type Product = {
   id: string;
@@ -196,7 +196,7 @@ export default function Search() {
           </div>
         ) : sortedProducts.length > 0 ? (
           <>
-            <EnhancedProductGrid 
+            <ProductGrid 
               products={sortedProducts} 
               onProductAdded={handleProductAdded}
             />
@@ -234,7 +234,7 @@ export default function Search() {
       </div>
 
       {/* Persistent Basket Popup */}
-      <BasketPopup key={basketUpdateTrigger} onProductAdded={handleProductAdded} />
+      
     </>
   );
 }
