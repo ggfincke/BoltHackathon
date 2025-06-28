@@ -50,22 +50,7 @@ export default function NavBar() {
         </div>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Chat to Basket Link (if logged in) */}
-          {user && (
-            <div className="navbar-item">
-              <Link 
-                href="/chat-to-basket"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-md hover-primary-bg transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                <span className="hidden md:inline">Chat to Basket</span>
-              </Link>
-            </div>
-          )}
-          
+        <div className="flex items-center gap-2 flex-shrink-0">    
           {/* Notification Center (if logged in) */}
           {user && (
             <div className="navbar-item">

@@ -16,6 +16,7 @@ type BasketItem = {
     id: string;
     name: string;
     slug: string;
+    image_url?: string | null;
     brand?: {
       name: string;
     } | null;
@@ -108,14 +109,14 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
   
   if (items.length === 0) {
     return (
-      <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
+      <div className="empty-state">
         <h2 className="text-xl font-semibold mb-2">No items in this basket</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-muted mb-4">
           Start adding products to your basket to track prices and availability.
         </p>
         <Link
           href="/categories"
-          className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors inline-block"
+          className="product-button inline-block"
         >
           Browse Products
         </Link>
@@ -124,50 +125,84 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
   }
   
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+    <div style={{ background: 'var(--surface)' }} className="rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-100 dark:bg-gray-800">
-              <th className="px-4 py-3 text-left text-sm font-semibold">Product</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Best Price</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Quantity</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Total</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Notes</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold">Actions</th>
+            <tr className="table-header">
+              <th className="px-4 py-3 text-left text-sm font-semibold" style={{ color: 'var(--text)' }}>Product</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold" style={{ color: 'var(--text)' }}>Best Price</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold" style={{ color: 'var(--text)' }}>Quantity</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold" style={{ color: 'var(--text)' }}>Total</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold" style={{ color: 'var(--text)' }}>Notes</th>
+              <th className="px-4 py-3 text-right text-sm font-semibold" style={{ color: 'var(--text)' }}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="table-divider">
             {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <tr key={item.id} className="table-row">
                 <td className="px-4 py-3">
-                  <div>
-                    <Link 
-                      href={`/product/${item.product.slug}`}
-                      className="font-medium hover:text-primary transition-colors"
-                    >
-                      {item.product.name}
-                    </Link>
-                    {item.product.brand && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {item.product.brand.name}
+                  <div className="flex items-center gap-3">
+                    {/* Product Image */}
+                    <div className="product-image-container w-12 h-12 flex-shrink-0">
+                      {item.product.image_url ? (
+                        <img
+                          src={item.product.image_url}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover rounded"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      {/* Fallback placeholder */}
+                      <div 
+                        className={`w-full h-full rounded flex items-center justify-center text-xs font-medium ${item.product.image_url ? 'hidden' : ''}`}
+                        style={{ 
+                          background: 'var(--bg-muted)', 
+                          color: 'var(--text-muted)' 
+                        }}
+                      >
+                        {item.product.name.charAt(0).toUpperCase()}
                       </div>
-                    )}
-                    {getBestRetailer(item) && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Best at: {getBestRetailer(item)}
-                      </div>
-                    )}
+                    </div>
+                    
+                    {/* Product Details */}
+                    <div className="flex-1 min-w-0">
+                      <Link 
+                        href={`/product/${item.product.slug}`}
+                        className="font-medium transition-colors line-clamp-2"
+                        style={{ color: 'var(--text)' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text)'}
+                      >
+                        {item.product.name}
+                      </Link>
+                      {item.product.brand && (
+                        <div className="text-xs text-secondary mt-1">
+                          {item.product.brand.name}
+                        </div>
+                      )}
+                      {getBestRetailer(item) && (
+                        <div className="product-retailer-badge inline-block mt-1">
+                          Best at: {getBestRetailer(item)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   {getBestPrice(item) !== null ? (
-                    <span className="font-medium">${getBestPrice(item)?.toFixed(2)}</span>
+                    <span className="font-medium" style={{ color: 'var(--text)' }}>
+                      ${getBestPrice(item)?.toFixed(2)}
+                    </span>
                   ) : (
-                    <span className="text-gray-500">N/A</span>
+                    <span className="text-muted">N/A</span>
                   )}
                   {item.price_at_add !== null && getBestPrice(item) !== item.price_at_add && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <div className="text-xs text-secondary mt-1">
                       Added at: ${item.price_at_add?.toFixed(2)}
                     </div>
                   )}
@@ -179,13 +214,13 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                       min="1"
                       value={editingQuantity}
                       onChange={(e) => setEditingQuantity(parseInt(e.target.value) || 1)}
-                      className="w-16 p-1 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
+                      className="form-input w-16 p-1 text-sm"
                     />
                   ) : (
-                    <span>{item.quantity}</span>
+                    <span style={{ color: 'var(--text)' }}>{item.quantity}</span>
                   )}
                 </td>
-                <td className="px-4 py-3 font-medium">
+                <td className="px-4 py-3 font-medium" style={{ color: 'var(--text)' }}>
                   ${getItemTotal(item).toFixed(2)}
                 </td>
                 <td className="px-4 py-3">
@@ -194,11 +229,13 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                       type="text"
                       value={editingNotes}
                       onChange={(e) => setEditingNotes(e.target.value)}
-                      className="w-full p-1 border border-gray-300 dark:border-gray-700 rounded-md bg-background"
+                      className="form-input w-full p-1 text-sm"
                       placeholder="Add notes..."
                     />
                   ) : (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <span className="text-sm text-secondary truncate-tooltip" 
+                          data-tooltip={item.notes}
+                          style={{ maxWidth: '150px', display: 'inline-block' }}>
                       {item.notes || '-'}
                     </span>
                   )}
@@ -208,19 +245,21 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                     <div className="flex justify-end space-x-2">
                       <button
                         onClick={saveEdits}
-                        className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                        className="modal-button p-2 rounded transition-all hover-lift"
+                        style={{ color: 'var(--success-text)' }}
                         title="Save"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </button>
                       <button
                         onClick={cancelEdits}
-                        className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                        className="modal-button p-2 rounded transition-all hover-lift"
+                        style={{ color: 'var(--text-muted)' }}
                         title="Cancel"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -231,19 +270,20 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                         <>
                           <button
                             onClick={() => startEditing(item)}
-                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            className="modal-button p-2 rounded transition-all hover-lift"
+                            style={{ color: 'var(--primary)' }}
                             title="Edit"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button>
                           <button
                             onClick={() => onRemoveItem(item.id)}
-                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                            className="modal-button danger p-2 rounded transition-all hover-lift"
                             title="Remove"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
@@ -251,10 +291,11 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                       )}
                       <Link
                         href={`/product/${item.product.slug}`}
-                        className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                        className="modal-button p-2 rounded transition-all hover-lift"
+                        style={{ color: 'var(--text-muted)' }}
                         title="View Product"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>

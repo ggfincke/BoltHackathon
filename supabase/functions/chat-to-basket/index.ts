@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
 
 async function extractIngredientsWithOpenAI(openai: OpenAI, messages: Message[]): Promise<ParsedFoodChat> {
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
@@ -244,7 +244,7 @@ async function createBasket(supabase: any, userId: string, matches: ProductMatch
   const { data: basketData, error: basketError } = await supabase
     .from('baskets')
     .insert({
-      name: `Chat Basket: ${summary.substring(0, 30)}${summary.length > 30 ? '...' : ''}`,
+      name: summary.length > 50 ? `${summary.substring(0, 50)}...` : summary,
       description: summary,
       is_public: false
     })
@@ -272,11 +272,30 @@ async function createBasket(supabase: any, userId: string, matches: ProductMatch
 
   // Add products to the basket
   if (matches.length > 0) {
-    const basketItems = matches.map(match => ({
+    // Deduplicate products to avoid violating UNIQUE(basket_id, product_id)
+    const aggregated: Record<string, { quantity: number; notes: string | null }> = {};
+
+    for (const match of matches) {
+      if (!aggregated[match.product_id]) {
+        aggregated[match.product_id] = {
+          quantity: match.quantity,
+          notes: match.unit ? `${match.quantity} ${match.unit}` : null,
+        };
+      } else {
+        // If the product already exists, aggregate quantities
+        aggregated[match.product_id].quantity += match.quantity;
+        // Keep the first notes or update if not set
+        if (!aggregated[match.product_id].notes && match.unit) {
+          aggregated[match.product_id].notes = `${match.quantity} ${match.unit}`;
+        }
+      }
+    }
+
+    const basketItems = Object.entries(aggregated).map(([product_id, info]) => ({
       basket_id: basketData.id,
-      product_id: match.product_id,
-      quantity: match.quantity,
-      notes: match.unit ? `${match.quantity} ${match.unit}` : null
+      product_id,
+      quantity: info.quantity,
+      notes: info.notes,
     }));
 
     const { error: itemsError } = await supabase

@@ -292,26 +292,16 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                 ) : (
                   <>
                     <Link
-                      href="/baskets"
+                      href="/create-basket"
                       className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
                     >
-                      <span>➕</span>
                       Create New Basket
                     </Link>
                     <Link
                       href="/baskets"
                       className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
                     >
-                      <span>📋</span>
                       Manage Baskets
-                    </Link>
-                    
-                    <Link
-                      href="/chat-to-basket"
-                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
-                    >
-                      <span>💬</span>
-                      Chat to Basket
                     </Link>
                     
                     {/* Recent Baskets */}
