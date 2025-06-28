@@ -5,15 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '~/lib/auth';
 import { supabase } from '~/lib/supabaseClient';
 
-
-
 interface ProductMatch {
   ingredient: string;
   product_id: string;
   product_name: string;
   confidence: 'high' | 'medium' | 'low';
+  confidence_reason: string;
   quantity: number;
   unit: string | null;
+  alternatives?: {
+    product_id: string;
+    product_name: string;
+    confidence: 'high' | 'medium' | 'low';
+  }[];
 }
 
 interface ChatToBasketResponse {
@@ -32,6 +36,8 @@ export default function CreateBasketPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ChatToBasketResponse | null>(null);
+  const [editableMatches, setEditableMatches] = useState<ProductMatch[]>([]);
+  const [streamingStatus, setStreamingStatus] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -39,6 +45,12 @@ export default function CreateBasketPage() {
       router.push('/auth/login?redirectedFrom=/create-basket');
     }
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (result) {
+      setEditableMatches([...result.matches]);
+    }
+  }, [result]);
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +67,26 @@ export default function CreateBasketPage() {
     
     setIsProcessing(true);
     setError(null);
+    setStreamingStatus('Analyzing your text...');
     
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-to-basket`;
+      
+      // Simulate streaming updates
+      const statusUpdates = [
+        'Extracting ingredients...',
+        'Searching for products...',
+        'Finding best matches...',
+        'Creating your basket...'
+      ];
+      
+      let statusIndex = 0;
+      const statusInterval = setInterval(() => {
+        if (statusIndex < statusUpdates.length) {
+          setStreamingStatus(statusUpdates[statusIndex]);
+          statusIndex++;
+        }
+      }, 1000);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -71,6 +100,8 @@ export default function CreateBasketPage() {
         })
       });
       
+      clearInterval(statusInterval);
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to process text');
@@ -78,6 +109,7 @@ export default function CreateBasketPage() {
       
       const data = await response.json();
       setResult(data);
+      setStreamingStatus('');
       
       // Dispatch event to update baskets in sidebar
       window.dispatchEvent(new Event('basketUpdated'));
@@ -85,6 +117,7 @@ export default function CreateBasketPage() {
     } catch (err) {
       console.error('Error processing chat to basket:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
+      setStreamingStatus('');
     } finally {
       setIsProcessing(false);
     }
@@ -145,9 +178,38 @@ export default function CreateBasketPage() {
     setInputText('');
     setBasketName('');
     setResult(null);
+    setEditableMatches([]);
     setError(null);
+    setStreamingStatus('');
     if (textareaRef.current) {
       textareaRef.current.focus();
+    }
+  };
+
+  const updateMatchQuantity = (index: number, newQuantity: number) => {
+    const updated = [...editableMatches];
+    updated[index].quantity = Math.max(1, newQuantity);
+    setEditableMatches(updated);
+  };
+
+  const removeMatch = (index: number) => {
+    const updated = editableMatches.filter((_, i) => i !== index);
+    setEditableMatches(updated);
+  };
+
+  const replaceMatch = (index: number, alternativeId: string, alternativeName: string) => {
+    const updated = [...editableMatches];
+    updated[index].product_id = alternativeId;
+    updated[index].product_name = alternativeName;
+    setEditableMatches(updated);
+  };
+
+  const getConfidenceBadgeColor = (confidence: string) => {
+    switch (confidence) {
+      case 'high': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      case 'low': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
     }
   };
 
@@ -219,6 +281,15 @@ export default function CreateBasketPage() {
             {error}
           </div>
         )}
+
+        {streamingStatus && (
+          <div className="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-600"></div>
+              {streamingStatus}
+            </div>
+          </div>
+        )}
         
         {!result ? (
           <form onSubmit={mode === 'chat' ? handleChatSubmit : handleManualSubmit}>
@@ -240,7 +311,7 @@ export default function CreateBasketPage() {
                   value={basketName}
                   onChange={(e) => setBasketName(e.target.value)}
                   className="input-enhanced gradient-border-textarea"
-                  placeholder="Enter basket name (e.g., &apos;Weekly Groceries&apos;, &apos;Dinner Party Shopping&apos;)"
+                  placeholder="Enter basket name (e.g., 'Weekly Groceries', 'Dinner Party Shopping')"
                   disabled={isProcessing}
                 />
               )}
@@ -280,41 +351,77 @@ export default function CreateBasketPage() {
             </div>
             
             <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">Matched Products ({result.matches.length})</h3>
-              {result.matches.length > 0 ? (
-                <div className="rounded-lg overflow-hidden border-primary" style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border-primary)' }}>
-                  <table className="min-w-full table-divider">
-                    <thead className="table-header">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Ingredient</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Product</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Quantity</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Confidence</th>
-                      </tr>
-                    </thead>
-                    <tbody className="table-divider" style={{ backgroundColor: 'var(--background)' }}>
-                      {result.matches.map((match, index) => (
-                        <tr key={index} className="table-row">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">{match.ingredient}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{match.product_name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            {match.quantity} {match.unit || ''}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`status-badge ${
-                              match.confidence === 'high' 
-                                ? 'success' 
-                                : match.confidence === 'medium'
-                                ? 'warning'
-                                : 'error'
-                            }`}>
-                              {match.confidence}
+              <h3 className="font-semibold text-lg mb-3">Matched Products ({editableMatches.length})</h3>
+              {editableMatches.length > 0 ? (
+                <div className="space-y-4">
+                  {editableMatches.map((match, index) => (
+                    <div key={index} className="border rounded-lg p-4" style={{ borderColor: 'var(--border-primary)' }}>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{match.ingredient}</span>
+                            <span className="text-sm text-muted">→</span>
+                            <span className="font-medium text-primary">{match.product_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getConfidenceBadgeColor(match.confidence)}`}>
+                              {match.confidence} confidence
                             </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            <span className="text-xs text-muted" title={match.confidence_reason}>
+                              {match.confidence_reason}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeMatch(index)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Remove item"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-medium">Quantity:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={match.quantity}
+                            onChange={(e) => updateMatchQuantity(index, parseInt(e.target.value) || 1)}
+                            className="w-20 px-2 py-1 border rounded text-sm"
+                            style={{ borderColor: 'var(--border-primary)' }}
+                          />
+                          {match.unit && <span className="text-sm text-muted">{match.unit}</span>}
+                        </div>
+                        
+                        {match.alternatives && match.alternatives.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Alternatives:</label>
+                            <select
+                              onChange={(e) => {
+                                const alt = match.alternatives?.find(a => a.product_id === e.target.value);
+                                if (alt) {
+                                  replaceMatch(index, alt.product_id, alt.product_name);
+                                }
+                              }}
+                              className="px-2 py-1 border rounded text-sm"
+                              style={{ borderColor: 'var(--border-primary)' }}
+                            >
+                              <option value="">Switch to...</option>
+                              {match.alternatives.map((alt, altIndex) => (
+                                <option key={altIndex} value={alt.product_id}>
+                                  {alt.product_name} ({alt.confidence})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-muted">No products were matched.</p>
@@ -347,7 +454,7 @@ export default function CreateBasketPage() {
                 style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 View Basket
               </button>
@@ -355,8 +462,6 @@ export default function CreateBasketPage() {
           </div>
         )}
       </div>
-      
-
     </div>
   );
 }
