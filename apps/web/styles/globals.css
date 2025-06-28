@@ -1186,6 +1186,67 @@ a.bg-primary,
   overflow: hidden;
 }
 
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Text truncation utilities */
+.truncate-tooltip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.truncate-tooltip:hover {
+  position: relative;
+}
+
+.truncate-tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  animation: fadeIn 0.2s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Improved text handling for small containers */
+.text-container-sm {
+  max-width: 12rem;
+}
+
+.text-container-md {
+  max-width: 16rem;
+}
+
+.text-container-lg {
+  max-width: 20rem;
+}
+
 /* Basket Popup Styles */
 .basket-popup {
   position: fixed;
@@ -1291,4 +1352,20 @@ a.bg-primary,
   .product-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Gradient border textarea */
+.gradient-border-textarea {
+  position: relative;
+  background: var(--background);
+  border: 2px solid transparent;
+  background-image: linear-gradient(var(--background), var(--background)), linear-gradient(135deg, var(--primary), var(--secondary));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  transition: all 0.3s ease;
+}
+
+.gradient-border-textarea:focus {
+  background-image: linear-gradient(var(--background), var(--background)), linear-gradient(135deg, var(--secondary), var(--accent));
+  box-shadow: 0 0 0 3px rgba(133, 209, 231, 0.1);
 }

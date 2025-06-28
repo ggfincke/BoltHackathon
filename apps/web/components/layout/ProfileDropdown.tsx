@@ -90,8 +90,22 @@ export default function ProfileDropdown() {
                   {displayName.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate" style={{ color: 'var(--text)' }}>{displayName}</div>
-                  <div className="text-xs opacity-60 truncate" style={{ color: 'var(--text)' }}>{userEmail}</div>
+                  <div 
+                    className="font-medium text-sm truncate-tooltip" 
+                    style={{ color: 'var(--text)' }}
+                    data-tooltip={displayName}
+                    title={displayName}
+                  >
+                    {displayName}
+                  </div>
+                  <div 
+                    className="text-xs opacity-60 truncate-tooltip" 
+                    style={{ color: 'var(--text)' }}
+                    data-tooltip={userEmail}
+                    title={userEmail}
+                  >
+                    {userEmail}
+                  </div>
                 </div>
               </div>
             </div>

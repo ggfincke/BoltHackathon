@@ -44,13 +44,31 @@ export default function NavBar() {
           </Link>
         </div>
         
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
+          <Link href="/categories" className="navbar-item hover:text-primary transition-colors">
+            Categories
+          </Link>
+          <Link href="/best-deals" className="navbar-item hover:text-primary transition-colors">
+            Best Deals
+          </Link>
+          <Link href="/create-basket" className="navbar-item hover:text-primary transition-colors">
+            Smart Basket
+          </Link>
+          {user && (
+            <Link href="/baskets" className="navbar-item hover:text-primary transition-colors">
+              My Baskets
+            </Link>
+          )}
+        </div>
+        
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl mx-4">
+        <div className="flex-1 max-w-md mx-4 md:mx-0">
           <SearchDropdown />
         </div>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">    
           {/* Notification Center (if logged in) */}
           {user && (
             <div className="navbar-item">
