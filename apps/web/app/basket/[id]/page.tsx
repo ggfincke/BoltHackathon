@@ -210,6 +210,10 @@ export default function BasketDetail() {
       if (error) throw error;
       
       router.push('/baskets');
+      // Dispatch event so components like the Sidebar refresh their basket lists
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('basketUpdated'));
+      }
     } catch (error) {
       console.error('Error deleting basket:', error);
     }
@@ -480,17 +484,17 @@ export default function BasketDetail() {
       
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteBasket}
         title="Delete Basket"
         message="Are you sure you want to delete this basket? This action cannot be undone."
         confirmText="Delete"
-        confirmButtonClass="bg-red-600 hover:bg-red-700"
+        variant="danger"
       />
       
       <ConfirmationModal
         isOpen={isCloneModalOpen}
-        onClose={() => setIsCloneModalOpen(false)}
+        onCancel={() => setIsCloneModalOpen(false)}
         onConfirm={handleCloneBasket}
         title="Clone Basket"
         message="This will create a copy of this basket with all its items. Do you want to continue?"
