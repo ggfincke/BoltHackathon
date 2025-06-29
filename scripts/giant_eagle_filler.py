@@ -7,6 +7,9 @@ Giant Eagle scraper to check if products exist.
 
 URL Pattern: https://www.gianteagle.com/settlers-ridge/search/product/{padded_upc}
 where UPC is padded to 14 digits with leading zeros.
+
+Example Usage:
+    python scripts/giant_eagle_filler.py --max-products 100 --batch-size 100 --delay 0.5 --offset 0 --log-level DEBUG --dry-run
 """
 
 import os
@@ -62,24 +65,67 @@ class GiantEagleFiller:
 
     # get products with upcs
     def get_products_with_upcs(self, limit: int = None, offset: int = 0) -> List[Dict]:
+        """Fetch products that have UPCs using paginated (blocking) requests.
+
+        Supabase/PostgREST caps any single request to 1 000 rows.  This helper
+        mirrors the pagination logic from `scripts/update.py`, retrieving data
+        in 1 000-row blocks so we never exceed that limit.  It still honours the
+        caller-supplied *limit* (if provided) as well as the instance
+        *batch_size* when *limit* is None.
+        """
+
         try:
-            query = self.backend.supabase.table('products')\
-                .select('id, name, slug, upc')\
-                .not_.is_('upc', 'null')\
-                .neq('upc', '')\
-                .eq('is_active', True)\
+            base_query = (
+                self.backend.supabase.table('products')
+                .select('id, name, slug, upc')
+                .not_.is_('upc', 'null')
+                .neq('upc', '')
+                .eq('is_active', True)
                 .order('created_at')
-            
-            if offset > 0:
-                query = query.range(offset, offset + limit - 1 if limit else offset + self.batch_size - 1)
-            elif limit:
-                query = query.limit(limit)
-            else:
-                query = query.limit(self.batch_size)
-            
-            result = query.execute()
-            return result.data if result.data else []
-            
+            )
+
+            PAGE_SIZE = 1000  # PostgREST hard cap per request
+
+            rows: List[Dict] = []
+            remaining = limit  # None means "no explicit limit – fetch as needed"
+            current_offset = offset
+
+            while True:
+                # determine how many rows to request in this page
+                if remaining is not None:
+                    if remaining <= 0:
+                        break
+                    fetch_size = min(PAGE_SIZE, remaining)
+                else:
+                    # honour self.batch_size but never exceed page size cap
+                    fetch_size = min(PAGE_SIZE, self.batch_size)
+
+                # PostgREST ranges are inclusive
+                page_query = base_query.range(current_offset, current_offset + fetch_size - 1)
+
+                result = page_query.execute()
+
+                if not result.data:
+                    # no more rows available
+                    break
+
+                rows.extend(result.data)
+
+                # if we received fewer rows than requested, we've reached the end
+                if len(result.data) < fetch_size:
+                    break
+
+                # prepare for next page
+                current_offset += fetch_size
+                if remaining is not None:
+                    remaining -= fetch_size
+
+            # safety: trim any over-fetch in the last page
+            if limit is not None and len(rows) > limit:
+                rows = rows[:limit]
+
+            return rows
+
         except Exception as e:
             self.logger.error(f"Error fetching products with UPCs: {e}")
             return []
