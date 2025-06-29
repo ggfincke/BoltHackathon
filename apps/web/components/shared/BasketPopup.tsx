@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '~/lib/auth';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
@@ -40,9 +40,17 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
   const [activeBasket, setActiveBasket] = useState<Basket | null>(null);
   const [baskets, setBaskets] = useState<Basket[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showBasketSelector, setShowBasketSelector] = useState(false);
+  const [showBasketSelectorModal, setShowBasketSelectorModal] = useState(false);
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [debounceTimers, setDebounceTimers] = useState<Map<string, NodeJS.Timeout>>(new Map());
+
+  // Ref to detect clicks outside the popup
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Ref to keep the latest visibility state of the selector modal
+  const showSelectorRef = useRef<boolean>(showBasketSelectorModal);
+
+  // Keep ref up-to-date each render
+  showSelectorRef.current = showBasketSelectorModal;
 
   useEffect(() => {
     if (user) {
@@ -94,15 +102,11 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
     setBaskets(prev => prev.map(basket =>
       basket.id === activeBasket.id ? { ...basket, items: updatedItems } : basket
     ));
-
-    console.log('BasketPopup: Optimistically added product:', productName, 'with price:', price);
   }, [activeBasket]);
 
   // Listen for basket updates
   useEffect(() => {
     const handleBasketUpdate = (event: any) => {
-      console.log('BasketPopup: basketUpdated event received');
-      
       // If optimistic add event, handle differently
       if (event.detail?.type === 'optimisticAdd') {
         addProductOptimistically(
@@ -116,28 +120,46 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
         
         // Fetch fresh data after delay to sync w/ db
         setTimeout(() => {
-          console.log('BasketPopup: Fetching fresh data after optimistic add');
           fetchBaskets(true); // Preserve overlay size
         }, 1000);
       } else {
         // Regular basket update - only fetch if not optimistic mode
-        console.log('BasketPopup: Regular basket update, fetching baskets...');
         fetchBaskets(true); // Preserve overlay size
       }
     };
 
-    console.log('BasketPopup: Setting up basketUpdated event listener');
     window.addEventListener('basketUpdated', handleBasketUpdate);
     
     return () => {
-      console.log('BasketPopup: Removing basketUpdated event listener');
-      window.removeEventListener('basketUpdated', handleBasketUpdate);
-      
       // Clean up pending timers
       debounceTimers.forEach(timer => clearTimeout(timer));
       setDebounceTimers(new Map());
+      
+      window.removeEventListener('basketUpdated', handleBasketUpdate);
     };
   }, [user, addProductOptimistically]); // Add dependencies
+
+  // Close/minimize the popup if a click occurs outside of it
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
+        showSelectorRef.current
+      ) {
+        // Close only the basket selector modal if it is open
+        setShowBasketSelectorModal(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   const fetchBaskets = async (preserveOverlaySize = false) => {
     if (!user?.id) return;
@@ -337,8 +359,6 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
         if (error) throw error;
 
-        console.log('Successfully updated quantity in database');
-
       } catch (error) {
         console.error('Error updating item quantity:', error);
         // Revert optimistic update
@@ -392,8 +412,6 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
       if (error) throw error;
 
-      console.log('Successfully removed item from database');
-
     } catch (error) {
       console.error('Error removing item:', error);
       // Revert optimistic update
@@ -434,7 +452,11 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
   const handleBasketSwitch = (basket: Basket) => {
     setActiveBasket(basket);
-    setShowBasketSelector(false);
+    setShowBasketSelectorModal(false);
+  };
+
+  const openBasketSelectorModal = () => {
+    setShowBasketSelectorModal(true);
   };
 
   if (!user || baskets.length === 0) {
@@ -442,166 +464,255 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {/* Background overlay for proper layering */}
-      <div className={`bg-background border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl backdrop-blur-sm transition-all duration-300 ${
-        isMinimized ? 'w-72 h-16' : 'w-96 max-h-[32rem]'
-      }`} style={{ 
-        background: 'var(--background)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
-      }}>
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.71 9.29M7 13h10M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6" />
-            </svg>
-            <div className="flex items-center gap-1">
-              <span className="font-medium text-sm">{activeBasket?.name}</span>
+    <>
+      <div className="fixed bottom-4 right-4 z-50" ref={containerRef}>
+        {/* Background overlay for proper layering */}
+        <div className={`relative bg-background border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl backdrop-blur-sm transition-all duration-300 ${
+          isMinimized ? 'w-72 h-16' : 'w-[28rem] max-h-[36rem]'
+        }`} style={{ 
+          background: 'var(--background)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+        }}>
+          {/* Header */}
+          <div className="flex items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            {/* Trigger (name + arrow) */}
+            <button
+              className={`flex items-center flex-1 min-w-0 mr-2 gap-2 ${
+                baskets.length > 1 ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded px-2 py-1 -mx-2 -my-1 transition-colors' : 'cursor-default'
+              }`}
+              onClick={baskets.length > 1 ? openBasketSelectorModal : undefined}
+              disabled={baskets.length <= 1}
+              style={{ background: 'transparent' }}
+            >
+              {/* Icon & name */}
+              <svg className="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.71 9.29M7 13h10M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6" />
+              </svg>
+              <span
+                className={`font-medium text-sm ${
+                  isMinimized ? 'text-container-sm' : 'text-container-md'
+                } truncate-tooltip flex-1 min-w-0`}
+                data-tooltip={activeBasket?.name}
+                title={activeBasket?.name}
+                style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              > 
+                {activeBasket?.name}
+              </span>
+              {/* Arrow */}
               {baskets.length > 1 && (
-                <button
-                  onClick={() => setShowBasketSelector(!showBasketSelector)}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                <svg className="w-4 h-4 text-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted">
+            </button>
+
+            {/* Item count and total (NOT part of trigger) */}
+            <span className="text-xs text-muted whitespace-nowrap ml-2" style={{ minWidth: '80px', textAlign: 'right' }}>
               {getTotalItems()} items • ${getTotalPrice().toFixed(2)}
             </span>
+
+            {/* Minimize/maximize button */}
             <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMinimized(!isMinimized);
+              }}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded flex-shrink-0 ml-2"
+              style={{ width: '28px', height: '28px' }}
             >
               <svg className={`w-4 h-4 transition-transform ${isMinimized ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
               </svg>
             </button>
           </div>
-        </div>
 
-        {/* Basket Selector */}
-        {showBasketSelector && !isMinimized && (
-          <div className="border-b border-gray-200 dark:border-gray-700 p-2">
-            <div className="space-y-1">
-              {baskets.map(basket => (
-                <button
-                  key={basket.id}
-                  onClick={() => handleBasketSwitch(basket)}
-                  className={`w-full text-left p-2 rounded-md text-sm transition-colors ${
-                    activeBasket?.id === basket.id
-                      ? 'bg-primary text-buttonText'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{basket.name}</span>
-                    <span className="text-xs opacity-70">
-                      {basket.items.reduce((total, item) => total + item.quantity, 0)} items
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Content */}
-        {!isMinimized && (
-          <div className="p-4">
-            {isLoading ? (
-              <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
-              </div>
-            ) : activeBasket && activeBasket.items.length > 0 ? (
-              <div className="space-y-3">
-                <div className="max-h-80 overflow-y-auto space-y-3">
-                  {activeBasket.items.slice(0, 8).map(item => {
-                    const currentPrice = item.product.listings?.[0]?.price;
-                    const price = currentPrice || item.price_at_add || 0;
-                    const isUpdating = updatingItems.has(item.id);
-                    
-                    return (
-                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{item.product.name}</p>
-                          <p className="text-xs text-muted">${price.toFixed(2)} each</p>
-                        </div>
-                        
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                            disabled={isUpdating}
-                            className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
-                          >
-                            -
-                          </button>
-                          <span className="text-sm font-medium w-8 text-center">
-                            {isUpdating ? '...' : item.quantity}
-                          </span>
-                          <button
-                            onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                            disabled={isUpdating}
-                            className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
-                          >
-                            +
-                          </button>
-                        </div>
-                        
-                        <span className="font-medium text-sm min-w-0">
-                          ${(price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  
-                  {activeBasket.items.length > 8 && (
-                    <div className="text-center">
-                      <p className="text-xs text-muted">
-                        +{activeBasket.items.length - 8} more items
-                      </p>
-                    </div>
-                  )}
+          {/* Content */}
+          {!isMinimized && (
+            <div className="p-4">
+              {isLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
                 </div>
-                
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-medium">Total:</span>
-                    <span className="font-bold text-lg">${getTotalPrice().toFixed(2)}</span>
+              ) : activeBasket && activeBasket.items.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="max-h-80 overflow-y-auto space-y-3">
+                    {activeBasket.items.slice(0, 8).map(item => {
+                      const currentPrice = item.product.listings?.[0]?.price;
+                      const price = currentPrice || item.price_at_add || 0;
+                      const isUpdating = updatingItems.has(item.id);
+                      
+                      return (
+                        <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
+                          <div className="flex-1 min-w-0">
+                            <p 
+                              className="font-medium text-sm truncate-tooltip"
+                              data-tooltip={item.product.name}
+                              title={item.product.name}
+                            >
+                              {item.product.name}
+                            </p>
+                            <p className="text-xs text-muted">${price.toFixed(2)} each</p>
+                          </div>
+                          
+                          {/* Quantity Controls */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                              disabled={isUpdating}
+                              className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
+                            >
+                              -
+                            </button>
+                            <span className="text-sm font-medium w-8 text-center">
+                              {isUpdating ? '...' : item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                              disabled={isUpdating}
+                              className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
+                            >
+                              +
+                            </button>
+                          </div>
+                          
+                          <span className="font-medium text-sm min-w-0">
+                            ${(price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    
+                    {activeBasket.items.length > 8 && (
+                      <div className="text-center">
+                        <p className="text-xs text-muted">
+                          +{activeBasket.items.length - 8} more items
+                        </p>
+                      </div>
+                    )}
                   </div>
                   
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="font-medium">Total:</span>
+                      <span className="font-bold text-lg">${getTotalPrice().toFixed(2)}</span>
+                    </div>
+                    
+                    <Link
+                      href={`/basket/${activeBasket.id}`}
+                      className="block w-full bg-primary text-buttonText text-center py-2 rounded-md hover:bg-opacity-90 transition-colors font-medium"
+                    >
+                      View Basket
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.71 9.29M7 13h10M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6" />
+                  </svg>
+                  <p className="text-sm text-muted mb-3">Your basket is empty</p>
                   <Link
-                    href={`/basket/${activeBasket.id}`}
-                    className="block w-full bg-primary text-buttonText text-center py-2 rounded-md hover:bg-opacity-90 transition-colors font-medium"
+                    href="/categories"
+                    className="text-sm text-primary hover:underline"
                   >
-                    View Basket
+                    Start shopping
                   </Link>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Basket Selector Dropdown */}
+          {showBasketSelectorModal && (
+            <>
+              {/* Full screen backdrop - catches all clicks */}
+              <div 
+                className="fixed inset-0 z-[100]" 
+                onClick={() => setShowBasketSelectorModal(false)}
+                style={{ 
+                  pointerEvents: 'all',
+                  background: 'transparent'
+                }}
+              />
+              
+              <div 
+                className="absolute right-0 bottom-[calc(100%-40px)] w-80 bg-background border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-[101] max-h-96 overflow-hidden backdrop-blur-xl"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  background: 'rgba(var(--background-rgb), 0.95)',
+                  borderColor: 'var(--surface)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(var(--background-rgb), 0.05)'
+                }}
+              >
+                {/* Header */}
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="font-medium text-sm">Switch Basket</h3>
+                </div>
+
+                {/* Content */}
+                <div className="max-h-80 overflow-y-auto">
+                  <div className="p-2">
+                    {baskets.map(basket => (
+                      <button
+                        key={basket.id}
+                        onClick={() => handleBasketSwitch(basket)}
+                        className={`w-full text-left p-3 rounded-lg transition-colors mb-1 ${
+                          activeBasket?.id === basket.id
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start min-w-0 gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p 
+                              className="font-medium text-sm mb-1 truncate-tooltip"
+                              data-tooltip={basket.name}
+                              title={basket.name}
+                            >
+                              {basket.name}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted">
+                              <span>{basket.items.reduce((total, item) => total + item.quantity, 0)} items</span>
+                              <span>•</span>
+                              <span>${basket.items.reduce((total, item) => {
+                                const price = item.product.listings?.[0]?.price || item.price_at_add || 0;
+                                return total + (price * item.quantity);
+                              }, 0).toFixed(2)}</span>
+                            </div>
+                          </div>
+                          
+                          {activeBasket?.id === basket.id && (
+                            <div className="flex-shrink-0">
+                              <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+                    <Link
+                      href="/create-basket"
+                      className="block w-full text-center py-2 px-3 rounded-lg text-sm text-primary hover:bg-primary/5 transition-colors font-medium"
+                      onClick={() => setShowBasketSelectorModal(false)}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Create New Basket
+                      </div>
+                    </Link>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-4">
-                <svg className="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.71 9.29M7 13h10M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6" />
-                </svg>
-                <p className="text-sm text-muted mb-3">Your basket is empty</p>
-                <Link
-                  href="/categories"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Start shopping
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

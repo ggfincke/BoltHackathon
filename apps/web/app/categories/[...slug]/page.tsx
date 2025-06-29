@@ -8,6 +8,7 @@ import { Database } from '~/lib/database.types';
 import Breadcrumbs from '~/components/layout/Breadcrumbs';
 import Pagination from '~/components/ui/Pagination';
 import ProductGrid from '~/components/product/ProductGrid';
+import BasketPopup from '~/components/shared/BasketPopup';
 
 
 type Category = Database['public']['Tables']['categories']['Row'];
@@ -358,8 +359,8 @@ export default function CategoryPage() {
         )}
       </div>
 
-      {/* Persistent Basket Popup */}
-      
+      {/* Basket Popup - only shown on product grid pages */}
+      <BasketPopup onProductAdded={handleProductAdded} />
     </>
   );
 }

@@ -36,7 +36,7 @@ export { default as BasketPopup } from './shared/BasketPopup';
 export { default as BasketShareModal } from './shared/BasketShareModal';
 export { default as BasketTrackingModal } from './shared/BasketTrackingModal';
 export { default as ConfirmationModal } from './shared/ConfirmationModal';
-export { default as CreateBasketModal } from './shared/CreateBasketModal';
+
 export { default as NotificationCenter } from './shared/NotificationCenter';
 export { default as AuthForm } from './shared/AuthForm';
 export { default as BasketItemsTable } from './shared/BasketItemsTable';

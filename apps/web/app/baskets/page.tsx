@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
 import Link from 'next/link';
-import CreateBasketModal from '~/components/shared/CreateBasketModal';
+
 
 type Basket = {
   id: string;
@@ -23,7 +23,7 @@ export default function Baskets() {
   const router = useRouter();
   const [baskets, setBaskets] = useState<Basket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (!authLoading) {
@@ -145,53 +145,7 @@ export default function Baskets() {
     }
   };
 
-  const handleCreateBasket = async (name: string, description: string, isPublic: boolean) => {
-    try {
-      // Check if user exists before creating basket
-      if (!user?.id) {
-        console.error('User not authenticated');
-        return;
-      }
 
-      // Generate UUID on the client
-      const basketId = crypto.randomUUID();
-
-      // Insert new basket
-      const { error: basketError } = await supabase
-        .from('baskets')
-        .insert({
-          id: basketId,
-          name,
-          description,
-          is_public: isPublic,
-        });
-
-      if (basketError) throw basketError;
-
-      // Add user as owner of the basket
-      const { error: userError } = await supabase
-        .from('basket_users')
-        .insert({
-          basket_id: basketId,
-          user_id: user.id,
-          role: 'owner',
-        });
-
-      if (userError) throw userError;
-
-      // Refresh baskets list
-      fetchBaskets();
-
-      // Close the modal
-      setIsModalOpen(false);
-
-      // Navigate to the new basket page
-      router.push(`/basket/${basketId}`);
-    } catch (error) {
-      // Log full error object for easier debugging
-      console.error('Error creating basket:', JSON.stringify(error, null, 2));
-    }
-  };
 
   if (authLoading) {
     return (
@@ -226,12 +180,12 @@ export default function Baskets() {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Your Baskets</h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+        <Link
+          href="/create-basket"
+          className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors inline-block"
         >
           Create New Basket
-        </button>
+        </Link>
       </div>
 
       {isLoading ? (
@@ -272,20 +226,16 @@ export default function Baskets() {
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             Create your first basket to start tracking products and prices.
           </p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+          <Link
+            href="/create-basket"
+            className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors inline-block"
           >
             Create New Basket
-          </button>
+          </Link>
         </div>
       )}
 
-      <CreateBasketModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreate={handleCreateBasket}
-      />
+
     </div>
   );
 }

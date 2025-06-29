@@ -25,9 +25,11 @@ RETAILER_UUID_MAP = {
     "1": "00000000-0000-0000-0000-000000000001",  # Amazon
     "2": "00000000-0000-0000-0000-000000000002",  # Target  
     "3": "00000000-0000-0000-0000-000000000003",  # Walmart
+    "4": "00000000-0000-0000-0000-000000000004",  # Giant Eagle
     "amazon": "00000000-0000-0000-0000-000000000001",
     "target": "00000000-0000-0000-0000-000000000002",
-    "walmart": "00000000-0000-0000-0000-000000000003"
+    "walmart": "00000000-0000-0000-0000-000000000003",
+    "giant_eagle": "00000000-0000-0000-0000-000000000004"
 }
 
 # default currency
@@ -37,7 +39,8 @@ DEFAULT_CURRENCY = "USD"
 RETAILER_URL_PATTERNS = {
     'amazon.com': 1,
     'target.com': 2, 
-    'walmart.com': 3
+    'walmart.com': 3,
+    'gianteagle.com': 4
 }
 
 # * Module-level utility functions *

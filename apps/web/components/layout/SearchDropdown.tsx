@@ -246,14 +246,14 @@ export default function SearchDropdown({ className = '' }: SearchDropdownProps) 
                     className={`w-full text-left px-4 py-3 transition-all duration-200 hover:translate-x-1 hover:shadow-md flex items-center gap-3 border-l-2 border-transparent`}
                     style={{
                       background: selectedIndex === index 
-                        ? `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
+                        ? 'var(--bg-hover)'
                         : 'var(--surface)',
                       color: 'var(--text)',
                       borderLeftColor: selectedIndex === index ? 'var(--primary)' : 'transparent'
                     }}
                     onMouseEnter={(e) => {
                       if (selectedIndex !== index) {
-                        e.currentTarget.style.background = `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
+                        e.currentTarget.style.background = 'var(--bg-hover)'
                         e.currentTarget.style.borderLeftColor = 'var(--primary)'
                       }
                     }}
@@ -344,14 +344,14 @@ export default function SearchDropdown({ className = '' }: SearchDropdownProps) 
                       className={`w-full text-left px-4 py-3 transition-all duration-200 hover:translate-x-1 hover:shadow-md flex items-center gap-3 border-l-2 border-transparent`}
                       style={{
                         background: selectedIndex === adjustedIndex 
-                          ? `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
+                          ? 'var(--bg-hover)'
                           : 'var(--surface)',
                         color: 'var(--text)',
                         borderLeftColor: selectedIndex === adjustedIndex ? 'var(--primary)' : 'transparent'
                       }}
                       onMouseEnter={(e) => {
                         if (selectedIndex !== adjustedIndex) {
-                          e.currentTarget.style.background = `linear-gradient(90deg, rgba(133, 209, 231, 0.2), rgba(198, 91, 130, 0.2))`
+                          e.currentTarget.style.background = 'var(--bg-hover)'
                           e.currentTarget.style.borderLeftColor = 'var(--primary)'
                         }
                       }}

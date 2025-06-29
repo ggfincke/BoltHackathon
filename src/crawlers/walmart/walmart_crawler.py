@@ -265,30 +265,23 @@ class WalmartCrawler(BaseCrawler):
     def _crawl_grids_concurrent_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, concurrency: int) -> None:
         self.logger.info(f"Starting concurrent grid crawling w/ categories for {len(url_category_pairs)} Walmart categories with concurrency={concurrency}")
         
-        # split URL-category pairs into batches for concurrent processing
-        batch_size = max(1, len(url_category_pairs) // concurrency)
-        batches = [url_category_pairs[i:i + batch_size] for i in range(0, len(url_category_pairs), batch_size)]
-        
-        self.logger.info(f"Processing {len(url_category_pairs)} Walmart URL-category pairs in {len(batches)} batches")
-        
-        # use ThreadPoolExecutor for concurrent processing
+        # process each URL-category pair individually to avoid category mix-ups
         all_results = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=min(concurrency, len(batches))) as executor:
-            # submit all batches
-            future_to_batch = {
-                executor.submit(self._crawl_batch_with_categories, batch, max_pages_per_cat, i + 1): i + 1 
-                for i, batch in enumerate(batches)
+        max_workers = min(concurrency, len(url_category_pairs)) or 1
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_pair = {
+                executor.submit(self._process_single_category_sync, pair, max_pages_per_cat): pair for pair in url_category_pairs
             }
             
-            # collect results as they complete
-            for future in concurrent.futures.as_completed(future_to_batch):
-                batch_num = future_to_batch[future]
+            for future in concurrent.futures.as_completed(future_to_pair):
+                pair = future_to_pair[future]
+                category = pair.get("category", "<unknown>")
                 try:
-                    batch_results = future.result()
-                    all_results.extend(batch_results)
-                    self.logger.info(f"Walmart Batch {batch_num} completed with {len(batch_results)} items")
+                    results = future.result()
+                    all_results.extend(results)
+                    self.logger.info(f"Completed crawl for category '{category}' with {len(results)} items")
                 except Exception as e:
-                    self.logger.error(f"Walmart Batch {batch_num} failed: {e}")
+                    self.logger.error(f"Crawl failed for category '{category}': {e}")
         
         # send results to output backend
         if all_results:
@@ -297,57 +290,50 @@ class WalmartCrawler(BaseCrawler):
         else:
             self.logger.warning("No results collected from Walmart concurrent crawling w/ categories")
 
-    # process a batch of URL-category pairs (new method for hierarchy-based approach)
-    def _crawl_batch_with_categories(self, url_category_pairs: List[Dict[str, str]], max_pages_per_cat: int, batch_num: int):
-        self.logger.info(f"Walmart Batch {batch_num}: Processing {len(url_category_pairs)} URL-category pairs")
-        
-        all_results = []
-        for pair in url_category_pairs:
-            url = pair['url']
-            category = pair['category']
-            
-            try:
-                self.logger.info(f"Walmart Batch {batch_num}: Crawling '{category}' from {url}")
-                
-                if self.urls_only:
-                    # urls-only mode - use existing grid crawler
-                    raw_results = crawl_grid(
-                        start_urls=[url],
-                        max_depth=max_pages_per_cat,
-                        extract_urls_only=True,
-                        use_safari=False,
-                        proxy_manager=None,
-                        logger=self.logger
-                    )
-                    all_results.extend(raw_results)
-                else:
-                    # full mode - crawl products with category context
-                    raw_results = crawl_grid(
-                        start_urls=[url],
-                        max_depth=max_pages_per_cat,
-                        extract_urls_only=False,
-                        use_safari=False,
-                        proxy_manager=None,
-                        logger=self.logger
-                    )
-                    
-                    # convert to ProductRecord objects w/ subcategory from hierarchy
-                    for item in raw_results:
-                        product_record = ProductRecord(
-                            retailer_id=self.retailer_id,
-                            wm_item_id=item.get("wm_item_id"),
-                            title=item.get("title", "Unknown Title"),
-                            price=item.get("price", "Unknown Price"),
-                            url=item.get("url", ""),
-                            category=category,
-                        )
-                        all_results.append(product_record)
-                        
-            except Exception as e:
-                self.logger.error(f"Walmart Batch {batch_num}: Error crawling '{category}' from {url}: {e}")
-        
-        self.logger.info(f"Walmart Batch {batch_num}: Found {len(all_results)} total items")
-        return all_results
+    # process a single URL-category pair (ensures correct category assignment)
+    def _process_single_category_sync(self, pair: Dict[str, str], max_pages_per_cat: int):
+        url = pair['url']
+        category = pair['category']
+
+        try:
+            self.logger.info(f"Crawling '{category}' from {url}")
+
+            if self.urls_only:
+                # URLs-only mode - just crawl for URLs
+                return crawl_grid(
+                    start_urls=[url],
+                    max_depth=max_pages_per_cat,
+                    extract_urls_only=True,
+                    use_safari=False,
+                    proxy_manager=None,
+                    logger=self.logger
+                )
+
+            # Full mode - crawl products then tag with the correct category
+            raw_results = crawl_grid(
+                start_urls=[url],
+                max_depth=max_pages_per_cat,
+                extract_urls_only=False,
+                use_safari=False,
+                proxy_manager=None,
+                logger=self.logger
+            )
+
+            processed = [
+                ProductRecord(
+                    retailer_id=self.retailer_id,
+                    wm_item_id=item.get("wm_item_id"),
+                    title=item.get("title", "Unknown Title"),
+                    price=item.get("price", "Unknown Price"),
+                    url=item.get("url", ""),
+                    category=category,
+                )
+                for item in raw_results
+            ]
+            return processed
+        except Exception as e:
+            self.logger.error(f"Error crawling '{category}' from {url}: {e}")
+            return []
 
     # crawl multiple grid URLs concurrently (new method for hierarchy file mode)
     def _crawl_grids_concurrent(self, grid_urls: List[str], max_pages_per_cat: int, concurrency: int) -> None:
@@ -395,7 +381,7 @@ class WalmartCrawler(BaseCrawler):
                 start_urls=urls,
                 max_depth=max_pages_per_cat,
                 extract_urls_only=self.urls_only,
-                use_safari=False,  # Walmart works better with Chrome UC
+                use_safari=False, 
                 proxy_manager=None,
                 logger=self.logger
             )
@@ -447,7 +433,7 @@ class WalmartCrawler(BaseCrawler):
             cat_json = crawl_category(
                 start_url=node.url,
                 max_depth=MAX_DEPTH,
-                use_safari=False,  # Walmart works better with Chrome UC
+                use_safari=False, 
                 proxy_manager=None,
                 logger=self.logger
             )

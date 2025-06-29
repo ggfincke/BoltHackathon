@@ -17,7 +17,7 @@ Example Usage:
 
 Normal usage:
     python scripts/update.py --retailer amazon --all
-    python scripts/update.py --retailer target --use-safari --all
+    python scripts/update.py --retailer target --use-safari --all --log-file logs/update_target.log
     python scripts/update.py --retailer walmart --scraper-concurrency 1 --all
 
 With logging:

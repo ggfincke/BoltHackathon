@@ -6,6 +6,7 @@ import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
 import Pagination from '~/components/ui/Pagination';
 import ProductGrid from '~/components/product/ProductGrid';
+import BasketPopup from '~/components/shared/BasketPopup';
 
 
 type Product = {
@@ -233,8 +234,8 @@ export default function Search() {
         )}
       </div>
 
-      {/* Persistent Basket Popup */}
-      
+      {/* Basket Popup - only shown on product grid pages */}
+      <BasketPopup onProductAdded={handleProductAdded} />
     </>
   );
 }
