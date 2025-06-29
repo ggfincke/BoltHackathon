@@ -300,7 +300,7 @@ export default function CreateBasketPage() {
                     ref={textareaRef}
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    className="input-enhanced gradient-border-textarea min-h-[200px] relative z-10"
+                    className="input-enhanced gradient-border-textarea min-h-[250px] relative z-10"
                     placeholder="Paste your recipe, ingredient list, or any food-related text here..."
                     disabled={isProcessing}
                   />

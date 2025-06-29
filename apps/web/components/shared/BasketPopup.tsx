@@ -64,7 +64,7 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
     }
   }, [onProductAdded]);
 
-    // Add new product optimistically
+  // Add new product optimistically
   const addProductOptimistically = useCallback((
     productId: string, 
     productName: string, 

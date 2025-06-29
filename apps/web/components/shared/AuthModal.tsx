@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '~/lib/auth';
 import { supabase } from '~/lib/supabaseClient';
+import { FcGoogle } from 'react-icons/fc';
+import { FaApple } from 'react-icons/fa';
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -183,6 +185,44 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}${redirectTo || '/'}`
+        }
+      });
+      
+      if (error) throw error;
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred with Google sign in';
+      setError(errorMessage);
+      setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}${redirectTo || '/'}`
+        }
+      });
+      
+      if (error) throw error;
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred with Apple sign in';
+      setError(errorMessage);
+      setLoading(false);
+    }
+  };
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -250,6 +290,34 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
               {message}
             </div>
           )}
+
+          {/* Social Sign In Options */}
+          <div className="flex flex-col gap-3 mb-6">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+              className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <FcGoogle className="w-5 h-5" />
+              <span className="font-medium">Continue with Google</span>
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleAppleSignIn}
+              disabled={loading}
+              className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <FaApple className="w-5 h-5" />
+              <span className="font-medium">Continue with Apple</span>
+            </button>
+          </div>
+
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="border-t border-gray-300 dark:border-gray-700 w-full"></div>
+            <div className="absolute bg-background px-4 text-sm text-gray-500 dark:text-gray-400">or</div>
+          </div>
 
           <form onSubmit={handleSubmit} className="auth-modal-form">
             <div className="auth-modal-field">
