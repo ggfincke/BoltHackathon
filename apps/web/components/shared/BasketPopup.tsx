@@ -102,15 +102,11 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
     setBaskets(prev => prev.map(basket =>
       basket.id === activeBasket.id ? { ...basket, items: updatedItems } : basket
     ));
-
-    console.log('BasketPopup: Optimistically added product:', productName, 'with price:', price);
   }, [activeBasket]);
 
   // Listen for basket updates
   useEffect(() => {
     const handleBasketUpdate = (event: any) => {
-      console.log('BasketPopup: basketUpdated event received');
-      
       // If optimistic add event, handle differently
       if (event.detail?.type === 'optimisticAdd') {
         addProductOptimistically(
@@ -124,26 +120,22 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
         
         // Fetch fresh data after delay to sync w/ db
         setTimeout(() => {
-          console.log('BasketPopup: Fetching fresh data after optimistic add');
           fetchBaskets(true); // Preserve overlay size
         }, 1000);
       } else {
         // Regular basket update - only fetch if not optimistic mode
-        console.log('BasketPopup: Regular basket update, fetching baskets...');
         fetchBaskets(true); // Preserve overlay size
       }
     };
 
-    console.log('BasketPopup: Setting up basketUpdated event listener');
     window.addEventListener('basketUpdated', handleBasketUpdate);
     
     return () => {
-      console.log('BasketPopup: Removing basketUpdated event listener');
-      window.removeEventListener('basketUpdated', handleBasketUpdate);
-      
       // Clean up pending timers
       debounceTimers.forEach(timer => clearTimeout(timer));
       setDebounceTimers(new Map());
+      
+      window.removeEventListener('basketUpdated', handleBasketUpdate);
     };
   }, [user, addProductOptimistically]); // Add dependencies
 
@@ -367,8 +359,6 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
         if (error) throw error;
 
-        console.log('Successfully updated quantity in database');
-
       } catch (error) {
         console.error('Error updating item quantity:', error);
         // Revert optimistic update
@@ -421,8 +411,6 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
         .eq('id', itemId);
 
       if (error) throw error;
-
-      console.log('Successfully removed item from database');
 
     } catch (error) {
       console.error('Error removing item:', error);

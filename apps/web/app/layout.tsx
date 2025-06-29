@@ -6,7 +6,6 @@ import Sidebar from '~/components/layout/Sidebar';
 import { ThemeProvider } from '~/components/ui/ThemeProvider';
 import { AuthProvider } from '~/lib/auth';
 import { AuthModalProvider } from '~/components/shared/AuthModalProvider';
-import BasketPopup from '~/components/shared/BasketPopup';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -36,7 +35,6 @@ export default function RootLayout({
                   </div>
                 </main>
               </div>
-              <BasketPopup />
             </AuthModalProvider>
           </AuthProvider>
         </ThemeProvider>

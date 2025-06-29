@@ -50,12 +50,25 @@ class DatabaseHelpers {
   constructor(private supabase: any) {}
 
   async searchProductsByName(searchTerm: string, limit: number = 5) {
+    // Automatically apply category-aware filtering by default
+    const guessedCategory = this.guessSimpleCategory(searchTerm);
+    return this.searchProductsByNameWithCategoryFilter(searchTerm, guessedCategory, limit);
+  }
+
+  async searchProductsByNameRaw(searchTerm: string, limit: number = 5) {
     const { data, error } = await this.supabase
       .from('products')
       .select(`
         id,
         name,
-        slug
+        slug,
+        product_categories!inner(
+          category:categories!inner(
+            id,
+            name,
+            slug
+          )
+        )
       `)
       .textSearch('name', searchTerm, { 
         type: 'websearch',
@@ -67,6 +80,156 @@ class DatabaseHelpers {
     return data || [];
   }
 
+  private guessSimpleCategory(searchTerm: string): string | null {
+    const term = searchTerm.toLowerCase();
+    
+    console.log(`[CATEGORY GUESS] Analyzing term: "${term}"`);
+    
+    // Map to exact category names from categories.json
+    if (term.includes('bread') && !term.includes('breaded')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Breads" (bakery category)`);
+      return 'Breads';
+    }
+    if (term.includes('chicken') && !term.includes('flavored')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Chicken" (meat category)`);
+      return 'Chicken';
+    }
+    if (term.includes('cheese') && !term.includes('flavored') && !term.includes('crackers')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Cheese" (dairy category)`);
+      return 'Cheese';
+    }
+    if (term.includes('lettuce')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Fresh Vegetables" (produce category)`);
+      return 'Fresh Vegetables';
+    }
+    if (term.includes('tomato')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Fresh Vegetables" (produce category)`);
+      return 'Fresh Vegetables';
+    }
+    if (term.includes('bacon')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Bacon" (meat category)`);
+      return 'Bacon';
+    }
+    if (term.includes('ham') || term.includes('beef')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Beef" (meat category)`);
+      return 'Beef';
+    }
+    if (term.includes('milk')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Milk" (dairy category)`);
+      return 'Milk';
+    }
+    if (term.includes('yogurt')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Yogurt" (dairy category)`);
+      return 'Yogurt';
+    }
+    if (term.includes('butter')) {
+      console.log(`[CATEGORY GUESS] "${term}" -> "Butter & Margarine" (dairy category)`);
+      return 'Butter & Margarine';
+    }
+    
+    console.log(`[CATEGORY GUESS] "${term}" -> null (no category match)`);
+    return null;
+  }
+
+  async searchProductsByNameWithCategoryFilter(searchTerm: string, expectedCategory: string | null, limit: number = 5) {
+    console.log(`[CATEGORY FILTER] Searching for "${searchTerm}" with expected category: "${expectedCategory}"`);
+    
+    // First, do a regular name search
+    const allResults = await this.searchProductsByNameRaw(searchTerm, limit * 3);
+    console.log(`[CATEGORY FILTER] Found ${allResults.length} total results for "${searchTerm}"`);
+    
+    if (!expectedCategory || allResults.length === 0) {
+      console.log(`[CATEGORY FILTER] No category filtering - returning ${Math.min(allResults.length, limit)} results`);
+      return allResults.slice(0, limit);
+    }
+
+    // Filter and rank results based on category relevance
+    const categoryRelevantResults: any[] = [];
+    const categoryIrrelevantResults: any[] = [];
+
+    for (const product of allResults) {
+      const productCategories = product.product_categories?.map((pc: any) => pc.category?.name) || [];
+      console.log(`[CATEGORY FILTER] Product "${product.name}" has categories: [${productCategories.join(', ')}]`);
+      
+      const isRelevant = this.isCategoryRelevant(expectedCategory, productCategories);
+      console.log(`[CATEGORY FILTER] Product "${product.name}" is ${isRelevant ? 'RELEVANT' : 'IRRELEVANT'} for category "${expectedCategory}"`);
+      
+      if (isRelevant) {
+        categoryRelevantResults.push(product);
+      } else {
+        categoryIrrelevantResults.push(product);
+      }
+    }
+
+    console.log(`[CATEGORY FILTER] Relevant results: ${categoryRelevantResults.length}, Irrelevant: ${categoryIrrelevantResults.length}`);
+    
+    // Return category-relevant results first, then others
+    const combinedResults = [...categoryRelevantResults, ...categoryIrrelevantResults];
+    console.log(`[CATEGORY FILTER] Final result order: ${combinedResults.slice(0, limit).map(p => p.name).join(' | ')}`);
+    return combinedResults.slice(0, limit);
+  }
+
+  private isCategoryRelevant(expectedCategory: string, productCategories: string[]): boolean {
+    console.log(`[CATEGORY RELEVANCE] Checking if expected "${expectedCategory}" matches product categories: [${productCategories.join(', ')}]`);
+    
+    // Check for exact category matches (case-insensitive)
+    for (const category of productCategories) {
+      if (category.toLowerCase() === expectedCategory.toLowerCase()) {
+        console.log(`[CATEGORY RELEVANCE] EXACT MATCH: ${category} === ${expectedCategory}`);
+        return true;
+      }
+    }
+
+    // Check for partial matches and category group relationships
+    // Map expected categories to possible variations and related categories
+    const categoryMappings: Record<string, string[]> = {
+      // Exact leaf categories from categories.json
+      'Breads': ['Breads', 'Bakery & Bread'],
+      'Bagels & Muffins': ['Bagels & Muffins', 'Bakery & Bread'],
+      'Chicken': ['Chicken', 'Meat & Seafood'],
+      'Beef': ['Beef', 'Meat & Seafood'], 
+      'Fish & Seafood': ['Fish & Seafood', 'Meat & Seafood'],
+      'Bacon': ['Bacon', 'Meat & Seafood'],
+      'Milk': ['Milk', 'Dairy'],
+      'Cheese': ['Cheese', 'Dairy'],
+      'Eggs': ['Eggs', 'Dairy'],
+      'Yogurt': ['Yogurt', 'Dairy'],
+      'Butter & Margarine': ['Butter & Margarine', 'Dairy'],
+      'Fresh Vegetables': ['Fresh Vegetables', 'Produce'],
+      'Fresh Fruit': ['Fresh Fruit', 'Produce'],
+      'Berries': ['Berries', 'Produce'],
+      'Organic Produce': ['Organic Produce', 'Produce'],
+      
+      // Also support broader category names
+      'Produce': ['Fresh Vegetables', 'Fresh Fruit', 'Berries', 'Organic Produce', 'Produce'],
+      'Meat': ['Chicken', 'Beef', 'Fish & Seafood', 'Bacon', 'Meat & Seafood'],
+      'Dairy': ['Milk', 'Cheese', 'Eggs', 'Yogurt', 'Butter & Margarine', 'Dairy'],
+      'Bakery': ['Breads', 'Bagels & Muffins', 'Bakery & Bread'],
+      'Frozen': ['Frozen Foods', 'Frozen Meals', 'Frozen Vegetables', 'Frozen Pizza', 'Ice Cream & Novelties']
+    };
+
+    const mappedCategories = categoryMappings[expectedCategory] || [];
+    console.log(`[CATEGORY RELEVANCE] Mapped categories for "${expectedCategory}": [${mappedCategories.join(', ')}]`);
+    
+    for (const mappedCategory of mappedCategories) {
+      for (const productCategory of productCategories) {
+        if (productCategory.toLowerCase() === mappedCategory.toLowerCase()) {
+          console.log(`[CATEGORY RELEVANCE] MAPPED MATCH: ${productCategory} matches mapped ${mappedCategory}`);
+          return true;
+        }
+        // Also check for partial matches
+        if (productCategory.toLowerCase().includes(mappedCategory.toLowerCase()) || 
+            mappedCategory.toLowerCase().includes(productCategory.toLowerCase())) {
+          console.log(`[CATEGORY RELEVANCE] PARTIAL MATCH: ${productCategory} partially matches ${mappedCategory}`);
+          return true;
+        }
+      }
+    }
+
+    console.log(`[CATEGORY RELEVANCE] NO MATCH: "${expectedCategory}" not relevant to [${productCategories.join(', ')}]`);
+    return false;
+  }
+
   async searchProductsByCategory(categoryName: string, searchTerm?: string, limit: number = 5) {
     let query = this.supabase
       .from('products')
@@ -76,7 +239,9 @@ class DatabaseHelpers {
         slug,
         product_categories!inner(
           category:categories!inner(
-            name
+            id,
+            name,
+            slug
           )
         )
       `)
@@ -101,6 +266,13 @@ class DatabaseHelpers {
         slug,
         brand:brands!inner(
           name
+        ),
+        product_categories(
+          category:categories(
+            id,
+            name,
+            slug
+          )
         )
       `)
       .eq('brand.name', brandName)
@@ -122,7 +294,7 @@ class DatabaseHelpers {
 
     if (error) {
       // Fallback to regular text search if fuzzy search fails
-      return this.searchProductsByName(searchTerm, limit);
+      return this.searchProductsByNameWithCategoryFilter(searchTerm, null, limit);
     }
     return data || [];
   }
@@ -368,6 +540,7 @@ async function matchSingleIngredient(
         }
       }
     },
+
     {
       type: "function" as const,
       function: {
@@ -440,9 +613,11 @@ async function matchSingleIngredient(
       Available synonyms: ${synonyms.join(', ')}
       Likely category: ${category || 'unknown'}
       
-      Try multiple search strategies:
-      1. Exact name search
-      2. Category-based search if exact fails
+      IMPORTANT: All searches now automatically use category-aware filtering to avoid incorrect matches (e.g., "bread" will not match "breaded chicken").
+      
+      Try these search strategies in order:
+      1. Name search (automatically category-filtered) - use search_products_by_name
+      2. Category-specific search within the expected category if name search fails
       3. Fuzzy search for typos/variants
       4. Brand-specific search if applicable
       
@@ -507,7 +682,8 @@ async function matchSingleIngredient(
 
     if (bestMatch) {
       // Determine confidence and reasoning
-      const { confidence, reason } = determineConfidence(ingredient.name, bestMatch.name);
+      const productCategories = bestMatch.product_categories?.map((pc: any) => pc.category?.name) || [];
+      const { confidence, reason } = determineConfidence(ingredient.name, bestMatch.name, productCategories);
       
       return {
         match: {
@@ -524,9 +700,10 @@ async function matchSingleIngredient(
             .map(alt => ({
               product_id: alt.id,
               product_name: alt.name,
-              confidence: determineConfidence(ingredient.name, alt.name).confidence
+              confidence: determineConfidence(ingredient.name, alt.name, alt.product_categories?.map((pc: any) => pc.category?.name) || []).confidence
             }))
-        }
+        },
+        ingredient: ingredient.name
       };
     }
 
@@ -546,6 +723,7 @@ async function executeToolCall(dbHelpers: DatabaseHelpers, toolCall: any) {
       case 'search_products_by_name':
         return await dbHelpers.searchProductsByName(parsedArgs.searchTerm, parsedArgs.limit);
       
+
       case 'search_products_by_category':
         return await dbHelpers.searchProductsByCategory(
           parsedArgs.categoryName, 
@@ -595,55 +773,222 @@ function getSynonyms(ingredient: string): string[] {
 
 function guessCategory(ingredient: string): string | null {
   const lowerIngredient = ingredient.toLowerCase();
+  console.log(`[GUESS CATEGORY] Analyzing ingredient: "${ingredient}"`);
   
+  // Use the updated mappings to exact category names from categories.json
+  if (lowerIngredient.includes('bread') && !lowerIngredient.includes('breaded')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Breads"`);
+    return 'Breads';
+  }
+  if (lowerIngredient.includes('chicken') && !lowerIngredient.includes('flavored')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Chicken"`);
+    return 'Chicken';
+  }
+  if (lowerIngredient.includes('cheese') && !lowerIngredient.includes('flavored')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Cheese"`);
+    return 'Cheese';
+  }
+  if (lowerIngredient.includes('lettuce') || lowerIngredient.includes('tomato') || lowerIngredient.includes('onion')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Fresh Vegetables"`);
+    return 'Fresh Vegetables';
+  }
+  if (lowerIngredient.includes('bacon')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Bacon"`);
+    return 'Bacon';
+  }
+  if (lowerIngredient.includes('ham') || lowerIngredient.includes('beef')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Beef"`);
+    return 'Beef';
+  }
+  if (lowerIngredient.includes('milk')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Milk"`);
+    return 'Milk';
+  }
+  if (lowerIngredient.includes('yogurt')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Yogurt"`);
+    return 'Yogurt';
+  }
+  if (lowerIngredient.includes('butter')) {
+    console.log(`[GUESS CATEGORY] "${ingredient}" -> "Butter & Margarine"`);
+    return 'Butter & Margarine';
+  }
+  
+  // Broader categories for the old INGREDIENT_CATEGORIES items
   for (const [category, items] of Object.entries(INGREDIENT_CATEGORIES)) {
     if (items.some(item => lowerIngredient.includes(item.toLowerCase()) || item.toLowerCase().includes(lowerIngredient))) {
+      console.log(`[GUESS CATEGORY] "${ingredient}" -> "${category}" (from legacy mapping)`);
       return category;
     }
   }
   
+  console.log(`[GUESS CATEGORY] "${ingredient}" -> null (no match)`);
   return null;
 }
 
-function determineConfidence(ingredient: string, productName: string): { confidence: 'high' | 'medium' | 'low', reason: string } {
+function determineConfidence(ingredient: string, productName: string, productCategories?: string[]): { confidence: 'high' | 'medium' | 'low', reason: string } {
   const ingredientLower = ingredient.toLowerCase();
   const productLower = productName.toLowerCase();
+  const expectedCategory = guessCategory(ingredient);
+  
+  console.log(`[CONFIDENCE] Determining confidence for "${ingredient}" -> "${productName}" (categories: [${(productCategories || []).join(', ')}])`);
+  
+  // Check for problematic cross-category matches
+  const isCrossCategoryMatch = checkForCrossCategoryMatch(ingredient, productName, productCategories);
+  console.log(`[CONFIDENCE] Cross-category match detected: ${isCrossCategoryMatch}`);
+  
+  let finalResult: { confidence: 'high' | 'medium' | 'low', reason: string };
   
   // Exact match
   if (ingredientLower === productLower) {
-    return { confidence: 'high', reason: 'Exact name match' };
+    finalResult = { confidence: 'high', reason: 'Exact name match' };
+    console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+    return finalResult;
   }
   
-  // Product name contains ingredient
+  // Product name contains ingredient - but check for false positives
   if (productLower.includes(ingredientLower)) {
-    return { confidence: 'high', reason: 'Product name contains ingredient' };
+    if (isCrossCategoryMatch) {
+      finalResult = { confidence: 'low', reason: `Contains ingredient but likely wrong category (${ingredient} vs ${productName})` };
+    } else {
+      finalResult = { confidence: 'high', reason: 'Product name contains ingredient' };
+    }
+    console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+    return finalResult;
   }
   
   // Ingredient contains product name (less common but possible)
   if (ingredientLower.includes(productLower)) {
-    return { confidence: 'medium', reason: 'Ingredient contains product name' };
+    finalResult = { confidence: 'medium', reason: 'Ingredient contains product name' };
+    console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+    return finalResult;
   }
   
   // Check for synonyms
   const synonyms = getSynonyms(ingredient);
   for (const synonym of synonyms) {
     if (productLower.includes(synonym.toLowerCase()) || synonym.toLowerCase().includes(productLower)) {
-      return { confidence: 'medium', reason: `Synonym match: ${synonym}` };
+      finalResult = { confidence: 'medium', reason: `Synonym match: ${synonym}` };
+      console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+      return finalResult;
     }
   }
   
-  // Partial word match
+  // Partial word match - be more careful about false positives
   const ingredientWords = ingredientLower.split(' ');
   const productWords = productLower.split(' ');
   const commonWords = ingredientWords.filter(word => 
+    word.length > 2 && // Ignore short words
     productWords.some(pWord => pWord.includes(word) || word.includes(pWord))
   );
   
   if (commonWords.length > 0) {
-    return { confidence: 'medium', reason: `Partial match: ${commonWords.join(', ')}` };
+    if (isCrossCategoryMatch) {
+      finalResult = { confidence: 'low', reason: `Partial match but likely wrong category: ${commonWords.join(', ')}` };
+    } else {
+      finalResult = { confidence: 'medium', reason: `Partial match: ${commonWords.join(', ')}` };
+    }
+    console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+    return finalResult;
   }
   
-  return { confidence: 'low', reason: 'Fuzzy match or category-based match' };
+  finalResult = { confidence: 'low', reason: 'Fuzzy match or category-based match' };
+  console.log(`[CONFIDENCE] Result: ${finalResult.confidence} - ${finalResult.reason}`);
+  return finalResult;
+}
+
+function checkForCrossCategoryMatch(ingredient: string, productName: string, productCategories?: string[]): boolean {
+  const expectedCategory = guessCategory(ingredient);
+  const ingredientLower = ingredient.toLowerCase();
+  const productLower = productName.toLowerCase();
+  const categories = productCategories || [];
+  
+  console.log(`[CROSS-CATEGORY CHECK] Ingredient: "${ingredient}" (expected: ${expectedCategory}) vs Product: "${productName}" (categories: [${categories.join(', ')}])`);
+  
+  // Known problematic patterns - using exact category names from categories.json
+  const problematicPatterns = [
+    // Bread vs Breaded/Battered items
+    { 
+      ingredient: 'bread', 
+      productPattern: /breaded|battered|crusted/, 
+      wrongCategories: ['Frozen Foods', 'Frozen Meals', 'Chicken', 'Beef', 'Fish & Seafood', 'Meat & Seafood'],
+      description: 'bread ingredient matched breaded/battered food'
+    },
+    // Chicken vs Chicken-flavored items
+    { 
+      ingredient: 'chicken', 
+      productPattern: /chicken.*(flavored|flavor|seasoning|ramen|soup|chips)/, 
+      wrongCategories: ['Pantry Staples', 'Snacks', 'Chips', 'Beverages', 'Condiments & Sauces'],
+      description: 'chicken ingredient matched chicken-flavored non-meat'
+    },
+    // Cheese vs Cheese-flavored snacks
+    { 
+      ingredient: 'cheese', 
+      productPattern: /cheese.*(flavored|flavor|puffs|crackers|chips|snacks)/, 
+      wrongCategories: ['Snacks', 'Chips', 'Crackers', 'Pantry Staples'],
+      description: 'cheese ingredient matched cheese-flavored snack'
+    },
+    // Vanilla vs Vanilla-flavored non-baking items
+    { 
+      ingredient: 'vanilla', 
+      productPattern: /vanilla.*(wafers|cookies|ice cream|yogurt)/, 
+      wrongCategories: ['Snacks', 'Cookies', 'Ice Cream & Novelties', 'Yogurt'],
+      description: 'vanilla extract matched vanilla-flavored food'
+    }
+  ];
+  
+  // Check against known problematic patterns
+  for (const pattern of problematicPatterns) {
+    if (ingredientLower.includes(pattern.ingredient) && pattern.productPattern.test(productLower)) {
+      console.log(`[CROSS-CATEGORY CHECK] Pattern match: "${pattern.ingredient}" + pattern in "${productName}"`);
+      
+      // Check if product is in wrong category
+      const hasWrongCategory = pattern.wrongCategories.some(wrongCat => 
+        categories.some(cat => cat.toLowerCase().includes(wrongCat.toLowerCase()) || wrongCat.toLowerCase().includes(cat.toLowerCase()))
+      );
+      
+      if (hasWrongCategory) {
+        console.log(`[CROSS-CATEGORY CHECK] ❌ CROSS-CATEGORY MATCH DETECTED: ${pattern.description}`);
+        return true;
+      }
+    }
+  }
+  
+  // Additional heuristic: check category mismatch for simple ingredients
+  if (expectedCategory && categories.length > 0) {
+    console.log(`[CROSS-CATEGORY CHECK] Checking category alignment: expected "${expectedCategory}" vs product categories [${categories.join(', ')}]`);
+    
+    // Map categories to broader groups
+    const categoryGroups: Record<string, string[]> = {
+      'Breads': ['Bakery & Bread', 'Breads', 'Bagels & Muffins'],
+      'Chicken': ['Meat & Seafood', 'Chicken', 'Bacon', 'Beef', 'Fish & Seafood'],
+      'Cheese': ['Dairy', 'Cheese', 'Milk', 'Yogurt', 'Butter & Margarine'],
+      'Fresh Vegetables': ['Produce', 'Fresh Vegetables', 'Fresh Fruit', 'Berries', 'Organic Produce'],
+      'Bacon': ['Meat & Seafood', 'Bacon', 'Chicken', 'Beef', 'Fish & Seafood']
+    };
+    
+    const expectedGroups = categoryGroups[expectedCategory] || [expectedCategory];
+    const isExpectedCategory = categories.some(cat => 
+      expectedGroups.some(expected => 
+        cat.toLowerCase().includes(expected.toLowerCase()) || expected.toLowerCase().includes(cat.toLowerCase())
+      )
+    );
+    
+    console.log(`[CROSS-CATEGORY CHECK] Category alignment: ${isExpectedCategory ? '✅ ALIGNED' : '❌ MISALIGNED'}`);
+    
+    if (!isExpectedCategory) {
+      // Simple ingredient name but complex product name from different category
+      const ingredientWords = ingredientLower.split(' ').filter(w => w.length > 2);
+      const productWords = productLower.split(' ').filter(w => w.length > 2);
+      
+      if (ingredientWords.length <= 2 && productWords.length >= 4) {
+        console.log(`[CROSS-CATEGORY CHECK] ❌ COMPLEX PRODUCT MISMATCH: simple ingredient "${ingredient}" vs complex product "${productName}"`);
+        return true;
+      }
+    }
+  }
+  
+  console.log(`[CROSS-CATEGORY CHECK] ✅ No cross-category issues detected`);
+  return false;
 }
 
 async function createBasket(supabase: any, userId: string, matches: ProductMatch[], summary: string): Promise<string> {
@@ -694,10 +1039,16 @@ async function createBasket(supabase: any, userId: string, matches: ProductMatch
       }
     }
 
+    // Ensure quantities are positive integers to satisfy the INTEGER column type in the database
+    const sanitizeQuantity = (qty: number | null | undefined): number => {
+      if (!qty || !Number.isFinite(qty)) return 1;
+      return Math.max(1, Math.round(qty));
+    };
+
     const basketItems = Object.entries(aggregated).map(([product_id, info]) => ({
       basket_id: basketData.id,
       product_id,
-      quantity: info.quantity,
+      quantity: sanitizeQuantity(info.quantity),
       notes: info.notes,
     }));
 
