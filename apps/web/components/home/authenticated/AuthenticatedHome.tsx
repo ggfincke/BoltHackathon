@@ -130,11 +130,7 @@ export default function AuthenticatedHome() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Left Column - Stats */}
         <div className="lg:col-span-1">
-          <UserStats 
-            trackedItems={userStats.trackedItems}
-            potentialSavings={userStats.potentialSavings}
-            avgDiscount={userStats.avgDiscount}
-          />
+          <UserStats />
           {/* <QuickActions /> */}
         </div>
 

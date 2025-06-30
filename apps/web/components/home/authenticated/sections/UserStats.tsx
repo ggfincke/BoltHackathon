@@ -45,7 +45,11 @@ export default function UserStats({
     try {
       setLoading(true);
       
-      // Count product trackings
+      let totalTrackedItems = 0;
+      // Map of product_id to total quantity (from basket items & trackings)
+      const productQuantities: Record<string, number> = {};
+      
+      // Count individual product trackings
       const { data: productTrackings, error: trackingError } = await supabase
         .from('product_trackings')
         .select('id, target_price, product_id')
@@ -53,76 +57,104 @@ export default function UserStats({
       
       if (trackingError) throw trackingError;
       
-      // Count basket trackings
-      const { data: basketTrackings, error: basketError } = await supabase
-        .from('basket_trackings')
-        .select('id, basket_id')
+      // Add individual product trackings to the count
+      totalTrackedItems += productTrackings?.length || 0;
+      
+      // Get baskets the user has access to (similar to other components)
+      const { data: userBaskets, error: basketUsersError } = await supabase
+        .from('basket_users')
+        .select('basket_id')
         .eq('user_id', user!.id);
       
-      if (basketError) throw basketError;
-      
-      // Calculate total tracked items
-      const totalTrackedItems = (productTrackings?.length || 0) + (basketTrackings?.length || 0);
-      setTrackedItems(totalTrackedItems);
-      
-      // Calculate potential savings
-      if (productTrackings && productTrackings.length > 0) {
-        let totalSavings = 0;
-        let totalDiscountPercent = 0;
-        let discountCount = 0;
-        
-        // Get current prices for products with target prices
-        const productIds = productTrackings
-          .filter(pt => pt.target_price !== null)
-          .map(pt => pt.product_id);
-        
-        if (productIds.length > 0) {
-          const { data: listings, error: listingsError } = await supabase
-            .from('listings')
-            .select('product_id, price')
-            .in('product_id', productIds)
-            .order('price', { ascending: true });
+      if (basketUsersError) {
+        console.error('UserStats - basketUsersError:', basketUsersError);
+      } else if (userBaskets && userBaskets.length > 0) {
+        // Filter out null basket_ids
+        const basketIds = userBaskets
+          .map(bu => bu.basket_id)
+          .filter((id): id is string => id !== null);
           
-          if (!listingsError && listings) {
-            // Group listings by product_id to get lowest price per product
-            const lowestPriceByProduct: Record<string, number> = {};
-            listings.forEach(listing => {
-              if (listing.price !== null) {
-                if (!lowestPriceByProduct[listing.product_id] || listing.price < lowestPriceByProduct[listing.product_id]) {
-                  lowestPriceByProduct[listing.product_id] = listing.price;
-                }
+        if (basketIds.length > 0) {
+          // Get all basket items for these baskets
+          const { data: basketItems, error: basketItemsError } = await supabase
+            .from('basket_items')
+            .select('quantity, product_id')
+            .in('basket_id', basketIds);
+          
+          if (basketItemsError) {
+            console.error('UserStats - basketItemsError:', basketItemsError);
+          } else {
+            // Build a map of product quantities from basket items
+            basketItems?.forEach(item => {
+              const qty = item.quantity || 1;
+              if (productQuantities[item.product_id]) {
+                productQuantities[item.product_id] += qty;
+              } else {
+                productQuantities[item.product_id] = qty;
               }
             });
-            
-            // Calculate savings and discounts
-            productTrackings
-              .filter(pt => pt.target_price !== null)
-              .forEach(pt => {
-                const currentPrice = lowestPriceByProduct[pt.product_id];
-                if (currentPrice && pt.target_price) {
-                  if (currentPrice > pt.target_price) {
-                    // Potential savings if price drops to target
-                    totalSavings += (currentPrice - pt.target_price);
-                    
-                    // Calculate discount percentage
-                    const discountPercent = ((currentPrice - pt.target_price) / currentPrice) * 100;
-                    totalDiscountPercent += discountPercent;
-                    discountCount++;
-                  }
-                }
-              });
+
+            // Also add these quantities to the tracked item count
+            const basketItemsCount = basketItems?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0;
+            totalTrackedItems += basketItemsCount;
           }
         }
-        
-        // Set potential savings (rounded to 2 decimal places)
-        setPotentialSavings(Math.round(totalSavings * 100) / 100);
-        
-        // Set average discount percentage (rounded to nearest integer)
-        setAvgDiscount(discountCount > 0 ? Math.round(totalDiscountPercent / discountCount) : 0);
-      } else {
-        setPotentialSavings(0);
-        setAvgDiscount(0);
       }
+      
+      // Include product trackings (quantity 1 each)
+      productTrackings?.forEach(pt => {
+        if (productQuantities[pt.product_id]) {
+          productQuantities[pt.product_id] += 1;
+        } else {
+          productQuantities[pt.product_id] = 1;
+        }
+      });
+
+      const productIdsForPricing = Object.keys(productQuantities);
+
+      let totalSavings = 0;
+      let totalDiscountPercent = 0;
+      let discountCount = 0;
+
+      if (productIdsForPricing.length > 0) {
+        const { data: listings, error: listingsError } = await supabase
+          .from('listings')
+          .select('product_id, price')
+          .in('product_id', productIdsForPricing)
+          .order('price', { ascending: true });
+
+        if (!listingsError && listings) {
+          // Group listings prices per product
+          const priceRangeByProduct: Record<string, { min: number; max: number }> = {};
+
+          listings.forEach(listing => {
+            if (listing.price === null) return;
+            const pid = listing.product_id as string;
+            if (!priceRangeByProduct[pid]) {
+              priceRangeByProduct[pid] = { min: listing.price, max: listing.price };
+            } else {
+              const range = priceRangeByProduct[pid];
+              if (listing.price < range.min) range.min = listing.price;
+              if (listing.price > range.max) range.max = listing.price;
+            }
+          });
+
+          Object.entries(priceRangeByProduct).forEach(([pid, range]) => {
+            const diff = range.max - range.min;
+            if (diff > 0) {
+              const qty = productQuantities[pid] || 1;
+              totalSavings += diff * qty;
+              const percent = (diff / range.max) * 100;
+              totalDiscountPercent += percent;
+              discountCount++;
+            }
+          });
+        }
+      }
+
+      setTrackedItems(totalTrackedItems);
+      setPotentialSavings(Math.round(totalSavings * 100) / 100);
+      setAvgDiscount(discountCount > 0 ? Math.round(totalDiscountPercent / discountCount) : 0);
     } catch (error) {
       console.error('Error fetching user stats:', error);
       // Set default values on error
