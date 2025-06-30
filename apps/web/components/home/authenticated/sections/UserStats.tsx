@@ -49,17 +49,7 @@ export default function UserStats({
       // Map of product_id to total quantity (from basket items & trackings)
       const productQuantities: Record<string, number> = {};
       
-      // Count individual product trackings
-
-      const { data: productTrackings, error: trackingError } = await supabase
-        .from('product_trackings')
-        .select('id, target_price, product_id')
-        .eq('user_id', user!.id);
-      
-      if (trackingError) throw trackingError;
-      
-      // Add individual product trackings to the count
-      totalTrackedItems += productTrackings?.length || 0;
+      // Product tracking has been disabled - focusing only on basket items
       
       // Get baskets the user has access to (similar to other components)
       const { data: userBaskets, error: basketUsersError } = await supabase
@@ -102,14 +92,7 @@ export default function UserStats({
         }
       }
       
-      // Include product trackings (quantity 1 each)
-      productTrackings?.forEach(pt => {
-        if (productQuantities[pt.product_id]) {
-          productQuantities[pt.product_id] += 1;
-        } else {
-          productQuantities[pt.product_id] = 1;
-        }
-      });
+      // Product tracking disabled - only counting basket items
 
       const productIdsForPricing = Object.keys(productQuantities);
 
@@ -169,8 +152,8 @@ export default function UserStats({
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6 h-full flex flex-col">
-      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+    <div className="bg-surface rounded-lg shadow-sm p-4 h-full flex flex-col">
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
         Your Stats
       </h2>
       {loading ? (
@@ -190,7 +173,7 @@ export default function UserStats({
               {trackedItems}
             </p>
             <p className="text-sm opacity-80 mt-1" style={{ color: 'var(--text)' }}>
-              {trackedItems === 1 ? 'Tracked Item' : 'Tracked Items'}
+              {trackedItems === 1 ? 'Basket Item' : 'Basket Items'}
             </p>
           </div>
 

@@ -285,6 +285,11 @@ export default function BasketDetail() {
       
       // Refresh basket items
       fetchBasketDetails();
+      
+      // Dispatch event so components like the Sidebar refresh their basket lists
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('basketUpdated'));
+      }
     } catch (error) {
       console.error('Error updating basket item:', error);
     }
@@ -301,6 +306,11 @@ export default function BasketDetail() {
       
       // Refresh basket items
       fetchBasketDetails();
+      
+      // Dispatch event so components like the Sidebar refresh their basket lists
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('basketUpdated'));
+      }
     } catch (error) {
       console.error('Error removing basket item:', error);
     }
@@ -335,8 +345,51 @@ export default function BasketDetail() {
       
       // Refresh basket items
       fetchBasketDetails();
+      
+      // Dispatch event so components like the Sidebar refresh their basket lists
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('basketUpdated'));
+      }
     } catch (error) {
       console.error('Error adding item to basket:', error);
+    }
+  };
+
+  const handleReplaceProduct = async (itemId: string, newProductId: string) => {
+    try {
+      // Get current price for the new product
+      const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select('price')
+        .eq('product_id', newProductId)
+        .order('price', { ascending: true })
+        .limit(1);
+      
+      if (listingsError) throw listingsError;
+      
+      const currentPrice = listings?.[0]?.price || null;
+      
+      // Update the basket item with the new product
+      const { error } = await supabase
+        .from('basket_items')
+        .update({
+          product_id: newProductId,
+          price_at_add: currentPrice,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', itemId);
+      
+      if (error) throw error;
+      
+      // Refresh basket items
+      fetchBasketDetails();
+      
+      // Dispatch event so components like the Sidebar refresh their basket lists
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('basketUpdated'));
+      }
+    } catch (error) {
+      console.error('Error replacing product:', error);
     }
   };
   
@@ -467,6 +520,7 @@ export default function BasketDetail() {
         canEdit={canEdit}
         onUpdateItem={handleUpdateItem}
         onRemoveItem={handleRemoveItem}
+        onReplaceProduct={handleReplaceProduct}
       />
       
       {/* Modals */}

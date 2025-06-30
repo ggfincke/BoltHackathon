@@ -106,24 +106,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
         basketItems = [];
       }
       
-      // Get user's tracked products to find popular categories
-      const { data: trackedProducts, error: trackingError } = await supabase
-        .from('product_trackings')
-        .select(`
-          product_id,
-          products:products(
-            product_categories(
-              category:categories(
-                id,
-                name,
-                slug
-              )
-            )
-          )
-        `)
-        .eq('user_id', user.id);
-      
-      if (trackingError) throw trackingError;
+      // Product tracking has been disabled - focusing only on basket items
       
       // Combine and count categories
       const categoryCounts: Record<string, { name: string; slug: string; count: number }> = {};
@@ -148,26 +131,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
         });
       }
       
-      // Process tracked products
-      if (trackedProducts) {
-        (trackedProducts as any[]).forEach((item: any) => {
-          const productCategories = item.products?.product_categories || [];
-          productCategories.forEach((pc: any) => {
-
-            const category = pc.category;
-            if (category) {
-              if (!categoryCounts[category.id]) {
-                categoryCounts[category.id] = {
-                  name: category.name,
-                  slug: category.slug,
-                  count: 0
-                };
-              }
-              categoryCounts[category.id].count += 1;
-            }
-          });
-        });
-      }
+      // Product tracking disabled - only counting basket item categories
       
       // Convert to array and sort by count, but don't slice yet – we will ensure exactly six later.
       const sortedCategories = Object.values(categoryCounts).sort((a, b) => b.count - a.count);
@@ -186,8 +150,8 @@ export default function PopularCategories({ categories: propCategories }: Popula
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+    <div className="bg-surface rounded-lg shadow-sm p-4">
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
         Your Popular Categories
       </h2>
       {loading ? (
@@ -210,14 +174,12 @@ export default function PopularCategories({ categories: propCategories }: Popula
               <span className="text-sm font-medium text-center" style={{ color: 'var(--text)' }}>
                 {category.name}
               </span>
-              {category.count > 0 && (
-                <span
-                  className="text-xs px-2 py-1 rounded-full mt-1"
-                  style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
-                >
-                  {category.count} items
-                </span>
-              )}
+              <span
+                className={`text-xs px-2 py-1 rounded-full mt-1 ${category.count > 0 ? 'opacity-100' : 'opacity-0'}`}
+                style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
+              >
+                {category.count > 0 ? `${category.count} items` : '0 items'}
+              </span>
 
             </Link>
           ))}

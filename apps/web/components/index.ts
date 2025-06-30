@@ -26,7 +26,7 @@ export { default as LandingPage } from './home/landing/LandingPage';
 export { default as ProductCard } from './product/ProductCard';
 export { default as ProductFilters } from './product/ProductFilters';
 export { default as ProductGrid } from './product/ProductGrid';
-export { default as ProductTrackingForm } from './product/ProductTrackingForm';
+// export { default as ProductTrackingForm } from './product/ProductTrackingForm'; // Disabled - focusing only on basket notifications
 export { default as PriceComparisonTable } from './product/PriceComparisonTable';
 export { default as PriceHistoryChart } from './product/PriceHistoryChart';
 
