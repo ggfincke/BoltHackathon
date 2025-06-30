@@ -106,24 +106,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
         basketItems = [];
       }
       
-      // Get user's tracked products to find popular categories
-      const { data: trackedProducts, error: trackingError } = await supabase
-        .from('product_trackings')
-        .select(`
-          product_id,
-          products:products(
-            product_categories(
-              category:categories(
-                id,
-                name,
-                slug
-              )
-            )
-          )
-        `)
-        .eq('user_id', user.id);
-      
-      if (trackingError) throw trackingError;
+      // Product tracking has been disabled - focusing only on basket items
       
       // Combine and count categories
       const categoryCounts: Record<string, { name: string; slug: string; count: number }> = {};
@@ -148,26 +131,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
         });
       }
       
-      // Process tracked products
-      if (trackedProducts) {
-        (trackedProducts as any[]).forEach((item: any) => {
-          const productCategories = item.products?.product_categories || [];
-          productCategories.forEach((pc: any) => {
-
-            const category = pc.category;
-            if (category) {
-              if (!categoryCounts[category.id]) {
-                categoryCounts[category.id] = {
-                  name: category.name,
-                  slug: category.slug,
-                  count: 0
-                };
-              }
-              categoryCounts[category.id].count += 1;
-            }
-          });
-        });
-      }
+      // Product tracking disabled - only counting basket item categories
       
       // Convert to array and sort by count, but don't slice yet – we will ensure exactly six later.
       const sortedCategories = Object.values(categoryCounts).sort((a, b) => b.count - a.count);

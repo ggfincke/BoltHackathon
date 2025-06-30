@@ -126,16 +126,10 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
       }
       
       /* ------------------------------------------------------------------
-       * 👤 User-specific deals (tracked products & basket items)
+       * 👤 User-specific deals (basket items only)
        * ------------------------------------------------------------------*/
       try {
-        // Fetch product IDs the user is tracking
-        const { data: trackedRows, error: trackedErr } = await supabase
-          .from('product_trackings')
-          .select('product_id');
-        if (trackedErr) {
-          console.error('Error fetching product trackings:', trackedErr);
-        }
+        // Product tracking has been disabled - focusing only on basket items
 
         // Fetch product IDs from the user's basket items (policies ensure user-specific data)
         const { data: basketRows, error: basketErr } = await supabase
@@ -145,9 +139,8 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
           console.error('Error fetching basket items:', basketErr);
         }
 
-        // Merge and deduplicate IDs
+        // Use only basket item IDs since product tracking is disabled
         const trackedIds = [
-          ...(trackedRows?.map((r: { product_id: string }) => r.product_id) ?? []),
           ...(basketRows?.map((r: { product_id: string }) => r.product_id) ?? []),
         ];
         trackedProductIdSet = new Set(trackedIds);
@@ -172,7 +165,7 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
             `)
             .in('id', Array.from(trackedProductIdSet));
 
-          // console.log(`📥 Tracked/basket products fetched: ${trackedProducts?.length || 0}`);
+          // console.log(`📥 Basket products fetched: ${trackedProducts?.length || 0}`);
 
           if (!trackedProductsErr && trackedProducts) {
             const trackedDeals = trackedProducts
@@ -210,11 +203,11 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
               })
               .filter(Boolean) as BestDeal[];
 
-            // console.log(`🎯 Tracked/basket deals found: ${trackedDeals.length}`);
+            // console.log(`🎯 Basket deals found: ${trackedDeals.length}`);
 
             combinedDeals = [...combinedDeals, ...trackedDeals];
           } else if (trackedProductsErr) {
-            console.error('Error fetching tracked product details:', trackedProductsErr);
+            console.error('Error fetching basket product details:', trackedProductsErr);
           }
         }
       } catch (err) {
@@ -335,7 +328,7 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
       
       // console.log(`🔄 After deduplication: ${uniqueDeals.length} deals`);
       
-      // Sort so that user-interested (tracked/basket) deals appear first, then by savings percent
+      // Sort so that user-interested (basket) deals appear first, then by savings percent
       uniqueDeals.sort((a, b) => {
         const aTracked = trackedProductIdSet.has(a.id);
         const bTracked = trackedProductIdSet.has(b.id);

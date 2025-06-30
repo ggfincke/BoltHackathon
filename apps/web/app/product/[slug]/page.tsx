@@ -7,7 +7,7 @@ import { useAuth } from '~/lib/auth';
 import Breadcrumbs from '~/components/layout/Breadcrumbs';
 import PriceHistoryChart from '~/components/product/PriceHistoryChart';
 import PriceComparisonTable from '~/components/product/PriceComparisonTable';
-import ProductTrackingForm from '~/components/product/ProductTrackingForm';
+// import ProductTrackingForm from '~/components/product/ProductTrackingForm'; // Disabled for now - focusing only on basket notifications
 import AddToBasketModal from '~/components/shared/AddToBasketModal';
 
 type Product = {
@@ -60,13 +60,13 @@ type Product = {
   }[];
 };
 
-type TrackingPreferences = {
-  id?: string;
-  target_price: number | null;
-  notify_on_price_drop: boolean;
-  notify_on_availability: boolean;
-  notify_on_changes: boolean;
-};
+// type TrackingPreferences = {
+//   id?: string;
+//   target_price: number | null;
+//   notify_on_price_drop: boolean;
+//   notify_on_availability: boolean;
+//   notify_on_changes: boolean;
+// }; // Disabled - focusing only on basket notifications
 
 export default function ProductPage() {
   const params = useParams();
@@ -74,14 +74,15 @@ export default function ProductPage() {
   const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [trackingPreferences, setTrackingPreferences] = useState<TrackingPreferences>({
-    target_price: null,
-    notify_on_price_drop: true,
-    notify_on_availability: true,
-    notify_on_changes: true
-  });
-  const [isTracking, setIsTracking] = useState(false);
-  const [savingTracking, setSavingTracking] = useState(false);
+  // const [trackingPreferences, setTrackingPreferences] = useState<TrackingPreferences>({
+  //   target_price: null,
+  //   notify_on_price_drop: true,
+  //   notify_on_availability: true,
+  //   notify_on_changes: true
+  // });
+  // const [isTracking, setIsTracking] = useState(false);
+  // const [savingTracking, setSavingTracking] = useState(false);
+  // Disabled - focusing only on basket notifications
   const [breadcrumbs, setBreadcrumbs] = useState<{name: string, slug: string}[]>([]);
   const [isAddToBasketModalOpen, setIsAddToBasketModalOpen] = useState(false);
 
@@ -220,26 +221,7 @@ export default function ProductPage() {
           }
         }
 
-        // If user is logged in, check if they're already tracking this product
-        if (user && data) {
-          const { data: trackingData, error: trackingError } = await supabase
-            .from('product_trackings')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('product_id', data.id)
-            .single();
-
-          if (!trackingError && trackingData) {
-            setIsTracking(true);
-            setTrackingPreferences({
-              id: trackingData.id,
-              target_price: trackingData.target_price,
-              notify_on_price_drop: trackingData.notify_on_price_drop ?? false,
-              notify_on_availability: trackingData.notify_on_availability ?? false,
-              notify_on_changes: trackingData.notify_on_changes ?? false
-            });
-          }
-        }
+        // Product tracking has been disabled - focusing only on basket notifications
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -252,45 +234,7 @@ export default function ProductPage() {
     }
   }, [params.slug, user]);
 
-  const handleTrackingSubmit = async (preferences: TrackingPreferences) => {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-
-    if (!product) return;
-
-    setSavingTracking(true);
-    try {
-      // Use UPSERT to handle both insert and update cases
-      const { error } = await supabase
-        .from('product_trackings')
-        .upsert({
-          user_id: user.id,
-          product_id: product.id,
-          target_price: preferences.target_price,
-          notify_on_price_drop: preferences.notify_on_price_drop,
-          notify_on_availability: preferences.notify_on_availability,
-          notify_on_changes: preferences.notify_on_changes
-        }, {
-          onConflict: 'user_id,product_id'
-        });
-
-      if (error) throw error;
-      setIsTracking(true);
-    } catch (error: any) {
-      console.error('Error saving tracking preferences:', error);
-      console.error('Full error object:', JSON.stringify(error, null, 2));
-      console.error('Error details:', {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint
-      });
-    } finally {
-      setSavingTracking(false);
-    }
-  };
+  // Product tracking functionality disabled - focusing only on basket notifications
 
   if (loading) {
     return (
@@ -360,29 +304,14 @@ export default function ProductPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Product Image */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="card-enhanced bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover-lift">
+        <div className="lg:col-span-1">
+          <div className="card-enhanced bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
             <img 
               src={mainImageUrl} 
               alt={product.name}
               className="w-full h-auto object-contain aspect-square"
             />
           </div>
-          
-          {/* Price History Chart - moved under product image */}
-          {product.price_histories && product.price_histories.length > 0 && (
-            <div className="animate-fade-in-up delay-300">
-              <div className="flex items-center mb-4">
-                <svg className="w-5 h-5 mr-2" style={{ color: 'var(--secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <h3 className="text-lg font-semibold">Price History</h3>
-              </div>
-              <div className="card-enhanced bg-surface p-6 rounded-lg shadow-sm">
-                <PriceHistoryChart priceHistories={product.price_histories} />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Product Info */}
@@ -395,7 +324,7 @@ export default function ProductPage() {
                 <a 
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="px-3 py-1 rounded-full text-sm font-medium transition-all hover-lift"
+                  className="px-3 py-1 rounded-full text-sm font-medium transition-colors hover:opacity-80"
                   style={{ 
                     background: 'var(--accent)',
                     color: 'var(--light-text)'
@@ -447,7 +376,7 @@ export default function ProductPage() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Best Price Section */}
               {bestListing && (
-                <div className="p-6 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+                <div className="p-6 rounded-xl" style={{ background: 'var(--background)' }}>
                   <div className="flex items-baseline mb-2">
                     <span className="text-4xl font-bold" style={{ color: 'var(--primary)' }}>
                       ${bestListing.price?.toFixed(2)}
@@ -472,7 +401,7 @@ export default function ProductPage() {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={() => setIsAddToBasketModalOpen(true)}
-                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover-lift"
+                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2"
                       style={{ 
                         background: 'var(--primary)',
                         color: 'var(--dark-text)'
@@ -487,7 +416,7 @@ export default function ProductPage() {
                       href={bestListing.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover-lift"
+                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2"
                       style={{ 
                         background: 'var(--secondary)',
                         color: 'var(--light-text)'
@@ -503,7 +432,7 @@ export default function ProductPage() {
               )}
 
               {/* Price Comparison Section */}
-              <div className="p-6 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+              <div className="p-6 rounded-xl" style={{ background: 'var(--background)' }}>
                 <div className="flex items-center mb-4">
                   <svg className="w-5 h-5 mr-2" style={{ color: 'var(--primary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -520,12 +449,21 @@ export default function ProductPage() {
                       return (a.price || 0) - (b.price || 0);
                     })
                     .map((listing, index) => (
-                      <div key={listing.id} className={`flex items-center justify-between p-3 rounded-lg ${index === 0 ? 'bg-success-bg border border-primary' : 'bg-hover'}`}>
+                      <a 
+                        key={listing.id} 
+                        href={listing.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${index === 0 ? 'bg-success-bg border border-primary hover:bg-success-bg-hover' : 'bg-hover hover:bg-hover-intense'}`}
+                      >
                         <div className="flex items-center">
                           <div className="text-sm font-medium mr-2">{listing.retailer.name}</div>
                           {index === 0 && (
                             <span className="text-xs px-2 py-1 rounded-full bg-primary text-dark-text font-medium">Best</span>
                           )}
+                          <svg className="w-3 h-3 ml-2 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className="font-bold">${listing.price?.toFixed(2)}</span>
@@ -533,7 +471,7 @@ export default function ProductPage() {
                             {listing.in_stock ? 'In Stock' : 'Out'}
                           </span>
                         </div>
-                      </div>
+                      </a>
                     ))
                   }
                 </div>
@@ -541,25 +479,24 @@ export default function ProductPage() {
             </div>
           </div>
           
-          {/* Price Tracking Form */}
-          <div className="card-enhanced bg-surface p-8 rounded-lg shadow-sm animate-fade-in-up delay-100">
-            <div className="flex items-center mb-6">
-              <svg className="w-6 h-6 mr-3" style={{ color: 'var(--accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9.86 1.86L11 3l-1.14 1.14a4 4 0 000 5.66L11 11l-1.14 1.14a4 4 0 000 5.66L11 19l-1.14 1.14a4 4 0 01-5.66 0L3 19l1.14-1.14a4 4 0 010-5.66L3 11l1.14-1.14a4 4 0 010-5.66L3 3l1.14-1.14a4 4 0 015.66 0z" />
-              </svg>
-              <h2 className="text-xl font-semibold">Track This Product</h2>
-            </div>
-            <ProductTrackingForm 
-              isTracking={isTracking}
-              preferences={trackingPreferences}
-              onSubmit={handleTrackingSubmit}
-              isLoading={savingTracking}
-              isLoggedIn={!!user}
-              currentPrice={bestListing?.price || null}
-            />
-          </div>
+          {/* Product tracking has been disabled - focusing only on basket notifications */}
         </div>
       </div>
+
+      {/* Price History Chart - Full Width at Bottom */}
+      {product.price_histories && product.price_histories.length > 0 && (
+        <div className="mt-8 animate-fade-in-up delay-300">
+          <div className="flex items-center mb-6">
+            <svg className="w-6 h-6 mr-3" style={{ color: 'var(--secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h2 className="text-2xl font-bold">Price History</h2>
+          </div>
+          <div className="card-enhanced bg-surface p-8 rounded-lg shadow-sm">
+            <PriceHistoryChart priceHistories={product.price_histories} />
+          </div>
+        </div>
+      )}
 
       {/* Add to Basket Modal */}
       <AddToBasketModal

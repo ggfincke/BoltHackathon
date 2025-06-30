@@ -1287,8 +1287,8 @@ a.bg-primary,
   border-radius: 0.75rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 100%;
-  max-width: 64rem;
-  max-height: 90vh;
+  max-width: 70rem;
+  max-height: 98vh;
   overflow: hidden;
 }
 
@@ -1970,6 +1970,29 @@ a.bg-primary,
   transition: none !important;
 }
 
+/* AI Gradient Button Styles */
+.ai-gradient-button {
+  position: relative;
+  border: 2px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, 
+              linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
+}
+
+.ai-gradient-button svg {
+  stroke: var(--primary);
+  filter: hue-rotate(45deg); 
+}
+
+/* Removed color change on hover */
+/*
+.ai-gradient-button:hover svg {
+  stroke: var(--secondary);
+}
+*/
+.ai-gradient-button:hover {
+  transform: translateY(-2px);
+}
+
 /* Basket Popup Styles - IMPROVED BACKGROUND */
 .basket-popup {
   position: fixed;
@@ -1987,8 +2010,8 @@ a.bg-primary,
 /* Ensure proper background for basket popup content */
 .basket-popup > div {
   background: var(--background);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(0.5px);
+  -webkit-backdrop-filter: blur(0.5px);
 }
 
 /* Ensure proper background for basket popup dropdown */
@@ -2020,9 +2043,9 @@ a.bg-primary,
 
 /* Product detail overlay improvements */
 .product-overlay {
-  background-color: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(0.5px);
+  -webkit-backdrop-filter: blur(0.5px);
 }
 
 .product-overlay-content {

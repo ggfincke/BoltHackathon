@@ -25,17 +25,17 @@ interface PriceHistoryChartProps {
   priceHistories: PriceHistory[];
 }
 
-// Generate a color based on retailer name for consistent colors
+// Generate a color based on retailer name for consistent colors that work in both modes
 const getRetailerColor = (retailerName: string): string => {
   const colors = [
+    '#85d1e7', // primary
+    '#c65b82', // secondary  
+    '#6f506f', // accent
     '#4299E1', // blue
     '#48BB78', // green
     '#ED8936', // orange
     '#9F7AEA', // purple
-    '#F56565', // red
-    '#38B2AC', // teal
-    '#ED64A6', // pink
-    '#ECC94B'  // yellow
+    '#38B2AC'  // teal
   ];
   
   // Simple hash function to get consistent color for same retailer
@@ -79,7 +79,7 @@ export default function PriceHistoryChart({ priceHistories }: PriceHistoryChartP
   
   if (priceHistories.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
         No price history data available
       </div>
     );
@@ -92,23 +92,33 @@ export default function PriceHistoryChart({ priceHistories }: PriceHistoryChartP
           data={chartData.data}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
           <XAxis 
             dataKey="date" 
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: 'var(--text)' }}
             tickMargin={10}
+            stroke="var(--text)"
           />
           <YAxis 
             tickFormatter={(value) => `$${value}`}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: 'var(--text)' }}
             tickMargin={10}
             domain={['dataMin - 5', 'dataMax + 5']}
+            stroke="var(--text)"
           />
           <Tooltip 
             formatter={(value) => [`$${value}`, 'Price']}
             labelFormatter={(label) => `Date: ${label}`}
+            contentStyle={{
+              backgroundColor: 'var(--background)',
+              border: '1px solid var(--border-primary)',
+              borderRadius: '8px',
+              color: 'var(--text)'
+            }}
           />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ color: 'var(--text)' }}
+          />
           {chartData.retailers.map(retailer => (
             <Line
               key={retailer}
@@ -116,7 +126,7 @@ export default function PriceHistoryChart({ priceHistories }: PriceHistoryChartP
               dataKey={retailer}
               name={retailer}
               stroke={getRetailerColor(retailer)}
-              activeDot={{ r: 8 }}
+              activeDot={{ r: 8, fill: getRetailerColor(retailer) }}
               strokeWidth={2}
               connectNulls
             />

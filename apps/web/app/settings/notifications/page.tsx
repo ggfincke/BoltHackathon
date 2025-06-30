@@ -8,7 +8,7 @@ import { useAuth } from '~/lib/auth';
 type NotificationPreference = {
   id: string;
   user_id: string;
-  notification_type: 'price_drop' | 'availability' | 'changes' | 'general';
+  notification_type: 'basket_updates' | 'general';
   channel: 'email' | 'push' | 'sms';
   is_enabled: boolean;
   created_at: string;
@@ -26,32 +26,12 @@ export default function NotificationSettings() {
 
   const notificationTypes = [
     { 
-      id: 'price_drop', 
-      label: 'Price Drops', 
-      description: 'Get notified when prices drop for tracked products',
+      id: 'basket_updates', 
+      label: 'Basket Updates', 
+      description: 'Get notified about changes to your baskets and basket items',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-        </svg>
-      )
-    },
-    { 
-      id: 'availability', 
-      label: 'Availability', 
-      description: 'Get notified when out-of-stock products become available',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      )
-    },
-    { 
-      id: 'changes', 
-      label: 'Product Changes', 
-      description: 'Get notified about changes to products you track',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v4a2 2 0 01-2 2H9a2 2 0 01-2-2v-4m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
         </svg>
       )
     },
@@ -166,7 +146,7 @@ export default function NotificationSettings() {
         for (const channel of notificationChannels) {
           defaultPreferences.push({
             user_id: user.id,
-            notification_type: type.id as 'price_drop' | 'availability' | 'changes' | 'general',
+            notification_type: type.id as 'basket_updates' | 'general',
             channel: channel.id as 'email' | 'push' | 'sms',
             is_enabled: channel.id === 'email'
           });
@@ -244,7 +224,7 @@ export default function NotificationSettings() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Notification Settings</h1>
-        <p className="text-muted">Choose how and when you want to be notified about your tracked products and baskets.</p>
+        <p className="text-muted">Choose how and when you want to be notified about your baskets and general updates.</p>
       </div>
       
       {message && (

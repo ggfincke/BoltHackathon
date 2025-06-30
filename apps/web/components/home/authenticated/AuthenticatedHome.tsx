@@ -32,13 +32,7 @@ export default function AuthenticatedHome() {
     try {
       setLoading(true);
       
-      // Count product trackings
-      const { data: productTrackings, error: trackingError } = await supabase
-        .from('product_trackings')
-        .select('id, target_price, product_id')
-        .eq('user_id', user!.id);
-      
-      if (trackingError) throw trackingError;
+      // Product tracking has been disabled - focusing only on basket notifications
       
       // Count basket trackings
       const { data: basketTrackings, error: basketError } = await supabase
@@ -48,58 +42,15 @@ export default function AuthenticatedHome() {
       
       if (basketError) throw basketError;
       
-      // Calculate total tracked items
-      const totalTrackedItems = (productTrackings?.length || 0) + (basketTrackings?.length || 0);
+      // Calculate total tracked items (basket trackings only)
+      const totalTrackedItems = basketTrackings?.length || 0;
       
       // Calculate potential savings
       let potentialSavings = 0;
       let totalDiscountPercent = 0;
       let discountCount = 0;
       
-      if (productTrackings && productTrackings.length > 0) {
-        // Get current prices for products with target prices
-        const productIds = productTrackings
-          .filter(pt => pt.target_price !== null)
-          .map(pt => pt.product_id);
-        
-        if (productIds.length > 0) {
-          const { data: listings, error: listingsError } = await supabase
-            .from('listings')
-            .select('product_id, price')
-            .in('product_id', productIds)
-            .order('price', { ascending: true });
-          
-          if (!listingsError && listings) {
-            // Group listings by product_id to get lowest price per product
-            const lowestPriceByProduct: Record<string, number> = {};
-            listings.forEach(listing => {
-              if (listing.price !== null) {
-                if (!lowestPriceByProduct[listing.product_id] || listing.price < lowestPriceByProduct[listing.product_id]) {
-                  lowestPriceByProduct[listing.product_id] = listing.price;
-                }
-              }
-            });
-            
-            // Calculate savings and discounts
-            productTrackings
-              .filter(pt => pt.target_price !== null)
-              .forEach(pt => {
-                const currentPrice = lowestPriceByProduct[pt.product_id];
-                if (currentPrice && pt.target_price) {
-                  if (currentPrice > pt.target_price) {
-                    // Potential savings if price drops to target
-                    potentialSavings += (currentPrice - pt.target_price);
-                    
-                    // Calculate discount percentage
-                    const discountPercent = ((currentPrice - pt.target_price) / currentPrice) * 100;
-                    totalDiscountPercent += discountPercent;
-                    discountCount++;
-                  }
-                }
-              });
-          }
-        }
-      }
+      // Product tracking disabled - potential savings calculation would come from basket items price differences
       
       // Set user stats
       setUserStats({
