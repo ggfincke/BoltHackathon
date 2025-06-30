@@ -212,7 +212,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     >
       <div className="flex flex-col h-full">
         {/* Collapse Toggle */}
-        <div className="p-2 sidebar-section">
+        {/* <div className="p-2 sidebar-section">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="w-full flex items-center justify-center p-1 rounded-md hover-primary-bg transition-colors"
@@ -228,7 +228,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
-        </div>
+        </div> */}
 
         <div className="flex-1 overflow-y-auto">
           {/* Home Section */}

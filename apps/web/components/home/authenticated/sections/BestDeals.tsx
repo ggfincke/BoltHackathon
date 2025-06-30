@@ -4,17 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FaArrowRight, FaExclamationCircle } from 'react-icons/fa';
 import { supabase } from '~/lib/supabaseClient';
-
-interface BestDeal {
-  id: string;
-  productName: string;
-  productSlug: string;
-  retailer: string;
-  oldPrice: number;
-  newPrice: number;
-  percentChange: number;
-  imageUrl: string;
-}
+import { BestDeal, MOCK_DEALS } from './mockDeals';
 
 interface BestDealsProps {
   deals?: BestDeal[];
@@ -23,6 +13,18 @@ interface BestDealsProps {
 export default function BestDeals({ deals: propDeals }: BestDealsProps) {
   const [deals, setDeals] = useState<BestDeal[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Configuration constants
+  const MAX_REALISTIC_PERCENT_DIFF = 50;
+  const MIN_PRICE_GAP_PERCENT = 15;
+  const MIN_PRICE_HISTORY_PERCENT = 10;
+  const DEALS_LIMIT = 16;
+  const FALLBACK_PRODUCTS_LIMIT_WITH_DEALS = 2000; // Increased to get more products
+  const FALLBACK_PRODUCTS_LIMIT_NO_DEALS = 2000; // Increased to get more products
+  const MIN_LISTINGS_REQUIRED = 2;
+  const MIN_THRESHOLD_WITH_DEALS = 5; // Reduced to catch smaller but meaningful deals
+  const MIN_THRESHOLD_NO_DEALS = 3; // Reduced to catch smaller but meaningful deals
+  const FALLBACK_IMAGE_URL = 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300';
 
   useEffect(() => {
     if (propDeals) {
@@ -38,21 +40,44 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
     try {
       setLoading(true);
       
-      // Find products with significant price differences between retailers
-      const { data: priceGapDeals, error: priceGapError } = await supabase
-        .rpc('get_price_gap_deals', { min_percent_diff: 15, limit_count: 8 });
+      console.log('🔍 Starting fetchBestDeals...');
       
-      if (priceGapError) {
-        console.error('Error fetching price gap deals:', priceGapError);
-        // Fallback to price history deals if retailer comparison fails
+      // Initialize variables for deals
+      let priceGapDeals = null;
+      let priceHistoryDeals = null;
+      
+      // Try to fetch price gap deals with error handling
+      try {
+        const { data, error } = await supabase
+          .rpc('get_price_gap_deals', { min_percent_diff: MIN_PRICE_GAP_PERCENT, limit_count: DEALS_LIMIT });
+        
+        if (error) {
+          console.error('Price gap deals function error:', error);
+        } else if (data && data.length > 0) {
+          console.log('✅ Price gap deals found:', data.length);
+          priceGapDeals = data;
+        } else {
+          console.log('❌ No price gap deals found');
+        }
+      } catch (err) {
+        console.error('Price gap deals function call failed:', err);
       }
       
-      // Find products with price changes over time
-      const { data: priceHistoryDeals, error: historyError } = await supabase
-        .rpc('get_price_history_deals', { min_percent_change: 10, limit_count: 8 });
-      
-      if (historyError) {
-        console.error('Error fetching price history deals:', historyError);
+      // Try to fetch price history deals with error handling
+      try {
+        const { data, error } = await supabase
+          .rpc('get_price_history_deals', { min_percent_change: MIN_PRICE_HISTORY_PERCENT, limit_count: DEALS_LIMIT });
+        
+        if (error) {
+          console.error('Price history deals function error:', error);
+        } else if (data && data.length > 0) {
+          console.log('✅ Price history deals found:', data.length);
+          priceHistoryDeals = data;
+        } else {
+          console.log('❌ No price history deals found');
+        }
+      } catch (err) {
+        console.error('Price history deals function call failed:', err);
       }
       
       // Combine and format deals
@@ -60,73 +85,122 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
       
       // Process price gap deals (between retailers)
       if (priceGapDeals && priceGapDeals.length > 0) {
-        const formattedGapDeals = priceGapDeals.map(deal => ({
-          id: deal.product_id,
-          productName: deal.product_name,
-          productSlug: deal.product_slug,
-          retailer: deal.best_retailer_name,
-          oldPrice: deal.worst_price,
-          newPrice: deal.best_price,
-          percentChange: Math.round((deal.worst_price - deal.best_price) / deal.worst_price * 100),
-          imageUrl: deal.image_url || 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
-        }));
+        const formattedGapDeals = priceGapDeals
+          .map(deal => ({
+            id: deal.product_id,
+            productName: deal.product_name,
+            productSlug: deal.product_slug,
+            retailer: deal.best_retailer_name,
+            oldPrice: deal.worst_price,
+            newPrice: deal.best_price,
+            percentChange: Math.round((deal.worst_price - deal.best_price) / deal.worst_price * 100),
+            imageUrl: deal.image_url || FALLBACK_IMAGE_URL
+          }))
+          .filter(deal => {
+            // Filter out unrealistic percentage differences
+            return deal.percentChange <= MAX_REALISTIC_PERCENT_DIFF;
+          });
+        console.log(`🔄 Price gap deals after filtering: ${formattedGapDeals.length}`);
         combinedDeals = [...combinedDeals, ...formattedGapDeals];
       }
       
       // Process price history deals (price changes over time)
       if (priceHistoryDeals && priceHistoryDeals.length > 0) {
-        const formattedHistoryDeals = priceHistoryDeals.map(deal => ({
-          id: deal.product_id,
-          productName: deal.product_name,
-          productSlug: deal.product_slug,
-          retailer: deal.retailer_name,
-          oldPrice: deal.old_price,
-          newPrice: deal.current_price,
-          percentChange: Math.round((deal.old_price - deal.current_price) / deal.old_price * 100),
-          imageUrl: deal.image_url || 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
-        }));
+        const formattedHistoryDeals = priceHistoryDeals
+          .map(deal => ({
+            id: deal.product_id,
+            productName: deal.product_name,
+            productSlug: deal.product_slug,
+            retailer: deal.retailer_name,
+            oldPrice: deal.old_price,
+            newPrice: deal.current_price,
+            percentChange: Math.round((deal.old_price - deal.current_price) / deal.old_price * 100),
+            imageUrl: deal.image_url || FALLBACK_IMAGE_URL
+          }))
+          .filter(deal => {
+            // Filter out unrealistic percentage differences
+            return deal.percentChange <= MAX_REALISTIC_PERCENT_DIFF;
+          });
+        console.log(`🔄 Price history deals after filtering: ${formattedHistoryDeals.length}`);
         combinedDeals = [...combinedDeals, ...formattedHistoryDeals];
       }
       
-      // If we don't have enough deals, add some fallback deals
-      if (combinedDeals.length < 8) {
+      // If we don't have enough deals, try to find more from regular product listings
+      const needsMoreDeals = combinedDeals.length < DEALS_LIMIT;
+      const hasNoDeals = combinedDeals.length === 0;
+      
+      console.log(`💡 Combined deals so far: ${combinedDeals.length}, needs more: ${needsMoreDeals}, has no deals: ${hasNoDeals}`);
+      
+      if (needsMoreDeals) {
+        console.log('🔍 Fetching fallback products...');
         const { data: fallbackProducts, error: fallbackError } = await supabase
           .from('products')
           .select(`
             id, 
             name,
             slug,
-            listings(
+            listings!inner(
               id,
               price,
-              retailer:retailers(name),
-              image_url
+              retailer:retailers!inner(name),
+              image_url,
+              in_stock
             )
           `)
-          .limit(8 - combinedDeals.length);
+          .limit(hasNoDeals ? FALLBACK_PRODUCTS_LIMIT_NO_DEALS : FALLBACK_PRODUCTS_LIMIT_WITH_DEALS);
+        
+        console.log(`📦 Fallback products fetched: ${fallbackProducts?.length || 0}, error: ${fallbackError ? 'YES' : 'NO'}`);
         
         if (!fallbackError && fallbackProducts) {
-          const fallbackDeals = fallbackProducts
-            .filter(product => product.listings && product.listings.length >= 2)
+          const productsWithMultipleListings = fallbackProducts
+            .filter(product => product.listings && product.listings.length >= MIN_LISTINGS_REQUIRED);
+          
+          console.log(`🔢 Products with >= ${MIN_LISTINGS_REQUIRED} listings: ${productsWithMultipleListings.length}`);
+          
+          const fallbackDeals = productsWithMultipleListings
             .map(product => {
-              // Sort listings by price
-              const sortedListings = [...product.listings].sort((a, b) => 
+              // Sort listings by price (ascending) and filter for valid items
+              // Very permissive filtering - just need price and retailer
+              const validListings = product.listings.filter(listing => 
+                listing.price && 
+                listing.price > 0 && 
+                listing.retailer?.name
+                // Stock status is not relevant for price comparison deals
+              );
+              
+              console.log(`📋 Product "${product.name}" - Total listings: ${product.listings.length}, Valid listings: ${validListings.length}`);
+              
+              if (validListings.length < MIN_LISTINGS_REQUIRED) return null;
+              
+              const sortedListings = [...validListings].sort((a, b) => 
                 (a.price || 999) - (b.price || 999)
               );
               
               const bestListing = sortedListings[0];
               const worstListing = sortedListings[sortedListings.length - 1];
               
-              // Only include if there's a price difference
-              if (!bestListing?.price || !worstListing?.price || bestListing.price === worstListing.price) {
-                return null;
-              }
+              // Additional null checks for TypeScript
+              if (!bestListing?.price || !worstListing?.price) return null;
               
               // Calculate percent change
               const percentChange = Math.round((worstListing.price - bestListing.price) / worstListing.price * 100);
               
-              // Only include significant differences
-              if (percentChange < 5) return null;
+              console.log(`💰 "${product.name}" - Best: $${bestListing.price} (${bestListing.retailer.name}), Worst: $${worstListing.price} (${worstListing.retailer.name}), Savings: ${percentChange}%`);
+              
+              // Filter out unrealistic percentage differences
+              if (percentChange > MAX_REALISTIC_PERCENT_DIFF) {
+                console.log(`❌ Filtered out "${product.name}" - percentage too high: ${percentChange}%`);
+                return null;
+              }
+              
+              // Use lower threshold when functions fail to ensure we show real data
+              const minThreshold = hasNoDeals ? MIN_THRESHOLD_NO_DEALS : MIN_THRESHOLD_WITH_DEALS;
+              if (percentChange < minThreshold) {
+                console.log(`❌ Filtered out "${product.name}" - percentage too low: ${percentChange}% (min: ${minThreshold}%)`);
+                return null;
+              }
+              
+              console.log(`✅ "${product.name}" qualifies as a deal!`);
               
               return {
                 id: product.id,
@@ -136,116 +210,54 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
                 oldPrice: worstListing.price,
                 newPrice: bestListing.price,
                 percentChange,
-                imageUrl: bestListing.image_url || 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300'
+                imageUrl: bestListing.image_url || FALLBACK_IMAGE_URL
               };
             })
             .filter(Boolean) as BestDeal[];
           
-          combinedDeals = [...combinedDeals, ...fallbackDeals];
+          console.log(`🎯 Fallback deals found: ${fallbackDeals.length}`);
+          
+          if (fallbackDeals.length > 0) {
+            combinedDeals = [...combinedDeals, ...fallbackDeals];
+            console.log(`📈 Total combined deals after fallback: ${combinedDeals.length}`);
+          }
+        } else if (fallbackError) {
+          console.error('Error fetching fallback products:', fallbackError);
         }
       }
       
-      // If we still don't have deals, use default ones
+      // Final check - only use mock data if absolutely no real data is available
       if (combinedDeals.length === 0) {
-        combinedDeals = DEFAULT_DEALS;
+        console.log('⚠️ No real deals found, using mock data');
+        combinedDeals = MOCK_DEALS;
       }
       
-      // Sort by percent change (highest savings first)
-      combinedDeals.sort((a, b) => Math.abs(b.percentChange) - Math.abs(a.percentChange));
+      // Remove duplicates based on product ID
+      const uniqueDeals = combinedDeals.filter((deal, index, self) => 
+        index === self.findIndex(d => d.id === deal.id)
+      );
       
-      // Take top 8
-      setDeals(combinedDeals.slice(0, 8));
+      console.log(`🔄 After deduplication: ${uniqueDeals.length} deals`);
+      
+      // Sort by percent change (highest savings first)
+      uniqueDeals.sort((a, b) => Math.abs(b.percentChange) - Math.abs(a.percentChange));
+      
+      // Take top deals
+      const finalDeals = uniqueDeals.slice(0, DEALS_LIMIT);
+      
+      console.log(`🏆 Final deals to display: ${finalDeals.length}`);
+      console.log('📊 Final deals:', finalDeals.map(d => `${d.productName} - ${d.percentChange}%`));
+      
+      setDeals(finalDeals);
     } catch (error) {
-      console.error('Error fetching best deals:', error);
-      setDeals(DEFAULT_DEALS);
+      console.error('Critical error in fetchBestDeals:', error);
+      setDeals(MOCK_DEALS);
     } finally {
       setLoading(false);
     }
   };
 
-  // Default deals as fallback
-  const DEFAULT_DEALS: BestDeal[] = [
-    {
-      id: '1',
-      productName: 'Organic Milk',
-      productSlug: 'organic-milk',
-      retailer: 'Target',
-      oldPrice: 4.99,
-      newPrice: 3.49,
-      percentChange: -30,
-      imageUrl: 'https://images.pexels.com/photos/2510584/pexels-photo-2510584.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '2',
-      productName: 'Cheerios Cereal',
-      productSlug: 'cheerios-cereal',
-      retailer: 'Walmart',
-      oldPrice: 3.99,
-      newPrice: 2.99,
-      percentChange: -25,
-      imageUrl: 'https://images.pexels.com/photos/135525/pexels-photo-135525.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '3',
-      productName: 'Pasta Sauce',
-      productSlug: 'pasta-sauce',
-      retailer: 'Target',
-      oldPrice: 3.99,
-      newPrice: 2.79,
-      percentChange: -30,
-      imageUrl: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '4',
-      productName: 'Greek Yogurt',
-      productSlug: 'greek-yogurt',
-      retailer: 'Walmart',
-      oldPrice: 5.49,
-      newPrice: 4.49,
-      percentChange: -18,
-      imageUrl: 'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '5',
-      productName: 'Chicken Breast',
-      productSlug: 'chicken-breast',
-      retailer: 'Target',
-      oldPrice: 8.99,
-      newPrice: 6.99,
-      percentChange: -22,
-      imageUrl: 'https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '6',
-      productName: 'Olive Oil',
-      productSlug: 'olive-oil',
-      retailer: 'Walmart',
-      oldPrice: 7.99,
-      newPrice: 6.49,
-      percentChange: -19,
-      imageUrl: 'https://images.pexels.com/photos/33783/olive-oil-salad-dressing-cooking-olive.jpg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '7',
-      productName: 'Frozen Pizza',
-      productSlug: 'frozen-pizza',
-      retailer: 'Walmart',
-      oldPrice: 6.49,
-      newPrice: 4.99,
-      percentChange: -23,
-      imageUrl: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-    {
-      id: '8',
-      productName: 'Orange Juice',
-      productSlug: 'orange-juice',
-      retailer: 'Target',
-      oldPrice: 4.19,
-      newPrice: 3.29,
-      percentChange: -21,
-      imageUrl: 'https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300',
-    },
-  ];
+
 
   return (
     <div className="bg-surface rounded-lg shadow-sm p-6">
@@ -292,12 +304,12 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
                     </h3>
                     <div
                       className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
-                        deal.percentChange < 0
+                        deal.percentChange > 0
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                           : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                       }`}
                     >
-                      {deal.percentChange < 0 ? '↓' : '↑'}{' '}
+                      {deal.percentChange > 0 ? '↓' : '↑'}{' '}
                       {Math.abs(deal.percentChange)}%
                     </div>
                   </div>
