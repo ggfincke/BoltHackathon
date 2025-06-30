@@ -27,8 +27,10 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
   const [loadingBaskets, setLoadingBaskets] = useState(false);
   const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
+  const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const categories = [
+  const defaultCategories = [
     { name: 'Fresh & Perishable', slug: 'fresh-perishable' },
     { name: 'Frozen Foods', slug: 'frozen-foods' },
     { name: 'Bakery & Bread', slug: 'bakery-bread' },
@@ -40,6 +42,8 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
   ];
 
   useEffect(() => {
+    fetchCategories();
+    
     if (user?.id) {
       fetchRecentBaskets();
     } else {
@@ -60,6 +64,33 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
       window.removeEventListener('basketUpdated', handleBasketUpdate);
     };
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      
+      // Fetch top-level grocery categories
+      const { data, error } = await supabase
+        .from('categories')
+        .select('name, slug')
+        .eq('is_active', true)
+        .order('name')
+        .limit(8);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        setCategories(defaultCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories(defaultCategories);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const fetchRecentBaskets = async () => {
     if (!user?.id) return;
@@ -180,7 +211,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
       }`}
     >
       <div className="flex flex-col h-full">
-        {/* Collapse Toggle
+        {/* Collapse Toggle */}
         <div className="p-2 sidebar-section">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -197,7 +228,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
-        </div> */}
+        </div>
 
         <div className="flex-1 overflow-y-auto">
           {/* Home Section */}
@@ -231,7 +262,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               </Link>
             </div>
 
-            {!isCollapsed && (
+            {!isCollapsed && !loadingCategories && (
               <div className="ml-3 space-y-1">
                 <Link
                   href="/best-deals"

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import ProductDetailOverlay from '../shared/ProductDetailOverlay';
 import AddToBasketModal from '../shared/AddToBasketModal';
 import { useAuth } from '~/lib/auth';
@@ -218,11 +217,9 @@ export default function ProductCard({ product, compact = false, onProductAdded }
       >
         <Link href={`/product/${product.slug}`} className="block">
           <div className="product-image-container relative">
-            <Image 
+            <img 
               src={imageUrl} 
               alt={product.name}
-              width={300}
-              height={300}
               className="w-full h-full object-contain"
             />
             
