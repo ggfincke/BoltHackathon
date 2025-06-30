@@ -31,12 +31,13 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const [loadingCategories, setLoadingCategories] = useState(false);
 
   const defaultCategories = [
-    { name: 'Fresh & Perishable', slug: 'fresh-perishable' },
+    { name: 'Dairy', slug: 'dairy' },
+    { name: 'Meat & Seafood', slug: 'meat-seafood' },
+    { name: 'Produce', slug: 'produce' },
+    { name: 'Pantry Staples', slug: 'pantry-staples' },
     { name: 'Frozen Foods', slug: 'frozen-foods' },
     { name: 'Bakery & Bread', slug: 'bakery-bread' },
     { name: 'Beverages', slug: 'beverages' },
-    { name: 'Pantry Staples', slug: 'pantry-staples' },
-    { name: 'Cooking & Baking Supplies', slug: 'cooking-baking-supplies' },
     { name: 'Breakfast & Cereal', slug: 'breakfast-cereal' },
     { name: 'Snacks', slug: 'snacks' },
   ];
@@ -69,23 +70,10 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     try {
       setLoadingCategories(true);
       
-      // Fetch top-level grocery categories
-      const { data, error } = await supabase
-        .from('categories')
-        .select('name, slug')
-        .eq('is_active', true)
-        .order('name')
-        .limit(8);
-      
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        setCategories(data);
-      } else {
-        setCategories(defaultCategories);
-      }
+      // Use default categories instead of fetching from database
+      setCategories(defaultCategories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error setting categories:', error);
       setCategories(defaultCategories);
     } finally {
       setLoadingCategories(false);
@@ -212,7 +200,8 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
     >
       <div className="flex flex-col h-full">
         {/* Collapse Toggle */}
-        <div className="p-2 sidebar-section">
+        {/* <div className="p-2 sidebar-section">
+
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="w-full flex items-center justify-center p-1 rounded-md hover-primary-bg transition-colors"
