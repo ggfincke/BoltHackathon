@@ -153,6 +153,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
         (trackedProducts as any[]).forEach((item: any) => {
           const productCategories = item.products?.product_categories || [];
           productCategories.forEach((pc: any) => {
+
             const category = pc.category;
             if (category) {
               if (!categoryCounts[category.id]) {
@@ -175,6 +176,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
       const finalCategories = ensureSixCategories(sortedCategories.length === 0 ? [] : sortedCategories);
 
       setCategories(finalCategories);
+
     } catch (error) {
       console.error('Error fetching popular categories:', error);
       setCategories(DEFAULT_CATEGORIES);
@@ -216,6 +218,7 @@ export default function PopularCategories({ categories: propCategories }: Popula
                   {category.count} items
                 </span>
               )}
+
             </Link>
           ))}
         </div>

@@ -13,7 +13,6 @@ interface BestDealsProps {
 export default function BestDeals({ deals: propDeals }: BestDealsProps) {
   const [deals, setDeals] = useState<BestDeal[]>([]);
   const [loading, setLoading] = useState(true);
-  
   // Configuration constants
   const MAX_REALISTIC_PERCENT_DIFF = 75;
   const MIN_PRICE_GAP_PERCENT = 15;
@@ -297,6 +296,7 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
               }
               
               // console.log(`✅ "${product.name}" qualifies as a deal!`);
+
               
               return {
                 id: product.id,
@@ -359,8 +359,6 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
     }
   };
 
-
-
   return (
     <div className="bg-surface rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-center mb-4">
@@ -407,6 +405,7 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
                     <div
                       className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
                         deal.percentChange > 0
+
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                           : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
                       }`}

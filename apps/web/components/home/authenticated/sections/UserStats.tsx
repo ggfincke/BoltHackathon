@@ -50,6 +50,7 @@ export default function UserStats({
       const productQuantities: Record<string, number> = {};
       
       // Count individual product trackings
+
       const { data: productTrackings, error: trackingError } = await supabase
         .from('product_trackings')
         .select('id, target_price, product_id')
@@ -155,6 +156,7 @@ export default function UserStats({
       setTrackedItems(totalTrackedItems);
       setPotentialSavings(Math.round(totalSavings * 100) / 100);
       setAvgDiscount(discountCount > 0 ? Math.round(totalDiscountPercent / discountCount) : 0);
+
     } catch (error) {
       console.error('Error fetching user stats:', error);
       // Set default values on error

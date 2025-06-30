@@ -121,13 +121,13 @@ export default function AuthenticatedHome() {
   };
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-6">
       <WelcomeBanner username={username} />
       
       {/* Best Deals - Full Width */}
       <BestDeals />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Stats */}
         <div className="lg:col-span-1">
           <UserStats />
