@@ -16,13 +16,27 @@ interface PopularCategoriesProps {
 }
 
 const DEFAULT_CATEGORIES: Category[] = [
-  { name: 'Fresh & Perishable', slug: 'fresh-perishable', count: 15 },
-  { name: 'Frozen Foods', slug: 'frozen-foods', count: 12 },
-  { name: 'Bakery & Bread', slug: 'bakery-bread', count: 8 },
-  { name: 'Beverages', slug: 'beverages', count: 10 },
-  { name: 'Pantry Staples', slug: 'pantry-staples', count: 14 },
-  { name: 'Snacks', slug: 'snacks', count: 7 },
+  { name: 'Fresh & Perishable', slug: 'fresh-perishable', count: 0 },
+  { name: 'Frozen Foods', slug: 'frozen-foods', count: 0 },
+  { name: 'Bakery & Bread', slug: 'bakery-bread', count: 0 },
+  { name: 'Beverages', slug: 'beverages', count: 0 },
+  { name: 'Pantry Staples', slug: 'pantry-staples', count: 0 },
+  { name: 'Snacks', slug: 'snacks', count: 0 },
 ];
+
+// ensure returned array always has exactly six categories
+const ensureSixCategories = (base: Category[]): Category[] => {
+  if (base.length >= 6) return base.slice(0, 6);
+
+  const existingSlugs = new Set(base.map((c) => c.slug));
+  const fillers = DEFAULT_CATEGORIES
+    .filter((c) => !existingSlugs.has(c.slug))
+    .slice(0, 6 - base.length)
+    // counts for filler categories are zero (no pill)
+    .map((c) => ({ ...c, count: 0 }));
+
+  return [...base, ...fillers];
+};
 
 export default function PopularCategories({ categories: propCategories }: PopularCategoriesProps) {
   const { user } = useAuth();
@@ -50,28 +64,47 @@ export default function PopularCategories({ categories: propCategories }: Popula
         return;
       }
       
-      // Get user's basket items to find popular categories
-      const { data: basketItems, error: basketError } = await supabase
-        .from('basket_items')
-        .select(`
-          product_id,
-          products:products(
-            product_categories(
-              category:categories(
-                id,
-                name,
-                slug
+      // 1st: find all basket IDs the user has access to
+      const {
+        data: basketUserRows,
+        error: basketUsersError
+      } = await supabase
+        .from('basket_users')
+        .select('basket_id')
+        .eq('user_id', user.id);
+
+      if (basketUsersError) throw basketUsersError;
+
+      const basketIds = (basketUserRows || [])
+        .map((row) => row.basket_id)
+        .filter((id): id is string => Boolean(id));
+
+      // Explicitly type to avoid implicit any lint errors
+      let basketItems: any[] | null = null;
+
+      if (basketIds.length > 0) {
+        const { data, error } = await supabase
+          .from('basket_items')
+          .select(`
+            product_id,
+            products:products(
+              product_categories(
+                category:categories(
+                  id,
+                  name,
+                  slug
+                )
               )
             )
-          )
-        `)
-        .in('basket_id', function(builder) {
-          builder.select('basket_id')
-            .from('basket_users')
-            .eq('user_id', user.id);
-        });
-      
-      if (basketError) throw basketError;
+          `)
+          .in('basket_id', basketIds);
+
+        if (error) throw error;
+        basketItems = data;
+      }
+      else {
+        basketItems = [];
+      }
       
       // Get user's tracked products to find popular categories
       const { data: trackedProducts, error: trackingError } = await supabase
@@ -97,9 +130,9 @@ export default function PopularCategories({ categories: propCategories }: Popula
       
       // Process basket items
       if (basketItems) {
-        basketItems.forEach(item => {
+        basketItems.forEach((item: any) => {
           const productCategories = item.products?.product_categories || [];
-          productCategories.forEach(pc => {
+          productCategories.forEach((pc: any) => {
             const category = pc.category;
             if (category) {
               if (!categoryCounts[category.id]) {
@@ -117,9 +150,9 @@ export default function PopularCategories({ categories: propCategories }: Popula
       
       // Process tracked products
       if (trackedProducts) {
-        trackedProducts.forEach(item => {
+        (trackedProducts as any[]).forEach((item: any) => {
           const productCategories = item.products?.product_categories || [];
-          productCategories.forEach(pc => {
+          productCategories.forEach((pc: any) => {
             const category = pc.category;
             if (category) {
               if (!categoryCounts[category.id]) {
@@ -135,17 +168,13 @@ export default function PopularCategories({ categories: propCategories }: Popula
         });
       }
       
-      // Convert to array and sort by count
-      let sortedCategories = Object.values(categoryCounts)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 6);
-      
-      // If no categories found, use defaults
-      if (sortedCategories.length === 0) {
-        sortedCategories = DEFAULT_CATEGORIES;
-      }
-      
-      setCategories(sortedCategories);
+      // Convert to array and sort by count, but don't slice yet – we will ensure exactly six later.
+      const sortedCategories = Object.values(categoryCounts).sort((a, b) => b.count - a.count);
+
+      // Fill with defaults if needed so we always have six categories.
+      const finalCategories = ensureSixCategories(sortedCategories.length === 0 ? [] : sortedCategories);
+
+      setCategories(finalCategories);
     } catch (error) {
       console.error('Error fetching popular categories:', error);
       setCategories(DEFAULT_CATEGORIES);
@@ -179,12 +208,14 @@ export default function PopularCategories({ categories: propCategories }: Popula
               <span className="text-sm font-medium text-center" style={{ color: 'var(--text)' }}>
                 {category.name}
               </span>
-              <span
-                className="text-xs px-2 py-1 rounded-full mt-1"
-                style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
-              >
-                {category.count} items
-              </span>
+              {category.count > 0 && (
+                <span
+                  className="text-xs px-2 py-1 rounded-full mt-1"
+                  style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
+                >
+                  {category.count} items
+                </span>
+              )}
             </Link>
           ))}
         </div>
