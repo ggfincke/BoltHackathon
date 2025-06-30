@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   // Toggle to control whether social authentication options are shown in UI
-  const SHOW_SOCIAL_AUTH = true;
+  const SHOW_SOCIAL_AUTH = false;
 
   // Focus management
   useEffect(() => {
