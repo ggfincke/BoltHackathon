@@ -29,6 +29,9 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
+  // Toggle to control whether social authentication options are shown in UI
+  const SHOW_SOCIAL_AUTH = true;
+
   // Focus management
   useEffect(() => {
     if (isOpen && firstInputRef.current) {
@@ -291,33 +294,38 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
             </div>
           )}
 
-          {/* Social Sign In Options */}
-          <div className="flex flex-col gap-3 mb-6">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-              className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <FcGoogle className="w-5 h-5" />
-              <span className="font-medium">Continue with Google</span>
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleAppleSignIn}
-              disabled={loading}
-              className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <FaApple className="w-5 h-5" />
-              <span className="font-medium">Continue with Apple</span>
-            </button>
-          </div>
+          {/** Replace social sign-in section with a conditional block so it is hidden by default */}
+          {SHOW_SOCIAL_AUTH && (
+            <>
+              {/* Social Sign In Options */}
+              <div className="flex flex-col gap-3 mb-6">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <FcGoogle className="w-5 h-5" />
+                  <span className="font-medium">Continue with Google</span>
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleAppleSignIn}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-3 w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <FaApple className="w-5 h-5" />
+                  <span className="font-medium">Continue with Apple</span>
+                </button>
+              </div>
 
-          <div className="relative flex items-center justify-center mb-6">
-            <div className="border-t border-gray-300 dark:border-gray-700 w-full"></div>
-            <div className="absolute bg-background px-4 text-sm text-gray-500 dark:text-gray-400">or</div>
-          </div>
+              <div className="relative flex items-center justify-center mb-6">
+                <div className="border-t border-gray-300 dark:border-gray-700 w-full"></div>
+                <div className="absolute bg-background px-4 text-sm text-gray-500 dark:text-gray-400">or</div>
+              </div>
+            </>
+          )}
 
           <form onSubmit={handleSubmit} className="auth-modal-form">
             <div className="auth-modal-field">
