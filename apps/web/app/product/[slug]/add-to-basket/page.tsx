@@ -210,7 +210,7 @@ export default function AddToBasketPage() {
         <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
           <h2 className="text-xl font-semibold mb-2">Product not found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The product you're looking for doesn't exist or has been removed.
+            The product you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <button
             onClick={() => router.back()}
@@ -266,7 +266,7 @@ export default function AddToBasketPage() {
         
         {baskets.length === 0 ? (
           <div className="text-center py-4">
-            <p className="mb-4">You don't have any baskets yet.</p>
+            <p className="mb-4">You don&apos;t have any baskets yet.</p>
             <Link
               href="/baskets"
               className="bg-primary text-buttonText px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"

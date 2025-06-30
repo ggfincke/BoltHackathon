@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import Popover from '~/components/ui/Popover';
 
 interface ProductMatch {
@@ -279,7 +279,7 @@ const CompletionScreen: React.FC<CompletionScreenProps> = ({
       {/* Unmatched Items */}
       {result.unmatched && result.unmatched.length > 0 && (
         <div className="completion-card">
-          <h3 className="completion-section-title mb-3">Items We Couldn't Match</h3>
+                          <h3 className="completion-section-title mb-3">Items We Couldn&apos;t Match</h3>
           <div className="space-y-2">
             {result.unmatched.map((item, index) => (
               <div key={index} className="flex items-center justify-between py-2 px-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">

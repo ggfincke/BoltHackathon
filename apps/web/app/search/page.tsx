@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ type Product = {
   } | null;
   listings?: {
     id: string;
+    retailer_id: string;
     price: number | null;
     currency: string | null;
     in_stock: boolean | null;
@@ -33,7 +34,7 @@ type Product = {
 
 type SortOption = 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
 
-export default function Search() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') || '';
@@ -44,7 +45,7 @@ export default function Search() {
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('price_asc');
   const [totalCount, setTotalCount] = useState(0);
-  const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
+
   
   useEffect(() => {
     if (!query) return;
@@ -75,7 +76,8 @@ export default function Search() {
             brand_id,
             brand:brands(name),
             listings(
-              id, 
+              id,
+              retailer_id,
               price, 
               currency, 
               in_stock, 
@@ -88,7 +90,8 @@ export default function Search() {
           .range(from, to);
         
         if (error) throw error;
-        setProducts((data ?? []) as unknown as Product[]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setProducts((data ?? []) as any);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -132,7 +135,7 @@ export default function Search() {
   };
 
   const handleProductAdded = () => {
-    setBasketUpdateTrigger(prev => prev + 1);
+    // Trigger basket refresh
   };
   
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -198,7 +201,8 @@ export default function Search() {
         ) : sortedProducts.length > 0 ? (
           <>
             <ProductGrid 
-              products={sortedProducts} 
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              products={sortedProducts as any} 
               onProductAdded={handleProductAdded}
             />
             
@@ -215,7 +219,7 @@ export default function Search() {
           <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
             <h2 className="text-xl font-semibold mb-2">No results found</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              We couldn't find any products matching "{query}"
+                                We couldn&apos;t find any products matching &quot;{query}&quot;
             </p>
             <Link 
               href="/"
@@ -237,5 +241,32 @@ export default function Search() {
       {/* Basket Popup - only shown on product grid pages */}
       <BasketPopup onProductAdded={handleProductAdded} />
     </>
+  );
+}
+
+function SearchFallback() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Search</h1>
+        <div className="bg-surface p-4 rounded-lg shadow-sm mb-4">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-background animate-pulse h-10"></div>
+            <div className="bg-primary text-buttonText px-4 py-2 rounded-md h-10 w-20 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function Search() {
+  return (
+    <Suspense fallback={<SearchFallback />}>
+      <SearchContent />
+    </Suspense>
   );
 }

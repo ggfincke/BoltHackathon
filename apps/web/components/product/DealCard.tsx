@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 
@@ -21,14 +21,9 @@ interface DealCardProps {
 }
 
 export default function DealCard({ deal, compact = false }: DealCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   
   return (
-    <div 
-      className="product-card relative group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="product-card relative group">
       <Link href={`/product/${deal.slug ?? deal.id}`} className="block">
         <div className="product-image-container relative">
           <img 

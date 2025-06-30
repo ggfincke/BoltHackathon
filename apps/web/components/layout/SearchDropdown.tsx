@@ -305,7 +305,7 @@ export default function SearchDropdown({ className = '' }: SearchDropdownProps) 
                     <SearchIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <p className="text-sm mb-2 font-medium">No results found for "{query}"</p>
+                <p className="text-sm mb-2 font-medium">No results found for &quot;{query}&quot;</p>
                 <p className="text-xs opacity-60">Try a different search term or browse categories</p>
               </div>
             )}

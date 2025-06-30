@@ -80,7 +80,14 @@ export default function PopularCategories({ categories: propCategories }: Popula
         .filter((id): id is string => Boolean(id));
 
       // Explicitly type to avoid implicit any lint errors
-      let basketItems: any[] | null = null;
+      let basketItems: Array<{
+        product_id: string;
+        products?: {
+          product_categories?: Array<{
+            category?: { id: string; name: string; slug: string };
+          }>;
+        };
+      }> | null = null;
 
       if (basketIds.length > 0) {
         const { data, error } = await supabase
@@ -113,9 +120,9 @@ export default function PopularCategories({ categories: propCategories }: Popula
       
       // Process basket items
       if (basketItems) {
-        basketItems.forEach((item: any) => {
+        basketItems.forEach((item) => {
           const productCategories = item.products?.product_categories || [];
-          productCategories.forEach((pc: any) => {
+          productCategories.forEach((pc) => {
             const category = pc.category;
             if (category) {
               if (!categoryCounts[category.id]) {

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import { useAuth } from '~/lib/auth'
+
+
 import { supabase } from '~/lib/supabaseClient'
 
 type AuthFormProps = {
@@ -21,7 +21,7 @@ export default function AuthForm({ type, onToggle }: AuthFormProps) {
   
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { signIn, signUp, resetPassword } = useAuth()
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -171,7 +171,7 @@ export default function AuthForm({ type, onToggle }: AuthFormProps) {
                 onClick={() => onToggle('signup')}
                 className="text-primary hover:underline"
               >
-                Don't have an account? Sign up
+                Don&apos;t have an account? Sign up
               </button>
               <br />
               <button

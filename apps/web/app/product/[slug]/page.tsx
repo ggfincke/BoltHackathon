@@ -6,7 +6,7 @@ import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
 import Breadcrumbs from '~/components/layout/Breadcrumbs';
 import PriceHistoryChart from '~/components/product/PriceHistoryChart';
-import PriceComparisonTable from '~/components/product/PriceComparisonTable';
+
 // import ProductTrackingForm from '~/components/product/ProductTrackingForm'; // Disabled for now - focusing only on basket notifications
 import AddToBasketModal from '~/components/shared/AddToBasketModal';
 
@@ -152,8 +152,10 @@ export default function ProductPage() {
               }
               
               // historyData can include error types in its union; cast to any[] for safe spreading
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const safeHistory: any[] = (historyData ?? []) as any[];
               
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               return safeHistory.map((item: any) => ({
                 ...item,
                 retailer: item?.retailer?.retailer || { id: '', name: 'Unknown' }
@@ -252,7 +254,7 @@ export default function ProductPage() {
         <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
           <h2 className="text-xl font-semibold mb-2">Product not found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The product you're looking for doesn't exist or has been removed.
+            The product you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <button
             onClick={() => router.back()}
