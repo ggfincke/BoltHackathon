@@ -40,6 +40,7 @@ export default function CreateBasketPage() {
   const [mode, setMode] = useState<'chat' | 'manual'>('chat');
   const [inputText, setInputText] = useState('');
   const [basketName, setBasketName] = useState('');
+  const [basketDescription, setBasketDescription] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ChatToBasketResponse | null>(null);
@@ -291,25 +292,41 @@ export default function CreateBasketPage() {
     setError(null);
     
     try {
-      const { data, error } = await supabase
+      // Generate basket ID client-side so we can reference it immediately
+      const newBasketId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+
+      // 1) Create the basket (no RETURNING needed – default behaviour is minimal in supabase-js v2)
+      const { error: basketError } = await supabase
         .from('baskets')
-        .insert([
-          {
-            name: basketName.trim(),
-            user_id: user.id,
-            created_at: new Date().toISOString()
-          }
-        ])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
+        .insert({
+          id: newBasketId,
+          name: basketName.trim(),
+          description: basketDescription.trim() || null,
+          is_public: false,
+          created_at: new Date().toISOString(),
+        } as any); // cast to any to bypass generated types that disallow id
+
+      if (basketError) throw basketError;
+
+      // 2) Add the current user as the owner of the basket so RLS policies allow access
+      const { error: linkError } = await supabase
+        .from('basket_users')
+        .insert({
+          basket_id: newBasketId,
+          user_id: user.id,
+          role: 'owner',
+          created_at: new Date().toISOString(),
+        } as any);
+
+      if (linkError) throw linkError;
+
       // Dispatch event to update baskets in sidebar
       window.dispatchEvent(new Event('basketUpdated'));
       
       // Redirect to the new basket
-      router.push(`/basket/${data.id}`);
+      router.push(`/basket/${newBasketId}`);
       
     } catch (err) {
       console.error('Error creating basket:', err);
@@ -328,6 +345,7 @@ export default function CreateBasketPage() {
   const handleReset = () => {
     setInputText('');
     setBasketName('');
+    setBasketDescription('');
     setResult(null);
     setEditableMatches([]);
     setError(null);
@@ -727,7 +745,7 @@ export default function CreateBasketPage() {
           </div>
         )}
 
-        {/* Enhanced Loading Screen */}
+        {/* Loading Screen */}
         {streamingStatus && <LoadingScreen />}
         
         {!result && !streamingStatus ? (
@@ -740,19 +758,33 @@ export default function CreateBasketPage() {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     className="input-enhanced gradient-border-textarea enhanced-chat-input"
-                    placeholder="Paste your recipe, ingredient list, or any food-related text here..."
+                    placeholder="Paste your recipe, ingredient list, or any text here..."
                     disabled={isProcessing}
                   />
                 </div>
               ) : (
-                <input
-                  type="text"
-                  value={basketName}
-                  onChange={(e) => setBasketName(e.target.value)}
-                  className="input-enhanced gradient-border-textarea"
-                  placeholder="Enter basket name (e.g., 'Weekly Groceries', 'Dinner Party Shopping')"
-                  disabled={isProcessing}
-                />
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={basketName}
+                      onChange={(e) => setBasketName(e.target.value)}
+                      className="input-enhanced w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter basket name (e.g., 'Weekly Groceries', 'Dinner Party Shopping')"
+                      disabled={isProcessing}
+                    />
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      value={basketDescription}
+                      onChange={(e) => setBasketDescription(e.target.value)}
+                      className="input-enhanced gradient-border-textarea w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      rows={8}
+                      placeholder="Enter basket description (optional)..."
+                      disabled={isProcessing}
+                    />
+                  </div>
+                </div>
               )}
             </div>
             
