@@ -19,6 +19,7 @@ import time
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import argparse
+from pathlib import Path
 
 # handle imports 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,9 +30,41 @@ sys.path.insert(0, os.path.join(project_root, 'src'))
 from crawlers.supabase_backend import SupabaseBackend, resolve_retailer_uuid
 from scrapers.giant_eagle.ge_scraper import GiantEagleScraper
 
+# logging helpers
+def setup_logging(log_level: str, log_file: Optional[str] = None) -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(getattr(logging, log_level))
+
+    # clear any existing handlers to avoid dupes when re-running
+    logger.handlers.clear()
+
+    fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # always add a console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(getattr(logging, log_level))
+    console_handler.setFormatter(fmt)
+    logger.addHandler(console_handler)
+
+    # optional file handler
+    if log_file:
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        file_handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')
+        file_handler.setLevel(getattr(logging, log_level))
+        file_handler.setFormatter(fmt)
+        logger.addHandler(file_handler)
+
+        logger.info(f"Logging to file: {log_file}")
+
+    return logger
+
+# Giant Eagle Filler
 class GiantEagleFiller:
-    def __init__(self, supabase_backend: SupabaseBackend, logger: logging.Logger, 
-                 batch_size: int = 100, delay_between_requests: float = 2.0):
+    def __init__(self, supabase_backend: SupabaseBackend, logger: logging.Logger,
+                 batch_size: int = 100, delay_between_requests: float = 2.0,
+                 log_file: Optional[str] = None):
         self.backend = supabase_backend
         self.logger = logger
         self.batch_size = batch_size
@@ -56,6 +89,8 @@ class GiantEagleFiller:
         }
         
         self.start_time = datetime.now()
+        # optional log file path for summary writing
+        self.log_file = log_file
 
     # construct giant eagle url from upc
     def construct_giant_eagle_url(self, upc: str) -> str:
@@ -69,15 +104,6 @@ class GiantEagleFiller:
 
     # get products with upcs
     def get_products_with_upcs(self, limit: int = None, offset: int = 0) -> List[Dict]:
-        """Fetch products that have UPCs using paginated (blocking) requests.
-
-        Supabase/PostgREST caps any single request to 1 000 rows.  This helper
-        mirrors the pagination logic from `scripts/update.py`, retrieving data
-        in 1 000-row blocks so we never exceed that limit.  It still honours the
-        caller-supplied *limit* (if provided) as well as the instance
-        *batch_size* when *limit* is None.
-        """
-
         try:
             base_query = (
                 self.backend.supabase.table('products')
@@ -88,10 +114,11 @@ class GiantEagleFiller:
                 .order('created_at')
             )
 
-            PAGE_SIZE = 1000  # PostgREST hard cap per request
+            # PostgREST hard cap per request
+            PAGE_SIZE = 1000
 
             rows: List[Dict] = []
-            remaining = limit  # None means "no explicit limit – fetch as needed"
+            remaining = limit  # None means "no explicit limit - fetch as needed" (i.e. all)
             current_offset = offset
 
             while True:
@@ -115,7 +142,7 @@ class GiantEagleFiller:
 
                 rows.extend(result.data)
 
-                # if we received fewer rows than requested, we've reached the end
+                # if received fewer rows than requested, reached the end
                 if len(result.data) < fetch_size:
                     break
 
@@ -468,6 +495,46 @@ class GiantEagleFiller:
         self.logger.info(f"Total Time:               {elapsed}")
         self.logger.info("="*60)
 
+        # write detailed summary if requested
+        if self.log_file:
+            self._write_log_summary()
+
+    # write detailed log summary to the configured log file
+    def _write_log_summary(self):
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("DETAILED EXECUTION SUMMARY\n")
+                f.write("=" * 80 + "\n")
+                f.write(f"Script: {__file__}\n")
+                f.write(f"Start time: {self.start_time.isoformat()}\n")
+                f.write(f"End time: {datetime.now().isoformat()}\n")
+                f.write(f"Total execution time: {datetime.now() - self.start_time}\n")
+                f.write(f"Batch size: {self.batch_size}\n")
+                f.write(f"Delay between requests: {self.delay}s\n")
+                f.write("\n")
+
+                # detailed stats
+                f.write("PROCESSING STATISTICS:\n")
+                f.write("-" * 40 + "\n")
+                for key, value in self.stats.items():
+                    f.write(f"{key.replace('_', ' ').title()}: {value}\n")
+
+                if self.stats['total_upcs_processed'] > 0:
+                    success_rate = (self.stats['successful_listings_created'] / self.stats['total_upcs_processed']) * 100
+                    found_rate = (self.stats['valid_urls_found'] / self.stats['total_upcs_processed']) * 100
+                    f.write(f"Success Rate: {success_rate:.2f}%\n")
+                    f.write(f"Found Rate: {found_rate:.2f}%\n")
+
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("END OF SUMMARY\n")
+                f.write("=" * 80 + "\n")
+
+            self.logger.info(f"Detailed log summary written to: {self.log_file}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to write log summary to file: {e}")
+
     # get existing Giant Eagle listings (for update mode)
     def get_existing_ge_listings(self, limit: int = None, offset: int = 0) -> List[Dict]:
         # get existing listings
@@ -585,19 +652,12 @@ def main():
                        default='INFO', help='Logging level')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be processed without scraping')
     parser.add_argument('--update-existing', action='store_true', help='Update existing Giant Eagle listings instead of creating new ones')
+    parser.add_argument('--log-file', help='Path to log file for detailed output (optional, logs to both console and file)')
     
     args = parser.parse_args()
     
-    # setup logging
-    logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(f'giant_eagle_filler_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
-        ]
-    )
-    logger = logging.getLogger(__name__)
+    # setup logging using shared helper
+    logger = setup_logging(args.log_level, args.log_file)
     
     try:
         # init supabase backend (disable upc lookup for this script)
@@ -608,7 +668,8 @@ def main():
             supabase_backend=backend,
             logger=logger,
             batch_size=args.batch_size,
-            delay_between_requests=args.delay
+            delay_between_requests=args.delay,
+            log_file=args.log_file
         )
         
         if args.dry_run:
