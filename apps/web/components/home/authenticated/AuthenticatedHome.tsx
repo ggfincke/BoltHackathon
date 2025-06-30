@@ -121,27 +121,27 @@ export default function AuthenticatedHome() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
       <WelcomeBanner username={username} />
       
       {/* Best Deals - Full Width */}
       <BestDeals />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Left Column - Stats */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1">
           <UserStats 
             trackedItems={userStats.trackedItems}
             potentialSavings={userStats.potentialSavings}
             avgDiscount={userStats.avgDiscount}
           />
-          <QuickActions />
+          {/* <QuickActions /> */}
         </div>
 
         {/* Right Column - Popular Categories & Recent Baskets */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2">
           <PopularCategories />
-          <RecentBaskets />
+          {/* <RecentBaskets /> */}
         </div>
       </div>
     </div>
