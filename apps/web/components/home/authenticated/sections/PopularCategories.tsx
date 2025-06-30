@@ -24,14 +24,14 @@ const DEFAULT_CATEGORIES: Category[] = [
   { name: 'Snacks', slug: 'snacks', count: 0 },
 ];
 
-// ensure returned array always has exactly six categories
-const ensureSixCategories = (base: Category[]): Category[] => {
-  if (base.length >= 6) return base.slice(0, 6);
+// ensure returned array always has exactly five categories
+const ensureFiveCategories = (base: Category[]): Category[] => {
+  if (base.length >= 5) return base.slice(0, 5);
 
   const existingSlugs = new Set(base.map((c) => c.slug));
   const fillers = DEFAULT_CATEGORIES
     .filter((c) => !existingSlugs.has(c.slug))
-    .slice(0, 6 - base.length)
+    .slice(0, 5 - base.length)
     // counts for filler categories are zero (no pill)
     .map((c) => ({ ...c, count: 0 }));
 
@@ -136,8 +136,8 @@ export default function PopularCategories({ categories: propCategories }: Popula
       // Convert to array and sort by count, but don't slice yet – we will ensure exactly six later.
       const sortedCategories = Object.values(categoryCounts).sort((a, b) => b.count - a.count);
 
-      // Fill with defaults if needed so we always have six categories.
-      const finalCategories = ensureSixCategories(sortedCategories.length === 0 ? [] : sortedCategories);
+      // Fill with defaults if needed so we always have five categories.
+      const finalCategories = ensureFiveCategories(sortedCategories.length === 0 ? [] : sortedCategories);
 
       setCategories(finalCategories);
 
