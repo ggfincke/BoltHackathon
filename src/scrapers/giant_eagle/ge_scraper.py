@@ -10,6 +10,7 @@ import time
 import os
 import sys
 import logging
+from typing import Optional
 
 # handle imports based on how script is being run
 try:
@@ -47,12 +48,8 @@ class GiantEagleScraper(BaseScraper):
         # Giant Eagle doesn't have third-party listings
         return "giant_eagle"
 
+    # check if product exists
     def product_exists(self, driver, timeout: int = 3) -> bool:
-        """
-        Returns True if the page looks like a real product page.
-        Returns False if we hit Giant Eagle's "Sorry, we couldn't find this product."
-        We key only off text, so randomised class names don't break the check.
-        """
         not_found_xpath = (
             "//*[contains(translate(normalize-space(.), "
             "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
@@ -63,7 +60,7 @@ class GiantEagleScraper(BaseScraper):
         )
 
         try:
-            # Wait a bit to see if the 'not found' message appears
+            # wait see if the 'not found' message appears
             WebDriverWait(driver, timeout).until(
                 lambda d: (
                     d.find_elements(By.XPATH, not_found_xpath)
@@ -100,31 +97,39 @@ class GiantEagleScraper(BaseScraper):
         except NoSuchElementException:
             return None
 
-    # extract price from page
-    def get_price(self, driver):
-        # first try a tight selector (faster if it exists)
-        try:
-            # stable base class
-            el = driver.find_element(By.CSS_SELECTOR, "span.sc-cGQErq")  
-            return Decimal(el.text.replace("$", "").strip())
-        except (NoSuchElementException, ValueError):
-            pass
-
-        # generic fallback: first <span> on the page that looks like $4.89
-        try:
-            el = driver.find_element(
-                By.XPATH,
-                "//span[contains(text(),'$') and string-length(normalize-space())<10]"
+    # extract price from page using Selenium driver
+    def get_price(self, driver) -> Optional[Decimal]:
+        # prefer original price when it exists
+        
+        # 1) try to capture the labelled "Original price"
+        orig_elems = driver.find_elements(
+            By.XPATH,
+            (
+                "//span[contains(translate(text(), "
+                "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+                "'original price')]/following-sibling::span[1]"
             )
-            price = re.search(r"\$?\s*([\d,.]+)", el.text)
-            if price:
-                return Decimal(price.group(1).replace(",", ""))
-        except (NoSuchElementException, ValueError):
-            return None
+        )
+        if orig_elems:
+            try:
+                return Decimal(orig_elems[0].text.replace('$', '').strip())
+            except Exception:
+                pass 
+
+        # 2) fallback - live price
+        sale_elems = driver.find_elements(By.CSS_SELECTOR, "span[data-testid='product-price']")
+        if sale_elems:
+            try:
+                return Decimal(sale_elems[0].text.replace('$', '').strip())
+            except Exception:
+                pass
+
+        # couldn't parse any numeric price
+        return None
 
     # check stock status
     def check_stock(self, driver):
-        # Add-to-cart button is the ground truth
+        # ATC button
         btns = driver.find_elements(By.CSS_SELECTOR,
                                     "button[data-test-id='QuantityPicker_atc']")
         if btns and btns[0].is_enabled():
@@ -144,7 +149,7 @@ class GiantEagleScraper(BaseScraper):
             img = driver.find_element(By.CSS_SELECTOR, "img[data-index='0']")
             return img.get_attribute("src")
         except NoSuchElementException:
-            # fallback – first product image with an alt that matches the title
+            # fallback - first product image w/ an alt that matches title
             try:
                 img = driver.find_element(
                     By.XPATH,
@@ -197,7 +202,7 @@ class GiantEagleScraper(BaseScraper):
 
     # extract UPC from product details
     def get_upc(self, driver):
-        # Primary: look for the SKU/UPC header block
+        # primary: look for the SKU/UPC header block
         try:
             upc_box = driver.find_element(
                 By.XPATH,
@@ -254,7 +259,9 @@ class GiantEagleScraper(BaseScraper):
                 self.logger.error("Could not extract product name - invalid product page")
                 return None
 
+            # --------------- PRICE EXTRACTION ---------------
             price = self.get_price(driver)
+
             in_stock = self.check_stock(driver)
             image_url = self.get_image_url(driver)
             rating, review_count = self.get_rating_reviews(driver)
@@ -263,7 +270,7 @@ class GiantEagleScraper(BaseScraper):
             # compile scraped data
             scraped_data = {
                 'name': product_name,
-                'price': price,
+                'price': float(price) if price is not None else None,
                 'url': url,
                 'in_stock': in_stock,
                 'image_url': image_url,
@@ -292,10 +299,11 @@ if __name__ == "__main__":
     
     # test URL - update with actual Giant Eagle product URL
     test_url = "https://www.gianteagle.com/settlers-ridge/search/product/00020471120199"
+    test_url2 = "https://www.gianteagle.com/settlers-ridge/search/product/00074653114650"
     
     scraper = GiantEagleScraper()
-    result = scraper.scrape_product(test_url)
-    
+    # result = scraper.scrape_product(test_url)
+    result = scraper.scrape_product(test_url2)
     if result:
         print(f"Product: {result['name']}")
         print(f"Price: ${result['price']}")
