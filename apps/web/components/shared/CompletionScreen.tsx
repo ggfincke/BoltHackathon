@@ -239,7 +239,8 @@ const CompletionScreen: React.FC<CompletionScreenProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <button
           onClick={onViewBasket}
-          className="btn-base bg-primary text-dark-text px-8 py-3 text-lg rounded-lg flex items-center justify-center space-x-2"
+          className="btn-base px-8 py-3 text-lg rounded-lg flex items-center justify-center space-x-2"
+          style={{ background: 'var(--secondary)', color: 'var(--light-text)' }}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -249,7 +250,8 @@ const CompletionScreen: React.FC<CompletionScreenProps> = ({
         </button>
         <button
           onClick={onReset}
-          className="btn-base border border-gray-300 dark:border-gray-700 text-text px-8 py-3 text-lg rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center space-x-2"
+          className="btn-base px-8 py-3 text-lg rounded-lg flex items-center justify-center space-x-2"
+          style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
