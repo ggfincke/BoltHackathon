@@ -1363,9 +1363,218 @@ a.bg-primary,
   background-origin: border-box;
   background-clip: padding-box, border-box;
   transition: all 0.3s ease;
+  min-height: 250px; /* Increased height by 25% */
 }
 
 .gradient-border-textarea:focus {
   background-image: linear-gradient(var(--background), var(--background)), linear-gradient(135deg, var(--secondary), var(--accent));
   box-shadow: 0 0 0 3px rgba(133, 209, 231, 0.1);
+}
+
+/* Chat interface styles */
+.chat-result-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-primary);
+  margin-bottom: 0.75rem;
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+
+.chat-result-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.chat-result-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 0.25rem;
+  object-fit: cover;
+  background-color: var(--bg-muted);
+  flex-shrink: 0;
+}
+
+.chat-result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-result-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+
+.chat-result-price {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.chat-confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.chat-confidence-high {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+}
+
+.chat-confidence-medium {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.chat-confidence-low {
+  background-color: var(--error-bg);
+  color: var(--error-text);
+}
+
+.chat-alternatives-dropdown {
+  position: absolute;
+  z-index: 10;
+  background: var(--background);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.chat-alternative-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chat-alternative-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.chat-alternative-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.25rem;
+  object-fit: cover;
+}
+
+.chat-loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--bg-muted);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chat-loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.chat-progress-bar {
+  width: 100%;
+  height: 0.25rem;
+  background-color: var(--bg-secondary);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.chat-progress-value {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* Completion screen styles */
+.completion-card {
+  background: var(--surface);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-primary);
+  transition: all 0.3s ease;
+}
+
+.completion-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.completion-product-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.completion-product-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.completion-product-price {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.completion-product-retailer {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.completion-section-title {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-primary);
+  padding-bottom: 0.5rem;
+}
+
+/* State transitions */
+.chat-state-transition {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.chat-state-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.chat-state-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chat-state-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chat-state-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
 }
