@@ -47,6 +47,35 @@ class GiantEagleScraper(BaseScraper):
         # Giant Eagle doesn't have third-party listings
         return "giant_eagle"
 
+    def product_exists(self, driver, timeout: int = 3) -> bool:
+        """
+        Returns True if the page looks like a real product page.
+        Returns False if we hit Giant Eagle's "Sorry, we couldn't find this product."
+        We key only off text, so randomised class names don't break the check.
+        """
+        not_found_xpath = (
+            "//*[contains(translate(normalize-space(.), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+            "'sorry') "
+            "and contains(translate(normalize-space(.), "
+            "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "
+            "'find this product')]"
+        )
+
+        try:
+            # Wait a bit to see if the 'not found' message appears
+            WebDriverWait(driver, timeout).until(
+                lambda d: (
+                    d.find_elements(By.XPATH, not_found_xpath)
+                    or "product not found" in d.title.lower()
+                )
+            )
+            # If we get past the wait without Timing out, we definitely saw the message/title
+            return False
+        except TimeoutException:
+            # Timed out ⇒ no message ⇒ product page is (probably) valid
+            return True
+
     # extract product name
     def get_product_name(self, driver):
         selectors = [
@@ -197,7 +226,7 @@ class GiantEagleScraper(BaseScraper):
 
     # main scraping method
     def scrape_product(self, url):
-        driver = self.get_driver()
+        driver = self.get_driver(headless=False)
         
         try:
             self.logger.info(f"Scraping Giant Eagle product: {url}")
@@ -213,6 +242,11 @@ class GiantEagleScraper(BaseScraper):
             
             # add random delay to avoid detection
             self.random_delay(2, 4)
+
+            # check if product exists (not found page)
+            if not self.product_exists(driver):
+                self.logger.info("Product not found on Giant Eagle")
+                return None
 
             # extract product information
             product_name = self.get_product_name(driver)

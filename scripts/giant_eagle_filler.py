@@ -45,6 +45,7 @@ class GiantEagleFiller:
         self.stats = {
             'total_upcs_processed': 0,
             'valid_urls_found': 0,
+            'products_not_found': 0,
             'successful_listings_created': 0,
             'failed_scrapes': 0,
             'skipped_existing_listings': 0,
@@ -227,8 +228,15 @@ class GiantEagleFiller:
                 else:
                     self.stats['errors'] += 1
                     
-            else:
+            elif scraped_data is None:
+                # None response can be either "product not found" or scraping error
+                # The scraper logs the specific reason, so we'll count as not found
                 self.logger.debug(f"Product not found on Giant Eagle: {product_name}")
+                self.stats['products_not_found'] += 1
+                
+            else:
+                # scraped_data exists but no name - this is a scraping issue
+                self.logger.warning(f"Failed to scrape product details for: {product_name}")
                 self.stats['failed_scrapes'] += 1
             
             # add delay b/w requests
@@ -308,6 +316,7 @@ class GiantEagleFiller:
         elapsed = datetime.now() - self.start_time
         self.logger.info(f"Progress - Processed: {self.stats['total_upcs_processed']}, "
                         f"Found: {self.stats['valid_urls_found']}, "
+                        f"Not Found: {self.stats['products_not_found']}, "
                         f"Created: {self.stats['successful_listings_created']}, "
                         f"Elapsed: {elapsed}")
 
@@ -334,6 +343,7 @@ class GiantEagleFiller:
         self.logger.info("="*60)
         self.logger.info(f"Total UPCs Processed:     {stats['total_upcs_processed']}")
         self.logger.info(f"Products Found on GE:     {stats['valid_urls_found']}")
+        self.logger.info(f"Products Not Found on GE: {stats['products_not_found']}")
         self.logger.info(f"Listings Created:         {stats['successful_listings_created']}")
         self.logger.info(f"Failed Scrapes:           {stats['failed_scrapes']}")
         self.logger.info(f"Existing Listings Skipped: {stats['skipped_existing_listings']}")

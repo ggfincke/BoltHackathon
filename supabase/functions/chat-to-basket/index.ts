@@ -654,7 +654,8 @@ async function matchSingleIngredient(
           if (!bestMatch) {
             bestMatch = result[0];
           }
-          alternatives.push(...result.slice(0, 3)); // Keep top 3 alternatives
+          // Allow up to 5 alternative suggestions
+          alternatives.push(...result.slice(0, 5)); // Keep top 5 alternatives
         }
 
         currentMessages.push({
@@ -696,7 +697,8 @@ async function matchSingleIngredient(
           unit: ingredient.unit,
           alternatives: alternatives
             .filter(alt => alt.id !== bestMatch.id)
-            .slice(0, 2)
+            // Provide up to 5 alternative suggestions
+            .slice(0, 5)
             .map(alt => ({
               product_id: alt.id,
               product_name: alt.name,

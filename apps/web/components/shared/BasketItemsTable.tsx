@@ -29,6 +29,7 @@ type BasketItem = {
       retailer: {
         name: string;
       };
+      image_url?: string | null;
     }[];
   };
 };
@@ -145,9 +146,9 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                   <div className="flex items-center gap-3">
                     {/* Product Image */}
                     <div className="product-image-container w-12 h-12 flex-shrink-0">
-                      {item.product.image_url ? (
+                       {(() => { const imageUrl = (item.product.image_url && item.product.image_url.trim() !== '') ? item.product.image_url : (item.product.listings?.[0]?.image_url || ''); return imageUrl; })() !== '' ? (
                         <img
-                          src={item.product.image_url}
+                          src={(item.product.image_url && item.product.image_url.trim() !== '') ? item.product.image_url : (item.product.listings?.[0]?.image_url || '')}
                           alt={item.product.name}
                           className="w-full h-full object-cover rounded"
                           onError={(e) => {
@@ -156,10 +157,10 @@ export default function BasketItemsTable({ items, canEdit, onUpdateItem, onRemov
                             target.nextElementSibling?.classList.remove('hidden');
                           }}
                         />
-                      ) : null}
+                       ) : null}
                       {/* Fallback placeholder */}
                       <div 
-                        className={`w-full h-full rounded flex items-center justify-center text-xs font-medium ${item.product.image_url ? 'hidden' : ''}`}
+                        className={`w-full h-full rounded flex items-center justify-center text-xs font-medium ${(() => { const imageUrl = (item.product.image_url && item.product.image_url.trim() !== '') ? item.product.image_url : (item.product.listings?.[0]?.image_url || ''); return imageUrl; })() !== '' ? 'hidden' : ''}`}
                         style={{ 
                           background: 'var(--bg-muted)', 
                           color: 'var(--text-muted)' 
