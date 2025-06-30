@@ -210,14 +210,12 @@ export default function PopularCategories({ categories: propCategories }: Popula
               <span className="text-sm font-medium text-center" style={{ color: 'var(--text)' }}>
                 {category.name}
               </span>
-              {category.count > 0 && (
-                <span
-                  className="text-xs px-2 py-1 rounded-full mt-1"
-                  style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
-                >
-                  {category.count} items
-                </span>
-              )}
+              <span
+                className={`text-xs px-2 py-1 rounded-full mt-1 ${category.count > 0 ? 'opacity-100' : 'opacity-0'}`}
+                style={{ background: 'var(--primary)', color: 'var(--dark-text)' }}
+              >
+                {category.count > 0 ? `${category.count} items` : '0 items'}
+              </span>
 
             </Link>
           ))}
