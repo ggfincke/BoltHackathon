@@ -169,8 +169,8 @@ export default function UserStats({
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6 h-full flex flex-col">
-      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+    <div className="bg-surface rounded-lg shadow-sm p-4 h-full flex flex-col">
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
         Your Stats
       </h2>
       {loading ? (

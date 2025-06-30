@@ -186,8 +186,8 @@ export default function PopularCategories({ categories: propCategories }: Popula
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+    <div className="bg-surface rounded-lg shadow-sm p-4">
+      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text)' }}>
         Your Popular Categories
       </h2>
       {loading ? (

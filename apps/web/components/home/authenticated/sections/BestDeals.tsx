@@ -360,8 +360,8 @@ export default function BestDeals({ deals: propDeals }: BestDealsProps) {
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-surface rounded-lg shadow-sm p-4">
+      <div className="flex justify-between items-center mb-2">
         <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>
           Best Deals
         </h2>
