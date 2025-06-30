@@ -26,6 +26,12 @@ type Product = {
     id: string;
     name: string;
     slug: string;
+    parent_id?: string | null;
+    parent?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
   }[];
   listings: {
     id: string;
@@ -95,7 +101,12 @@ export default function ProductPage() {
             review_count,
             brand:brands(id, name),
             categories:product_categories(
-              category:categories(id, name, slug)
+              category:categories(
+                id, 
+                name, 
+                slug,
+                parent_id
+              )
             ),
             listings(
               id,
@@ -149,25 +160,57 @@ export default function ProductPage() {
             })
           );
 
+          // Enhanced category processing with parent categories
+          const categoriesWithParents = await Promise.all(
+            data.categories.map(async (pc) => {
+              const category = pc.category;
+              
+              // If this category has a parent, fetch it
+              if (category.parent_id) {
+                const { data: parentData, error: parentError } = await supabase
+                  .from('categories')
+                  .select('id, name, slug, parent_id')
+                  .eq('id', category.parent_id)
+                  .single();
+                
+                if (!parentError && parentData) {
+                  return {
+                    ...category,
+                    parent: parentData
+                  };
+                }
+              }
+              
+              return category;
+            })
+          );
+
           // Format the data
           const formattedProduct = {
             ...data,
-            categories: data.categories.map(c => c.category),
+            categories: categoriesWithParents,
             price_histories: priceHistories.flat()
           };
 
           setProduct(formattedProduct);
           
-          // Build breadcrumbs
+          // Build breadcrumbs with parent categories
           if (formattedProduct.categories && formattedProduct.categories.length > 0) {
-            // Use the first category for breadcrumbs
+            // Use the first category for breadcrumbs and build hierarchy
             const category = formattedProduct.categories[0];
             const breadcrumbItems = [
               { name: 'Home', slug: '' },
-              { name: 'Categories', slug: 'categories' },
-              { name: category.name, slug: category.slug },
-              { name: formattedProduct.name, slug: '' }
+              { name: 'Categories', slug: 'categories' }
             ];
+            
+            // Add parent category if it exists
+            if ('parent' in category && category.parent) {
+              breadcrumbItems.push({ name: category.parent.name, slug: category.parent.slug });
+            }
+            
+            // Add current category
+            breadcrumbItems.push({ name: category.name, slug: category.slug });
+            breadcrumbItems.push({ name: formattedProduct.name, slug: '' });
             setBreadcrumbs(breadcrumbItems);
           } else {
             setBreadcrumbs([
@@ -317,27 +360,46 @@ export default function ProductPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Product Image */}
-        <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
+        <div className="lg:col-span-1 space-y-6">
+          <div className="card-enhanced bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover-lift">
             <img 
               src={mainImageUrl} 
               alt={product.name}
               className="w-full h-auto object-contain aspect-square"
             />
           </div>
+          
+          {/* Price History Chart - moved under product image */}
+          {product.price_histories && product.price_histories.length > 0 && (
+            <div className="animate-fade-in-up delay-300">
+              <div className="flex items-center mb-4">
+                <svg className="w-5 h-5 mr-2" style={{ color: 'var(--secondary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 className="text-lg font-semibold">Price History</h3>
+              </div>
+              <div className="card-enhanced bg-surface p-6 rounded-lg shadow-sm">
+                <PriceHistoryChart priceHistories={product.price_histories} />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
-        <div className="lg:col-span-2">
-          <div className="bg-surface p-6 rounded-lg shadow-sm mb-6">
-            <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+        <div className="lg:col-span-2 space-y-6">
+          <div className="card-enhanced bg-surface p-8 rounded-lg shadow-sm animate-fade-in-up">
+            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-6">
               {product.categories.map(category => (
                 <a 
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  className="px-3 py-1 rounded-full text-sm font-medium transition-all hover-lift"
+                  style={{ 
+                    background: 'var(--accent)',
+                    color: 'var(--light-text)'
+                  }}
                 >
                   {category.name}
                 </a>
@@ -345,22 +407,17 @@ export default function ProductPage() {
             </div>
             
             {product.brand && (
-              <div className="mb-4">
-                <span className="text-gray-600 dark:text-gray-400 text-sm">Brand: </span>
-                <span className="font-medium">{product.brand.name}</span>
-              </div>
-            )}
-            
-            {product.upc && (
-              <div className="mb-4">
-                <span className="text-gray-600 dark:text-gray-400 text-sm">UPC: </span>
-                <span className="font-mono">{product.upc}</span>
+              <div className="mb-6 flex items-center">
+                <span className="text-muted text-sm font-medium">Brand:</span>
+                <span className="ml-2 font-semibold" style={{ color: 'var(--primary)' }}>
+                  {product.brand.name}
+                </span>
               </div>
             )}
             
             {product.review_score !== null && (
-              <div className="mb-4 flex items-center">
-                <div className="flex items-center mr-2">
+              <div className="mb-6 flex items-center">
+                <div className="flex items-center mr-3">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <svg 
                       key={i}
@@ -368,63 +425,130 @@ export default function ProductPage() {
                       viewBox="0 0 24 24" 
                       fill={i < Math.round(product.review_score || 0) ? "currentColor" : "none"}
                       stroke="currentColor"
-                      className={`w-4 h-4 ${i < Math.round(product.review_score || 0) ? "text-yellow-400" : "text-gray-300"}`}
+                      className={`w-5 h-5 ${i < Math.round(product.review_score || 0) ? "text-yellow-400" : "text-gray-300"}`}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={i < Math.round(product.review_score || 0) ? 0 : 1.5} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                     </svg>
                   ))}
                 </div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-muted font-medium">
                   {product.review_score?.toFixed(1)} ({product.review_count} reviews)
                 </span>
               </div>
             )}
             
             {product.description && (
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold mb-2">Description</h2>
-                <p className="text-gray-700 dark:text-gray-300">{product.description}</p>
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-3">Description</h2>
+                <p className="text-secondary leading-relaxed">{product.description}</p>
               </div>
             )}
             
-            {bestListing && (
-              <div className="mt-4">
-                <div className="flex items-baseline">
-                  <span className="text-3xl font-bold text-primary">
-                    ${bestListing.price?.toFixed(2)}
-                  </span>
-                  {bestListing.sale_price && bestListing.price && bestListing.sale_price < bestListing.price && (
-                    <span className="ml-2 text-gray-500 line-through">
-                      ${bestListing.price.toFixed(2)}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {/* Best Price Section */}
+              {bestListing && (
+                <div className="p-6 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+                  <div className="flex items-baseline mb-2">
+                    <span className="text-4xl font-bold" style={{ color: 'var(--primary)' }}>
+                      ${bestListing.price?.toFixed(2)}
                     </span>
-                  )}
+                    {bestListing.sale_price && bestListing.price && bestListing.sale_price < bestListing.price && (
+                      <span className="ml-3 text-lg text-muted line-through">
+                        ${bestListing.price.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mb-4 flex items-center">
+                    <span className="text-sm text-muted">Best price from</span>
+                    <span className="ml-1 font-semibold" style={{ color: 'var(--secondary)' }}>
+                      {bestListing.retailer.name}
+                    </span>
+                    {bestListing.in_stock && (
+                      <span className="status-badge success ml-3">
+                        In Stock
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => setIsAddToBasketModalOpen(true)}
+                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover-lift"
+                      style={{ 
+                        background: 'var(--primary)',
+                        color: 'var(--dark-text)'
+                      }}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span>Add to Basket</span>
+                    </button>
+                    <a 
+                      href={bestListing.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn-base px-6 py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover-lift"
+                      style={{ 
+                        background: 'var(--secondary)',
+                        color: 'var(--light-text)'
+                      }}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      <span>View Best Deal</span>
+                    </a>
+                  </div>
                 </div>
-                <div className="mt-1 text-sm">
-                  Best price from <span className="font-medium">{bestListing.retailer.name}</span>
+              )}
+
+              {/* Price Comparison Section */}
+              <div className="p-6 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+                <div className="flex items-center mb-4">
+                  <svg className="w-5 h-5 mr-2" style={{ color: 'var(--primary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold">All Retailers</h3>
                 </div>
-                <div className="mt-4 flex gap-3">
-                  <a 
-                    href={bestListing.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-block bg-primary text-buttonText px-6 py-3 rounded-md hover:bg-opacity-90 transition-colors font-medium"
-                  >
-                    View Best Deal
-                  </a>
-                  <button
-                    onClick={() => setIsAddToBasketModalOpen(true)}
-                    className="inline-block bg-surface border border-gray-300 dark:border-gray-700 px-6 py-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-medium"
-                  >
-                    Add to Basket
-                  </button>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {product.listings
+                    .filter(listing => listing.price !== null)
+                    .sort((a, b) => {
+                      // In stock first, then by price
+                      if (a.in_stock && !b.in_stock) return -1;
+                      if (!a.in_stock && b.in_stock) return 1;
+                      return (a.price || 0) - (b.price || 0);
+                    })
+                    .map((listing, index) => (
+                      <div key={listing.id} className={`flex items-center justify-between p-3 rounded-lg ${index === 0 ? 'bg-success-bg border border-primary' : 'bg-hover'}`}>
+                        <div className="flex items-center">
+                          <div className="text-sm font-medium mr-2">{listing.retailer.name}</div>
+                          {index === 0 && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-primary text-dark-text font-medium">Best</span>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold">${listing.price?.toFixed(2)}</span>
+                          <span className={`status-badge ${listing.in_stock ? 'success' : 'error'} text-xs`}>
+                            {listing.in_stock ? 'In Stock' : 'Out'}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  }
                 </div>
               </div>
-            )}
+            </div>
           </div>
           
           {/* Price Tracking Form */}
-          <div className="bg-surface p-6 rounded-lg shadow-sm mb-6">
-            <h2 className="text-lg font-semibold mb-4">Track This Product</h2>
+          <div className="card-enhanced bg-surface p-8 rounded-lg shadow-sm animate-fade-in-up delay-100">
+            <div className="flex items-center mb-6">
+              <svg className="w-6 h-6 mr-3" style={{ color: 'var(--accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9.86 1.86L11 3l-1.14 1.14a4 4 0 000 5.66L11 11l-1.14 1.14a4 4 0 000 5.66L11 19l-1.14 1.14a4 4 0 01-5.66 0L3 19l1.14-1.14a4 4 0 010-5.66L3 11l1.14-1.14a4 4 0 010-5.66L3 3l1.14-1.14a4 4 0 015.66 0z" />
+              </svg>
+              <h2 className="text-xl font-semibold">Track This Product</h2>
+            </div>
             <ProductTrackingForm 
               isTracking={isTracking}
               preferences={trackingPreferences}
@@ -436,33 +560,6 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
-
-      {/* Price Comparison Table */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Price Comparison</h2>
-        <PriceComparisonTable listings={product.listings.map(listing => ({
-          id: listing.id,
-          retailer_id: listing.retailer_id,
-          price: listing.sale_price ?? listing.price,
-          original_price: (listing.sale_price !== null && listing.price !== null && listing.sale_price < listing.price) ? listing.price : null,
-          currency: listing.currency || '',
-          in_stock: listing.in_stock ?? false,
-          availability_status: listing.availability_status,
-          url: listing.url,
-          image_url: listing.image_url,
-          retailer: listing.retailer
-        }))} />
-      </div>
-
-      {/* Price History Chart */}
-      {product.price_histories && product.price_histories.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Price History</h2>
-          <div className="bg-surface p-6 rounded-lg shadow-sm">
-            <PriceHistoryChart priceHistories={product.price_histories} />
-          </div>
-        </div>
-      )}
 
       {/* Add to Basket Modal */}
       <AddToBasketModal
