@@ -106,6 +106,7 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
 
   // Listen for basket updates
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleBasketUpdate = (event: any) => {
       // If optimistic add event, handle differently
       if (event.detail?.type === 'optimisticAdd') {
@@ -257,7 +258,7 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
                 created_at: item.added_at, 
                 product: {
                   ...item.products,
-                  listings: (item.products.listings || []).map((listing: any) => ({
+                  listings: (item.products.listings || []).map((listing: { price: number | null; retailer: { name: string } }) => ({
                     price: listing.price,
                     retailer: listing.retailer
                   }))

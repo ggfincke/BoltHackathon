@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '~/lib/auth';
+import { useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
@@ -412,7 +411,7 @@ export default function AuthModal({ isOpen, onClose, initialType = 'login', redi
                   className="auth-modal-link"
                   disabled={loading}
                 >
-                  Don't have an account? Sign up
+                  Don&apos;t have an account? Sign up
                 </button>
                 <button
                   type="button"

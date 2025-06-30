@@ -291,7 +291,7 @@ export default function Settings() {
                 <div className="flex-1">
                   <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Are you sure?</h4>
                   <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-                    This will sign you out from all devices and sessions. You'll need to sign in again to access your account.
+                    This will sign you out from all devices and sessions. You&apos;ll need to sign in again to access your account.
                   </p>
                   <div className="flex gap-3">
                     <button 

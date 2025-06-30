@@ -3,8 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '~/lib/auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+
 
 export default function SettingsLayout({
   children,
@@ -13,7 +12,6 @@ export default function SettingsLayout({
 }) {
   const pathname = usePathname();
   const { user, loading } = useAuth();
-  const router = useRouter();
 
   if (loading) {
     return (

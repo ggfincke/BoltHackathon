@@ -95,7 +95,8 @@ export default function NotificationCenter() {
       if (error) throw error;
       
       // Format notifications
-      const formattedNotifications: Notification[] = data.map((notification: any) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const formattedNotifications: Notification[] = (data as any[]).map((notification) => ({
         ...notification,
         product: Array.isArray(notification.product) ? notification.product[0]?.product || null : notification.product || null
       }));

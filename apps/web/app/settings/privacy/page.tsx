@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '~/lib/auth';
+
 
 export default function PrivacySettings() {
-  const { user } = useAuth();
   const [dataSharing, setDataSharing] = useState(true);
   const [analyticsConsent, setAnalyticsConsent] = useState(true);
   const [marketingConsent, setMarketingConsent] = useState(false);

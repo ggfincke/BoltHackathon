@@ -266,7 +266,7 @@ export default function CategoryPage() {
         <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
           <h2 className="text-xl font-semibold mb-2">Category not found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The category you're looking for doesn't exist or has been removed.
+            The category you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Link 
             href="/categories"

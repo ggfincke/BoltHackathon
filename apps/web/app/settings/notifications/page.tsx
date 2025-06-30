@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
 
@@ -17,7 +17,6 @@ type NotificationPreference = {
 
 export default function NotificationSettings() {
   const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
   
   const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -384,7 +383,7 @@ export default function NotificationSettings() {
               </div>
             </div>
             <p className="text-sm text-muted mt-3">
-              We won't send notifications during your quiet hours, except for critical alerts you've opted into.
+              We won&apos;t send notifications during your quiet hours, except for critical alerts you&apos;ve opted into.
             </p>
           </div>
         </div>

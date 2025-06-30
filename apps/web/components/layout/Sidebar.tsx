@@ -19,11 +19,11 @@ interface RecentBasket {
   total_cost: number;
 }
 
-export default function Sidebar({ variant = 'home' }: SidebarProps) {
+export default function Sidebar({ }: SidebarProps) {
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed] = useState(false);
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
   const [loadingBaskets, setLoadingBaskets] = useState(false);
   const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);

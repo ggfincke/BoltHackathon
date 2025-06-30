@@ -6,6 +6,7 @@ import Sidebar from '~/components/layout/Sidebar';
 import { ThemeProvider } from '~/components/ui/ThemeProvider';
 import { AuthProvider } from '~/lib/auth';
 import { AuthModalProvider } from '~/components/shared/AuthModalProvider';
+import ConditionalBoltBadge from '~/components/shared/ConditionalBoltBadge';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
               </div>
             </AuthModalProvider>
           </AuthProvider>
+          <ConditionalBoltBadge />
         </ThemeProvider>
       </body>
     </html>

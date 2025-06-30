@@ -118,7 +118,7 @@ export default function CreateBasketPage() {
 
         // Get ALL product IDs (main products + alternatives) for efficient bulk fetching
         const allProductIds = new Set<string>();
-        basketItems.forEach((item: any) => {
+        basketItems.forEach((item) => {
           allProductIds.add(item.product_id);
           // Add alternatives from original matches
           const originalMatch = result.matches.find(m => m.product_id === item.product_id);
@@ -141,18 +141,19 @@ export default function CreateBasketPage() {
 
         // Create a map of best listings per product (prefer listings with images, then lowest price)
         const bestListings = new Map();
-        (listings || []).forEach((listing: any) => {
+        (listings || []).forEach((listing) => {
           const existing = bestListings.get(listing.product_id);
           if (!existing || 
               (listing.image_url && !existing.image_url) || 
-              ((!listing.image_url || existing.image_url) && listing.price < existing.price)) {
+              ((!listing.image_url || existing.image_url) && 
+               listing.price !== null && existing.price !== null && listing.price < existing.price)) {
             bestListings.set(listing.product_id, listing);
           }
         });
 
         // Transform the data into the structure we already use for editableMatches
         // Preserve and enrich alternatives from the original LLM response
-        const transformed: ProductMatch[] = basketItems.map((item: any) => {
+        const transformed: ProductMatch[] = basketItems.map((item) => {
           const listing = bestListings.get(item.product_id);
           // Find the original match to preserve alternatives
           const originalMatch = result.matches.find(m => m.product_id === item.product_id);
@@ -306,7 +307,7 @@ export default function CreateBasketPage() {
           description: basketDescription.trim() || null,
           is_public: false,
           created_at: new Date().toISOString(),
-        } as any); // cast to any to bypass generated types that disallow id
+        }); // Generate types will handle the ID field
 
       if (basketError) throw basketError;
 
@@ -318,7 +319,7 @@ export default function CreateBasketPage() {
           user_id: user.id,
           role: 'owner',
           created_at: new Date().toISOString(),
-        } as any);
+        });
 
       if (linkError) throw linkError;
 
@@ -356,16 +357,7 @@ export default function CreateBasketPage() {
     }
   };
 
-  const updateMatchQuantity = (index: number, newQuantity: number) => {
-    const updated = [...editableMatches];
-    updated[index].quantity = Math.max(1, newQuantity);
-    setEditableMatches(updated);
-  };
 
-  const removeMatch = (index: number) => {
-    const updated = editableMatches.filter((_, i) => i !== index);
-    setEditableMatches(updated);
-  };
 
   const switchToAlternative = useCallback((matchIndex: number, alternative: ProductAlternative) => {
     setIsUpdatingAlternative(true);
@@ -452,12 +444,57 @@ export default function CreateBasketPage() {
     }
   };
 
-  const getConfidenceBadgeClass = (confidence: string) => {
-    switch (confidence) {
-      case 'high': return 'chat-confidence-high';
-      case 'medium': return 'chat-confidence-medium';
-      case 'low': return 'chat-confidence-low';
-      default: return 'chat-confidence-medium';
+  const handleUpdateQuantity = async (matchIndex: number, newQuantity: number) => {
+    if (!result?.basket_id) return;
+    
+    try {
+      const match = editableMatches[matchIndex];
+      if (!match) return;
+
+      // Update in database
+      const { error } = await supabase
+        .from('basket_items')
+        .update({
+          quantity: newQuantity,
+          updated_at: new Date().toISOString()
+        })
+        .eq('basket_id', result.basket_id)
+        .eq('product_id', match.product_id);
+      
+      if (error) throw error;
+
+      // Update local state
+      const updatedMatches = [...editableMatches];
+      updatedMatches[matchIndex] = { ...match, quantity: newQuantity };
+      setEditableMatches(updatedMatches);
+      
+    } catch (err) {
+      console.error('Failed to update quantity:', err);
+    }
+  };
+
+  const handleDeleteProduct = async (matchIndex: number) => {
+    if (!result?.basket_id) return;
+    
+    try {
+      const match = editableMatches[matchIndex];
+      if (!match) return;
+
+      // Remove from database
+      const { error } = await supabase
+        .from('basket_items')
+        .delete()
+        .eq('basket_id', result.basket_id)
+        .eq('product_id', match.product_id);
+      
+      if (error) throw error;
+
+      // Update local state
+      const updatedMatches = editableMatches.filter((_, i) => i !== matchIndex);
+      setEditableMatches(updatedMatches);
+      
+    } catch (err) {
+      console.error('Failed to delete product:', err);
     }
   };
 
@@ -497,196 +534,7 @@ export default function CreateBasketPage() {
     </div>
   );
 
-  // Results Display Component
-  const ResultsDisplay = ({ matches }: { matches: ProductMatch[] }) => (
-    <div className="space-y-4">
-      <h3 className="text-xl font-semibold mb-4">Matched Products ({matches.length})</h3>
-      <div className="space-y-3">
-        {matches.map((match, index) => (
-          <div key={match.product_id} className="chat-result-item">
-            <div className="flex items-center space-x-4">
-              {/* Product Image */}
-              <div className="chat-result-image">
-                {match.image_url && match.image_url.trim() !== '' ? (
-                  <img 
-                    src={match.image_url} 
-                    alt={match.product_name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : null}
-                <div className={`w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${match.image_url && match.image_url.trim() !== '' ? 'hidden' : ''}`}>
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
 
-              {/* Product Details */}
-              <div className="flex-1 chat-result-content">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h4 className="chat-result-title">{match.product_name}</h4>
-                    <div className="text-sm text-muted mb-2">
-                      <span className="font-medium">{match.ingredient}</span> → 
-                      <span className="ml-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">
-                        {match.retailer}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Confidence Badge */}
-                  <span className={`chat-confidence-badge ${getConfidenceBadgeClass(match.confidence)}`}>
-                    {match.confidence} confidence
-                  </span>
-                </div>
-
-                {/* Price and Controls */}
-                <div className="flex items-center justify-between">
-                  <div className="chat-result-price">
-                    ${(match.price || 0).toFixed(2)}
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    {/* Quantity Controls */}
-                    <div className="flex items-center space-x-2">
-                      <label className="text-sm text-muted">Qty:</label>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          type="button"
-                          onClick={() => updateMatchQuantity(index, match.quantity - 1)}
-                          className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
-                          disabled={match.quantity <= 1}
-                        >
-                          −
-                        </button>
-                        <span className="w-8 text-center text-sm">{match.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateMatchQuantity(index, match.quantity + 1)}
-                          className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Alternatives Dropdown - More visible and always show button */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setOpenAlternatives(openAlternatives === `${index}` ? null : `${index}`)}
-                        className={`chat-alternatives-button text-sm px-3 py-1.5 rounded-md border transition-colors flex items-center space-x-1 ${
-                          match.alternatives && match.alternatives.length > 0 
-                            ? 'text-primary border-primary hover:bg-primary hover:text-white' 
-                            : 'text-gray-400 border-gray-300 cursor-not-allowed'
-                        }`}
-                        disabled={!match.alternatives || match.alternatives.length === 0}
-                        title={match.alternatives && match.alternatives.length > 0 
-                          ? `${match.alternatives.length} alternatives available` 
-                          : 'No alternatives available'
-                        }
-                      >
-                        <span>Alternatives</span>
-                        <span className="text-xs">
-                          ({match.alternatives?.length || 0})
-                        </span>
-                        <svg 
-                          className={`w-4 h-4 transition-transform ${openAlternatives === `${index}` ? 'rotate-180' : ''}`}
-                          fill="none" 
-                          stroke="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      {openAlternatives === `${index}` && match.alternatives && match.alternatives.length > 0 && (
-                        <>
-                          {/* Backdrop for mobile */}
-                          <div 
-                            className="fixed inset-0 z-40 bg-black/20 md:hidden" 
-                            onClick={() => setOpenAlternatives(null)} 
-                          />
-                          
-                          <div className="chat-alternatives-dropdown">
-                            <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                              <div className="text-xs font-medium text-muted">
-                                Choose an alternative:
-                              </div>
-                            </div>
-                            {match.alternatives.map((alt, altIndex) => (
-                              <button
-                                key={`${alt.product_id}-${altIndex}`}
-                                type="button"
-                                onClick={() => switchToAlternative(index, alt)}
-                                className="chat-alternative-item"
-                              >
-                                <div className="chat-alternative-image">
-                                  {alt.image_url && alt.image_url.trim() !== '' ? (
-                                    <img 
-                                      src={alt.image_url} 
-                                      alt={alt.product_name || 'Product image'}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.style.display = 'none';
-                                        target.nextElementSibling?.classList.remove('hidden');
-                                      }}
-                                    />
-                                  ) : null}
-                                  <div className={`w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${alt.image_url && alt.image_url.trim() !== '' ? 'hidden' : ''}`}>
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                  </div>
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm truncate" title={alt.product_name || 'Product name'}>
-                                    {alt.product_name || 'Unknown product'}
-                                  </div>
-                                  <div className="text-xs text-muted">{alt.retailer || 'Unknown retailer'}</div>
-                                </div>
-                                <div className="text-sm font-semibold text-primary">
-                                  ${(alt.price ?? 0).toFixed(2)}
-                                </div>
-                                <div className="ml-2">
-                                  <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                  </svg>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Remove Button */}
-                    <button
-                      type="button"
-                      onClick={() => removeMatch(index)}
-                      className="text-red-500 hover:text-red-700 transition-colors p-1"
-                      title="Remove item"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
 
 
@@ -731,7 +579,7 @@ export default function CreateBasketPage() {
 
         {mode === 'chat' ? (
           <p className="mb-4 text-muted text-center">
-            Paste any food-related text, recipe, or shopping list and we'll automatically create a basket with matching products.
+            Paste any food-related text, recipe, or shopping list and we&apos;ll automatically create a basket with matching products.
           </p>
         ) : (
           <p className="mb-4 text-muted text-center">
@@ -822,6 +670,8 @@ export default function CreateBasketPage() {
             openAlternatives={openAlternatives}
             onSetOpenAlternatives={setOpenAlternatives}
             onSwitchToAlternative={switchToAlternative}
+            onUpdateQuantity={handleUpdateQuantity}
+            onDeleteProduct={handleDeleteProduct}
             onViewBasket={handleViewBasket}
             onReset={handleReset}
           />

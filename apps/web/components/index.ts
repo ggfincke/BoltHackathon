@@ -40,4 +40,6 @@ export { default as ConfirmationModal } from './shared/ConfirmationModal';
 export { default as NotificationCenter } from './shared/NotificationCenter';
 export { default as AuthForm } from './shared/AuthForm';
 export { default as BasketItemsTable } from './shared/BasketItemsTable';
-export { default as CategoryCard } from './shared/CategoryCard'; 
+export { default as CategoryCard } from './shared/CategoryCard';
+export { default as BoltBadge } from './shared/BoltBadge';
+export { default as ConditionalBoltBadge } from './shared/ConditionalBoltBadge'; 

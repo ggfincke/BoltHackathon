@@ -41,7 +41,7 @@ export async function fetchBestDeals({
       }),
     ]);
 
-    let combined: BestDeal[] = [];
+    const combined: BestDeal[] = [];
 
     if (gapRes.data) {
       combined.push(

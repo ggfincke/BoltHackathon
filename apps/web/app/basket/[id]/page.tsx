@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuth } from '~/lib/auth';
@@ -78,18 +78,7 @@ export default function BasketDetail() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
   
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        router.push('/auth/login?redirectedFrom=/basket/' + (id as string));
-        return;
-      }
-      
-      fetchBasketDetails();
-    }
-  }, [user, authLoading, id, router]);
-  
-  const fetchBasketDetails = async () => {
+  const fetchBasketDetails = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -198,7 +187,18 @@ export default function BasketDetail() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, user, router]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        router.push('/auth/login?redirectedFrom=/basket/' + (id as string));
+        return;
+      }
+      
+      fetchBasketDetails();
+    }
+  }, [user, authLoading, id, router, fetchBasketDetails]);
   
   const handleDeleteBasket = async () => {
     try {
@@ -246,7 +246,7 @@ export default function BasketDetail() {
             user_id: user!.id,
             role: 'owner'
           }
-        ] as any);
+        ]);
       
       if (userError) throw userError;
       
@@ -262,7 +262,7 @@ export default function BasketDetail() {
       if (itemsToClone.length > 0) {
         const { error: itemsError } = await supabase
           .from('basket_items')
-          .insert(itemsToClone as any);
+          .insert(itemsToClone);
         
         if (itemsError) throw itemsError;
       }
@@ -316,44 +316,7 @@ export default function BasketDetail() {
     }
   };
   
-  const handleAddItem = async (productId: string, quantity: number = 1, notes: string = '') => {
-    try {
-      // Get current price for the product
-      const { data: listings, error: listingsError } = await supabase
-        .from('listings')
-        .select('price')
-        .eq('product_id', productId)
-        .order('price', { ascending: true })
-        .limit(1);
-      
-      if (listingsError) throw listingsError;
-      
-      const currentPrice = listings?.[0]?.price || null;
-      
-      // Add item to basket
-      const { error } = await supabase
-        .from('basket_items')
-        .insert({
-          basket_id: id as string,
-          product_id: productId,
-          quantity,
-          price_at_add: currentPrice,
-          notes
-        } as any);
-      
-      if (error) throw error;
-      
-      // Refresh basket items
-      fetchBasketDetails();
-      
-      // Dispatch event so components like the Sidebar refresh their basket lists
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('basketUpdated'));
-      }
-    } catch (error) {
-      console.error('Error adding item to basket:', error);
-    }
-  };
+
 
   const handleReplaceProduct = async (itemId: string, newProductId: string) => {
     try {
@@ -428,7 +391,7 @@ export default function BasketDetail() {
         <div className="bg-surface p-8 rounded-lg shadow-sm text-center">
           <h2 className="text-xl font-semibold mb-2">Basket not found</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            The basket you're looking for doesn't exist or you don't have access to it.
+            The basket you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
           </p>
           <button
             onClick={() => router.push('/baskets')}
@@ -516,6 +479,7 @@ export default function BasketDetail() {
       </div>
       
       <BasketItemsTable
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items={basketItems as any}
         canEdit={canEdit}
         onUpdateItem={handleUpdateItem}
@@ -528,6 +492,7 @@ export default function BasketDetail() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         basketId={basket.id}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         basketUsers={basketUsers as any}
         onUsersUpdated={fetchBasketDetails}
       />
