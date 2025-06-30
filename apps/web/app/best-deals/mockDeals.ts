@@ -1,0 +1,148 @@
+import type { Deal } from '~/components/product/DealCard';
+
+export const MOCK_DEALS: Deal[] = [
+  {
+    id: '1',
+    name: 'Organic Milk',
+    category: 'Dairy',
+    bestPrice: 3.49,
+    bestRetailer: 'Target',
+    worstPrice: 4.99,
+    worstRetailer: 'Amazon',
+    savings: 30,
+    imageUrl:
+      'https://images.pexels.com/photos/2510584/pexels-photo-2510584.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '2',
+    name: 'Cheerios Cereal',
+    category: 'Breakfast & Cereal',
+    bestPrice: 2.99,
+    bestRetailer: 'Walmart',
+    worstPrice: 3.99,
+    worstRetailer: 'Target',
+    savings: 25,
+    imageUrl:
+      'https://images.pexels.com/photos/135525/pexels-photo-135525.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '3',
+    name: 'Pasta Sauce',
+    category: 'Pantry Staples',
+    bestPrice: 2.79,
+    bestRetailer: 'Target',
+    worstPrice: 3.99,
+    worstRetailer: 'Amazon',
+    savings: 30,
+    imageUrl:
+      'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '4',
+    name: 'Greek Yogurt',
+    category: 'Dairy',
+    bestPrice: 4.49,
+    bestRetailer: 'Walmart',
+    worstPrice: 5.49,
+    worstRetailer: 'Amazon',
+    savings: 18,
+    imageUrl:
+      'https://images.pexels.com/photos/1435904/pexels-photo-1435904.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '5',
+    name: 'Chicken Breast',
+    category: 'Meat & Seafood',
+    bestPrice: 6.99,
+    bestRetailer: 'Target',
+    worstPrice: 8.99,
+    worstRetailer: 'Amazon',
+    savings: 22,
+    imageUrl:
+      'https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '6',
+    name: 'Olive Oil',
+    category: 'Pantry Staples',
+    bestPrice: 6.49,
+    bestRetailer: 'Walmart',
+    worstPrice: 7.99,
+    worstRetailer: 'Target',
+    savings: 19,
+    imageUrl:
+      'https://images.pexels.com/photos/33783/olive-oil-salad-dressing-cooking-olive.jpg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '7',
+    name: 'Frozen Pizza',
+    category: 'Frozen Foods',
+    bestPrice: 4.99,
+    bestRetailer: 'Walmart',
+    worstPrice: 6.49,
+    worstRetailer: 'Amazon',
+    savings: 23,
+    imageUrl:
+      'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '8',
+    name: 'Orange Juice',
+    category: 'Beverages',
+    bestPrice: 3.29,
+    bestRetailer: 'Target',
+    worstPrice: 4.19,
+    worstRetailer: 'Amazon',
+    savings: 21,
+    imageUrl:
+      'https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '9',
+    name: 'Potato Chips',
+    category: 'Snacks',
+    bestPrice: 2.5,
+    bestRetailer: 'Walmart',
+    worstPrice: 3.29,
+    worstRetailer: 'Target',
+    savings: 24,
+    imageUrl:
+      'https://images.pexels.com/photos/568805/pexels-photo-568805.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '10',
+    name: 'Ground Coffee',
+    category: 'Beverages',
+    bestPrice: 7.99,
+    bestRetailer: 'Target',
+    worstPrice: 9.99,
+    worstRetailer: 'Amazon',
+    savings: 20,
+    imageUrl:
+      'https://images.pexels.com/photos/1695052/pexels-photo-1695052.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '11',
+    name: 'Bananas',
+    category: 'Produce',
+    bestPrice: 0.49,
+    bestRetailer: 'Walmart',
+    worstPrice: 0.59,
+    worstRetailer: 'Target',
+    savings: 17,
+    imageUrl:
+      'https://images.pexels.com/photos/1093038/pexels-photo-1093038.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+  {
+    id: '12',
+    name: 'Bread Loaf',
+    category: 'Bakery & Bread',
+    bestPrice: 2.29,
+    bestRetailer: 'Walmart',
+    worstPrice: 2.99,
+    worstRetailer: 'Amazon',
+    savings: 23,
+    imageUrl:
+      'https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg?auto=compress&cs=tinysrgb&w=300',
+  },
+]; 
