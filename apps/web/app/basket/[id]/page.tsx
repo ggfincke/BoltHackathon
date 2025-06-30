@@ -35,12 +35,14 @@ type BasketItem = {
     brand?: {
       name: string;
     } | null;
+    image_url?: string | null;
     listings?: {
       id: string;
       price: number | null;
       currency: string | null;
       in_stock: boolean | null;
       url: string;
+      image_url?: string | null;
       retailer: {
         name: string;
       };
@@ -145,6 +147,7 @@ export default function BasketDetail() {
               currency,
               in_stock,
               url,
+              image_url,
               retailer:retailers(name)
             )
           )
