@@ -64,7 +64,7 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
     }
   }, [onProductAdded]);
 
-    // Add new product optimistically
+  // Add new product optimistically
   const addProductOptimistically = useCallback((
     productId: string, 
     productName: string, 
@@ -559,7 +559,11 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
                             <button
                               onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
                               disabled={isUpdating}
-                              className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors hover:brightness-90"
+                              style={{ 
+                                background: 'var(--primary)', 
+                                color: 'var(--dark-text)' 
+                              }}
                             >
                               -
                             </button>
@@ -569,7 +573,11 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
                             <button
                               onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
                               disabled={isUpdating}
-                              className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors"
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium disabled:opacity-50 transition-colors hover:brightness-90"
+                              style={{ 
+                                background: 'var(--primary)', 
+                                color: 'var(--dark-text)' 
+                              }}
                             >
                               +
                             </button>
@@ -658,9 +666,21 @@ export default function BasketPopup({ onProductAdded }: BasketPopupProps) {
                         onClick={() => handleBasketSwitch(basket)}
                         className={`w-full text-left p-3 rounded-lg transition-colors mb-1 ${
                           activeBasket?.id === basket.id
-                            ? 'bg-primary/10 text-primary'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                            ? ''
+                            : ''
                         }`}
+                        style={activeBasket?.id === basket.id ? {
+                          background: 'var(--primary)',
+                          color: 'var(--dark-text)'
+                        } : {}}
+                        onMouseEnter={activeBasket?.id !== basket.id ? (e) => {
+                          e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                          e.currentTarget.style.color = 'var(--highlighted-text)';
+                        } : undefined}
+                        onMouseLeave={activeBasket?.id !== basket.id ? (e) => {
+                          e.currentTarget.style.background = '';
+                          e.currentTarget.style.color = '';
+                        } : undefined}
                       >
                         <div className="flex justify-between items-start min-w-0 gap-2">
                           <div className="flex-1 min-w-0">

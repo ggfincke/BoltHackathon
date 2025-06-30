@@ -30,7 +30,7 @@ export default function RootLayout({
               <div className="flex">
                 <Sidebar variant="home" />
                 <main className="flex-1 ml-64 pt-16">
-                  <div className="p-6">
+                  <div className="p-4">
                     {children}
                   </div>
                 </main>

@@ -19,9 +19,10 @@ type Product = {
   brand?: { name: string } | null;
   listings?: {
     id: string;
+    retailer_id: string;
     price: number | null;
-    currency: string;
-    in_stock: boolean;
+    currency: string | null;
+    in_stock: boolean | null;
     url: string;
     image_url?: string | null;
     retailer: { name: string };
@@ -41,11 +42,10 @@ export default function CategoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<{name: string, slug: string}[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [sortOption, setSortOption] = useState<SortOption>('price_asc');
-  const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
   
-  // Pagination
+  // Pagination and sorting from URL params
   const page = parseInt(searchParams.get('page') || '1', 10);
+  const sortOption = (searchParams.get('sort') as SortOption) || 'price_asc';
   const pageSize = 20;
   
   // Get slug from params
@@ -112,7 +112,8 @@ export default function CategoryPage() {
                     slug, 
                     brand:brands(name),
                     listings(
-                      id, 
+                      id,
+                      retailer_id,
                       price, 
                       currency, 
                       in_stock, 
@@ -137,7 +138,9 @@ export default function CategoryPage() {
               }
             }
             
-            setProducts(allProducts as unknown as Product[]);
+            // Apply sorting to the products
+            const sortedProducts = applySorting(allProducts as unknown as Product[], sortOption);
+            setProducts(sortedProducts);
           } else {
             setProducts([]);
           }
@@ -155,7 +158,34 @@ export default function CategoryPage() {
     if (currentSlug) {
       fetchCategoryData();
     }
-  }, [currentSlug, page]);
+  }, [currentSlug, page, sortOption]);
+
+  const applySorting = (products: Product[], option: SortOption): Product[] => {
+    return [...products].sort((a, b) => {
+      const aPrice = a.listings?.reduce((min, listing) => 
+        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
+        null as number | null
+      );
+      
+      const bPrice = b.listings?.reduce((min, listing) => 
+        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
+        null as number | null
+      );
+      
+      switch (option) {
+        case 'price_asc':
+          return (aPrice || Infinity) - (bPrice || Infinity);
+        case 'price_desc':
+          return (bPrice || 0) - (aPrice || 0);
+        case 'name_asc':
+          return a.name.localeCompare(b.name);
+        case 'name_desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+  };
 
   const buildBreadcrumbs = async (currentCategory: Category) => {
     // Start with the current category
@@ -196,45 +226,28 @@ export default function CategoryPage() {
   };
 
   const handleSortChange = (option: SortOption) => {
-    setSortOption(option);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', option);
+    params.set('page', '1'); // Reset to first page when sorting changes
     
-    const sortedProducts = [...products].sort((a, b) => {
-      const aPrice = a.listings?.reduce((min, listing) => 
-        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
-        null as number | null
-      );
-      
-      const bPrice = b.listings?.reduce((min, listing) => 
-        listing.price !== null && (min === null || listing.price < min) ? listing.price : min, 
-        null as number | null
-      );
-      
-      switch (option) {
-        case 'price_asc':
-          return (aPrice || Infinity) - (bPrice || Infinity);
-        case 'price_desc':
-          return (bPrice || 0) - (aPrice || 0);
-        case 'name_asc':
-          return a.name.localeCompare(b.name);
-        case 'name_desc':
-          return b.name.localeCompare(a.name);
-        default:
-          return 0;
-      }
-    });
-    
-    setProducts(sortedProducts);
+    router.push(`/categories/${slugArray.join('/')}?${params.toString()}`);
   };
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', newPage.toString());
     
+    // Preserve current sort option
+    if (sortOption !== 'price_asc') {
+      params.set('sort', sortOption);
+    }
+    
     router.push(`/categories/${slugArray.join('/')}?${params.toString()}`);
   };
 
   const handleProductAdded = () => {
-    setBasketUpdateTrigger(prev => prev + 1);
+    // This callback is triggered when a product is added to the basket
+    // The BasketPopup component will handle its own state updates
   };
 
   if (loading) {

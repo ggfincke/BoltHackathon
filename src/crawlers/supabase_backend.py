@@ -688,6 +688,13 @@ class SupabaseBackend(OutputBackend):
                     }
                     
                     self.supabase.table('price_histories').insert(price_history_data).execute()
+                    
+                    # Check for price changes and send notifications if needed
+                    self.check_and_notify_price_changes(
+                        product_id=listing_data['product_id'],
+                        new_price=listing_data['price'],
+                        listing_id=listing_id
+                    )
             
             return listing_id
                 
@@ -1008,6 +1015,155 @@ class SupabaseBackend(OutputBackend):
                 "processed": 0,
                 "successful": 0
             }
+
+    def create_basket_notifications(self, product_id: str, listing_id: str, notification_type: str, 
+                                   old_price: float = None, new_price: float = None) -> Dict[str, Any]:
+        """
+        Create notifications for users tracking baskets that contain the specified product.
+        
+        Args:
+            product_id: UUID of the product that changed
+            listing_id: UUID of the listing that changed
+            notification_type: Type of notification ('price_drop', 'availability', 'changes')
+            old_price: Previous price (for price_drop notifications)
+            new_price: New price (for price_drop notifications)
+            
+        Returns:
+            Dict with results and statistics
+        """
+        try:
+            # First, get product details
+            product_response = self.supabase.table('products').select('name, slug').eq('id', product_id).single().execute()
+            if not product_response.data:
+                return {"error": "Product not found"}
+            
+            product_name = product_response.data['name']
+            
+            # Find all baskets containing this product and their tracking preferences
+            basket_items_response = self.supabase.table('basket_items')\
+                .select('basket_id')\
+                .eq('product_id', product_id)\
+                .execute()
+            
+            if not basket_items_response.data:
+                return {"message": "Product not in any baskets", "notifications_sent": 0}
+            
+            basket_ids = [item['basket_id'] for item in basket_items_response.data]
+            
+            # Get tracking preferences for these baskets
+            tracking_response = self.supabase.table('basket_trackings')\
+                .select('user_id, basket_id, notify_on_price_drop, notify_on_availability, notify_on_changes')\
+                .in_('basket_id', basket_ids)\
+                .execute()
+            
+            if not tracking_response.data:
+                self.logger.info(f"No users tracking baskets containing product {product_name}")
+                return {"message": "No users tracking baskets with this product", "notifications_sent": 0}
+            
+            # Filter based on notification type
+            relevant_trackings = []
+            for tracking in tracking_response.data:
+                should_notify = False
+                if notification_type == 'price_drop' and tracking.get('notify_on_price_drop'):
+                    should_notify = True
+                elif notification_type == 'availability' and tracking.get('notify_on_availability'):
+                    should_notify = True
+                elif notification_type == 'changes' and tracking.get('notify_on_changes'):
+                    should_notify = True
+                
+                if should_notify:
+                    relevant_trackings.append(tracking)
+            
+            if not relevant_trackings:
+                return {"message": f"No users want {notification_type} notifications", "notifications_sent": 0}
+            
+            # Generate notification message based on type
+            if notification_type == 'price_drop' and old_price and new_price:
+                savings = old_price - new_price
+                savings_percent = (savings / old_price) * 100
+                title = f"Price Drop Alert: {product_name}"
+                message = f"Great news! The price of {product_name} dropped from ${old_price:.2f} to ${new_price:.2f} (${savings:.2f} savings, {savings_percent:.1f}% off)!"
+            elif notification_type == 'availability':
+                title = f"Back in Stock: {product_name}"
+                message = f"{product_name} is now available in your tracked basket!"
+            else:  # changes
+                title = f"Product Update: {product_name}"
+                message = f"{product_name} in your tracked basket has been updated with new information."
+            
+            # Create notifications using the database function
+            notifications_created = 0
+            for tracking in relevant_trackings:
+                try:
+                    result = self.supabase.rpc('create_basket_notification', {
+                        'p_user_id': tracking['user_id'],
+                        'p_basket_id': tracking['basket_id'], 
+                        'p_notification_type': notification_type,
+                        'p_title': title,
+                        'p_message': message,
+                        'p_listing_id': listing_id
+                    }).execute()
+                    
+                    if result.data and result.data.get('success'):
+                        notifications_created += 1
+                        self.logger.debug(f"Created {notification_type} notification for user {tracking['user_id']}")
+                    else:
+                        self.logger.warning(f"Failed to create notification for user {tracking['user_id']}: {result.data}")
+                        
+                except Exception as e:
+                    self.logger.error(f"Error creating notification for user {tracking['user_id']}: {e}")
+            
+            self.logger.info(f"Created {notifications_created} {notification_type} notifications for product {product_name}")
+            return {
+                "success": True,
+                "notifications_sent": notifications_created,
+                "product_name": product_name,
+                "notification_type": notification_type
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error creating basket notifications: {e}")
+            return {"error": str(e)}
+
+    def check_and_notify_price_changes(self, product_id: str, new_price: float, listing_id: str) -> None:
+        """
+        Check if a price change warrants notifications and send them if so.
+        Call this method after updating a listing's price.
+        
+        Args:
+            product_id: UUID of the product
+            new_price: New price of the product
+            listing_id: UUID of the listing that was updated
+        """
+        try:
+            # Get the previous price from the listing history or current listing
+            listing_response = self.supabase.table('listings').select('price').eq('id', listing_id).single().execute()
+            if not listing_response.data:
+                return
+            
+            old_price = listing_response.data.get('price')
+            if not old_price or old_price == new_price:
+                return  # No price change or no previous price to compare
+            
+            # Only notify for significant price drops (not increases)
+            if new_price < old_price:
+                price_drop_percent = ((old_price - new_price) / old_price) * 100
+                
+                # Only notify for drops of 5% or more, and at least $1 savings
+                if price_drop_percent >= 5.0 and (old_price - new_price) >= 1.0:
+                    self.logger.info(f"Significant price drop detected: {price_drop_percent:.1f}% (${old_price:.2f} -> ${new_price:.2f})")
+                    result = self.create_basket_notifications(
+                        product_id=product_id,
+                        listing_id=listing_id,
+                        notification_type='price_drop',
+                        old_price=old_price,
+                        new_price=new_price
+                    )
+                    
+                    if result.get('notifications_sent', 0) > 0:
+                        self.logger.info(f"Sent {result['notifications_sent']} price drop notifications")
+                    
+        except Exception as e:
+            self.logger.error(f"Error checking price changes for notifications: {e}")
 
 # * Factory functions *
 

@@ -19,6 +19,7 @@ import time
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import argparse
+from pathlib import Path
 
 # handle imports 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,9 +30,41 @@ sys.path.insert(0, os.path.join(project_root, 'src'))
 from crawlers.supabase_backend import SupabaseBackend, resolve_retailer_uuid
 from scrapers.giant_eagle.ge_scraper import GiantEagleScraper
 
+# logging helpers
+def setup_logging(log_level: str, log_file: Optional[str] = None) -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(getattr(logging, log_level))
+
+    # clear any existing handlers to avoid dupes when re-running
+    logger.handlers.clear()
+
+    fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # always add a console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(getattr(logging, log_level))
+    console_handler.setFormatter(fmt)
+    logger.addHandler(console_handler)
+
+    # optional file handler
+    if log_file:
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        file_handler = logging.FileHandler(log_file, mode='w', encoding='utf-8')
+        file_handler.setLevel(getattr(logging, log_level))
+        file_handler.setFormatter(fmt)
+        logger.addHandler(file_handler)
+
+        logger.info(f"Logging to file: {log_file}")
+
+    return logger
+
+# Giant Eagle Filler
 class GiantEagleFiller:
-    def __init__(self, supabase_backend: SupabaseBackend, logger: logging.Logger, 
-                 batch_size: int = 100, delay_between_requests: float = 2.0):
+    def __init__(self, supabase_backend: SupabaseBackend, logger: logging.Logger,
+                 batch_size: int = 100, delay_between_requests: float = 2.0,
+                 log_file: Optional[str] = None):
         self.backend = supabase_backend
         self.logger = logger
         self.batch_size = batch_size
@@ -45,13 +78,19 @@ class GiantEagleFiller:
         self.stats = {
             'total_upcs_processed': 0,
             'valid_urls_found': 0,
+            'products_not_found': 0,
             'successful_listings_created': 0,
             'failed_scrapes': 0,
             'skipped_existing_listings': 0,
-            'errors': 0
+            'errors': 0,
+            'successful_listings_updated': 0,
+            'price_histories_added': 0,
+            'existing_listings_processed': 0
         }
         
         self.start_time = datetime.now()
+        # optional log file path for summary writing
+        self.log_file = log_file
 
     # construct giant eagle url from upc
     def construct_giant_eagle_url(self, upc: str) -> str:
@@ -65,15 +104,6 @@ class GiantEagleFiller:
 
     # get products with upcs
     def get_products_with_upcs(self, limit: int = None, offset: int = 0) -> List[Dict]:
-        """Fetch products that have UPCs using paginated (blocking) requests.
-
-        Supabase/PostgREST caps any single request to 1 000 rows.  This helper
-        mirrors the pagination logic from `scripts/update.py`, retrieving data
-        in 1 000-row blocks so we never exceed that limit.  It still honours the
-        caller-supplied *limit* (if provided) as well as the instance
-        *batch_size* when *limit* is None.
-        """
-
         try:
             base_query = (
                 self.backend.supabase.table('products')
@@ -84,10 +114,11 @@ class GiantEagleFiller:
                 .order('created_at')
             )
 
-            PAGE_SIZE = 1000  # PostgREST hard cap per request
+            # PostgREST hard cap per request
+            PAGE_SIZE = 1000
 
             rows: List[Dict] = []
-            remaining = limit  # None means "no explicit limit – fetch as needed"
+            remaining = limit  # None means "no explicit limit - fetch as needed" (i.e. all)
             current_offset = offset
 
             while True:
@@ -111,7 +142,7 @@ class GiantEagleFiller:
 
                 rows.extend(result.data)
 
-                # if we received fewer rows than requested, we've reached the end
+                # if received fewer rows than requested, reached the end
                 if len(result.data) < fetch_size:
                     break
 
@@ -146,6 +177,112 @@ class GiantEagleFiller:
             self.logger.error(f"Error checking existing listing for product {product_id}: {e}")
             # assume it exists to avoid duplicates on error
             return True
+
+    # fetch the existing listing record for this product/retailer (if any)
+    def get_existing_listing(self, product_id: str) -> Optional[Dict]:
+        try:
+            result = (
+                self.backend.supabase.table('listings')
+                .select('*')
+                .eq('product_id', product_id)
+                .eq('retailer_id', self.ge_retailer_id)
+                .limit(1)
+                .execute()
+            )
+            if result.data:
+                return result.data[0]
+            return None
+        except Exception as e:
+            self.logger.error(f"Error fetching existing listing for product {product_id}: {e}")
+            return None
+
+    # update an existing listing with newly scraped data and add price history entry if needed
+    def update_listing_from_scraped_data(self, listing: Dict, scraped_data: Dict) -> bool:
+        try:
+            listing_id = listing['id']
+            update_data = {}
+            price_changed = False
+
+            # price handling
+            new_price = scraped_data.get('price')
+            if new_price is not None:
+                try:
+                    new_price_float = float(new_price)
+                except (ValueError, TypeError):
+                    new_price_float = None
+                old_price = listing.get('price')
+                if new_price_float is not None:
+                    if old_price is None or abs(float(old_price) - new_price_float) > 0.01:
+                        update_data['price'] = new_price_float
+                        price_changed = True
+
+            # stock status
+            if scraped_data.get('in_stock') is not None and scraped_data.get('in_stock') != listing.get('in_stock'):
+                update_data['in_stock'] = scraped_data.get('in_stock')
+                update_data['availability_status'] = 'in_stock' if scraped_data.get('in_stock') else 'out_of_stock'
+
+            # optional fields
+            for field, key in [
+                ('image_url', 'image_url'),
+                ('rating', 'rating'),
+                ('review_count', 'review_count'),
+                ('upc', 'upc'),
+            ]:
+                value = scraped_data.get(field)
+                if value is not None and value != listing.get(key):
+                    # cast decimals to float where applicable
+                    if field == 'rating':
+                        try:
+                            value = float(value)
+                        except Exception:
+                            pass
+                    if field == 'review_count':
+                        try:
+                            value = int(value)
+                        except Exception:
+                            pass
+                    update_data[key] = value
+
+            # always update last_checked
+            update_data['last_checked'] = datetime.now().isoformat()
+
+            # perform update if any fields changed
+            if update_data:
+                self.backend.supabase.table('listings').update(update_data).eq('id', listing_id).execute()
+                self.logger.info(f"↻ Updated Giant Eagle listing {listing_id} - fields changed: {list(update_data.keys())}")
+                self.stats['successful_listings_updated'] += 1
+            else:
+                self.logger.debug(f"No listing fields changed for {listing_id}")
+
+            # add price history entry when required
+            if new_price is not None and new_price_float is not None:
+                try:
+                    # check if a price history entry with this price already exists
+                    history_check = (
+                        self.backend.supabase.table('price_histories')
+                        .select('id')
+                        .eq('listing_id', listing_id)
+                        .eq('price', new_price_float)
+                        .limit(1)
+                        .execute()
+                    )
+                    if not history_check.data:
+                        price_history_data = {
+                            'listing_id': listing_id,
+                            'price': new_price_float,
+                            'currency': 'USD',
+                            'timestamp': datetime.now().isoformat()
+                        }
+                        self.backend.supabase.table('price_histories').insert(price_history_data).execute()
+                        self.stats['price_histories_added'] += 1
+                        self.logger.info(f"➕ Added price history for listing {listing_id}: ${new_price_float}")
+                except Exception as e:
+                    self.logger.warning(f"Failed to insert price history for listing {listing_id}: {e}")
+
+            return True
+        except Exception as e:
+            self.logger.error(f"Error updating listing {listing.get('id', 'unknown')}: {e}")
+            return False
 
     # create a new listing from scraped giant eagle data
     def create_listing_from_scraped_data(self, product_id: str, scraped_data: Dict) -> bool:
@@ -203,12 +340,6 @@ class GiantEagleFiller:
         upc = product['upc']
         
         try:
-            # check if listing already exists
-            if self.check_existing_listing(product_id):
-                self.logger.debug(f"Skipping {product_name} - Giant Eagle listing already exists")
-                self.stats['skipped_existing_listings'] += 1
-                return True
-            
             # construct giant eagle url
             ge_url = self.construct_giant_eagle_url(upc)
             self.logger.info(f"Checking Giant Eagle for: {product_name} (UPC: {upc})")
@@ -221,14 +352,30 @@ class GiantEagleFiller:
                 self.logger.info(f"✓ Found on Giant Eagle: {scraped_data['name']}")
                 self.stats['valid_urls_found'] += 1
                 
-                # create listing
-                if self.create_listing_from_scraped_data(product_id, scraped_data):
-                    self.stats['successful_listings_created'] += 1
+                # determine if listing exists
+                existing_listing = self.get_existing_listing(product_id)
+                if existing_listing:
+                    # update existing listing
+                    if self.update_listing_from_scraped_data(existing_listing, scraped_data):
+                        pass  # stats handled inside
+                    else:
+                        self.stats['errors'] += 1
                 else:
-                    self.stats['errors'] += 1
-                    
-            else:
+                    # create new listing
+                    if self.create_listing_from_scraped_data(product_id, scraped_data):
+                        self.stats['successful_listings_created'] += 1
+                    else:
+                        self.stats['errors'] += 1
+                
+            elif scraped_data is None:
+                # None response can be either "product not found" or scraping error
+                # The scraper logs the specific reason, so we'll count as not found
                 self.logger.debug(f"Product not found on Giant Eagle: {product_name}")
+                self.stats['products_not_found'] += 1
+                
+            else:
+                # scraped_data exists but no name - this is a scraping issue
+                self.logger.warning(f"Failed to scrape product details for: {product_name}")
                 self.stats['failed_scrapes'] += 1
             
             # add delay b/w requests
@@ -308,6 +455,7 @@ class GiantEagleFiller:
         elapsed = datetime.now() - self.start_time
         self.logger.info(f"Progress - Processed: {self.stats['total_upcs_processed']}, "
                         f"Found: {self.stats['valid_urls_found']}, "
+                        f"Not Found: {self.stats['products_not_found']}, "
                         f"Created: {self.stats['successful_listings_created']}, "
                         f"Elapsed: {elapsed}")
 
@@ -334,14 +482,163 @@ class GiantEagleFiller:
         self.logger.info("="*60)
         self.logger.info(f"Total UPCs Processed:     {stats['total_upcs_processed']}")
         self.logger.info(f"Products Found on GE:     {stats['valid_urls_found']}")
+        self.logger.info(f"Products Not Found on GE: {stats['products_not_found']}")
         self.logger.info(f"Listings Created:         {stats['successful_listings_created']}")
         self.logger.info(f"Failed Scrapes:           {stats['failed_scrapes']}")
         self.logger.info(f"Existing Listings Skipped: {stats['skipped_existing_listings']}")
+        self.logger.info(f"Listings Updated:         {stats['successful_listings_updated']}")
+        self.logger.info(f"Price Histories Added:    {stats['price_histories_added']}")
+        self.logger.info(f"Existing Listings Proc.:  {stats['existing_listings_processed']}")
         self.logger.info(f"Errors:                   {stats['errors']}")
         self.logger.info(f"Success Rate:             {stats['success_rate']:.1f}%")
         self.logger.info(f"Found Rate:               {stats['found_rate']:.1f}%")
         self.logger.info(f"Total Time:               {elapsed}")
         self.logger.info("="*60)
+
+        # write detailed summary if requested
+        if self.log_file:
+            self._write_log_summary()
+
+    # write detailed log summary to the configured log file
+    def _write_log_summary(self):
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("DETAILED EXECUTION SUMMARY\n")
+                f.write("=" * 80 + "\n")
+                f.write(f"Script: {__file__}\n")
+                f.write(f"Start time: {self.start_time.isoformat()}\n")
+                f.write(f"End time: {datetime.now().isoformat()}\n")
+                f.write(f"Total execution time: {datetime.now() - self.start_time}\n")
+                f.write(f"Batch size: {self.batch_size}\n")
+                f.write(f"Delay between requests: {self.delay}s\n")
+                f.write("\n")
+
+                # detailed stats
+                f.write("PROCESSING STATISTICS:\n")
+                f.write("-" * 40 + "\n")
+                for key, value in self.stats.items():
+                    f.write(f"{key.replace('_', ' ').title()}: {value}\n")
+
+                if self.stats['total_upcs_processed'] > 0:
+                    success_rate = (self.stats['successful_listings_created'] / self.stats['total_upcs_processed']) * 100
+                    found_rate = (self.stats['valid_urls_found'] / self.stats['total_upcs_processed']) * 100
+                    f.write(f"Success Rate: {success_rate:.2f}%\n")
+                    f.write(f"Found Rate: {found_rate:.2f}%\n")
+
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("END OF SUMMARY\n")
+                f.write("=" * 80 + "\n")
+
+            self.logger.info(f"Detailed log summary written to: {self.log_file}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to write log summary to file: {e}")
+
+    # get existing Giant Eagle listings (for update mode)
+    def get_existing_ge_listings(self, limit: int = None, offset: int = 0) -> List[Dict]:
+        # get existing listings
+        try:
+            base_query = (
+                self.backend.supabase.table('listings')
+                # filter for giant eagle listings
+                .select('*') 
+                .eq('retailer_id', self.ge_retailer_id)
+                .order('updated_at')
+            )
+            # set page size
+            PAGE_SIZE = 1000
+            rows: List[Dict] = []
+            remaining = limit
+            current_offset = offset
+            # loop until all listings are fetched
+            while True:
+                if remaining is not None:
+                    if remaining <= 0:
+                        break
+                    fetch_size = min(PAGE_SIZE, remaining)
+                else:
+                    fetch_size = min(PAGE_SIZE, self.batch_size)
+                page_query = base_query.range(current_offset, current_offset + fetch_size - 1)
+                result = page_query.execute()
+                if not result.data:
+                    break
+                rows.extend(result.data)
+                if len(result.data) < fetch_size:
+                    break
+                current_offset += fetch_size
+                if remaining is not None:
+                    remaining -= fetch_size
+            if limit is not None and len(rows) > limit:
+                rows = rows[:limit]
+            return rows
+        except Exception as e:
+            self.logger.error(f"Error fetching existing Giant Eagle listings: {e}")
+            return []
+
+    # process & update a single existing listing
+    def process_existing_listing(self, listing: Dict) -> bool:
+        listing_id = listing['id']
+        product_id = listing.get('product_id')
+        url = listing.get('url')
+        self.logger.info(f"Updating existing GE listing {listing_id} (product {product_id}) -> {url}")
+        try:
+            scraped_data = self.scraper.scrape_product(url)
+            if scraped_data and scraped_data.get('name'):
+                if self.update_listing_from_scraped_data(listing, scraped_data):
+                    # already incremented inside but safe
+                    self.stats['successful_listings_updated'] += 1  
+                else:
+                    self.stats['errors'] += 1
+            elif scraped_data is None:
+                self.logger.debug(f"Listing {listing_id}: product not found or scrape failed")
+                self.stats['products_not_found'] += 1
+            else:
+                self.logger.warning(f"Listing {listing_id}: scrape returned incomplete data")
+                self.stats['failed_scrapes'] += 1
+            time.sleep(self.delay)
+            return True
+        except Exception as e:
+            self.logger.error(f"Error processing listing {listing_id}: {e}")
+            self.stats['errors'] += 1
+            return False
+
+    # run updater mode - refresh existing GE listings
+    def run_updater(self, max_listings: int = None, start_offset: int = 0) -> Dict:
+        self.logger.info("🔄 Starting Giant Eagle Listing Updater")
+        self.logger.info(f"Batch size: {self.batch_size}, Delay: {self.delay}s")
+        if max_listings:
+            self.logger.info(f"Updating max {max_listings} listings starting at offset {start_offset}")
+        processed = 0
+        current_offset = start_offset
+        try:
+            while True:
+                limit = None
+                if max_listings:
+                    remaining = max_listings - processed
+                    if remaining <= 0:
+                        break
+                    limit = min(self.batch_size, remaining)
+                listings = self.get_existing_ge_listings(limit=limit, offset=current_offset)
+                if not listings:
+                    self.logger.info("No more listings to update")
+                    break
+                self.logger.info(f"Processing batch of {len(listings)} listings (offset: {current_offset})")
+                for listing in listings:
+                    self.process_existing_listing(listing)
+                    self.stats['existing_listings_processed'] += 1
+                    processed += 1
+                current_offset += len(listings)
+                if max_listings and processed >= max_listings:
+                    break
+        except KeyboardInterrupt:
+            self.logger.info("Updater interrupted by user")
+        except Exception as e:
+            self.logger.error(f"Unexpected error in updater: {e}")
+            self.stats['errors'] += 1
+        finally:
+            self.scraper.close_driver()
+        return self.get_final_stats()
 
 # main
 def main():
@@ -354,19 +651,13 @@ def main():
     parser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], 
                        default='INFO', help='Logging level')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be processed without scraping')
+    parser.add_argument('--update-existing', action='store_true', help='Update existing Giant Eagle listings instead of creating new ones')
+    parser.add_argument('--log-file', help='Path to log file for detailed output (optional, logs to both console and file)')
     
     args = parser.parse_args()
     
-    # setup logging
-    logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(f'giant_eagle_filler_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
-        ]
-    )
-    logger = logging.getLogger(__name__)
+    # setup logging using shared helper
+    logger = setup_logging(args.log_level, args.log_file)
     
     try:
         # init supabase backend (disable upc lookup for this script)
@@ -377,7 +668,8 @@ def main():
             supabase_backend=backend,
             logger=logger,
             batch_size=args.batch_size,
-            delay_between_requests=args.delay
+            delay_between_requests=args.delay,
+            log_file=args.log_file
         )
         
         if args.dry_run:
@@ -388,8 +680,11 @@ def main():
                 logger.info(f"Would process: {product['name']} (UPC: {product['upc']}) -> {ge_url}")
             return
         
-        # run filler
-        stats = filler.run_filler(max_products=args.max_products, start_offset=args.offset)
+        if args.update_existing:
+            stats = filler.run_updater(max_listings=args.max_products, start_offset=args.offset)
+        else:
+            stats = filler.run_filler(max_products=args.max_products, start_offset=args.offset)
+        
         filler.print_final_summary()
         
     except Exception as e:

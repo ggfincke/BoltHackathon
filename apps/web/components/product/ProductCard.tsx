@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import ProductDetailOverlay from '../shared/ProductDetailOverlay';
 import AddToBasketModal from '../shared/AddToBasketModal';
 import { useAuth } from '~/lib/auth';
@@ -13,6 +12,7 @@ type Product = {
   brand?: { name: string } | null;
   listings?: {
     id: string;
+    retailer_id: string;
     price: number | null;
     currency: string | null;
     in_stock: boolean | null;
@@ -62,6 +62,24 @@ export default function ProductCard({ product, compact = false, onProductAdded }
       (best, current) => (current.price! < best.price! ? current : best),
       validListings[0]
     );
+  };
+
+  // Get best image URL based on retailer priority
+  const getBestImageUrl = () => {
+    if (!product.listings?.length) return 'https://via.placeholder.com/300x300?text=No+Image';
+    
+    // Filter listings with images
+    const listingsWithImages = product.listings.filter(l => l.image_url);
+    if (listingsWithImages.length === 0) return 'https://via.placeholder.com/300x300?text=No+Image';
+    
+    // Sort by retailer ID (1 = Amazon, 2 = Target, 3 = Walmart)
+    const sortedListings = [...listingsWithImages].sort((a, b) => {
+      const aRetailerId = parseInt(a.retailer_id) || 999;
+      const bRetailerId = parseInt(b.retailer_id) || 999;
+      return aRetailerId - bRetailerId;
+    });
+    
+    return sortedListings[0].image_url || 'https://via.placeholder.com/300x300?text=No+Image';
   };
 
   const handleShowDetails = (e: React.MouseEvent) => {
@@ -188,7 +206,7 @@ export default function ProductCard({ product, compact = false, onProductAdded }
   };
 
   const bestListing = getBestListing(product);
-  const imageUrl = bestListing?.image_url || 'https://via.placeholder.com/300x300?text=No+Image';
+  const imageUrl = getBestImageUrl();
   
   return (
     <>
@@ -199,11 +217,9 @@ export default function ProductCard({ product, compact = false, onProductAdded }
       >
         <Link href={`/product/${product.slug}`} className="block">
           <div className="product-image-container relative">
-            <Image 
+            <img 
               src={imageUrl} 
               alt={product.name}
-              width={300}
-              height={300}
               className="w-full h-full object-contain"
             />
             

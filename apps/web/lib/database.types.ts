@@ -935,7 +935,37 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_price_gap_deals: {
+        Args: {
+          min_percent_diff: number
+          limit_count: number
+        }
+        Returns: Array<{
+          product_id: string
+          product_name: string
+          product_slug: string
+          best_price: number
+          worst_price: number
+          best_retailer_name: string
+          worst_retailer_name: string
+          image_url: string | null
+        }>
+      }
+      get_price_history_deals: {
+        Args: {
+          min_percent_change: number
+          limit_count: number
+        }
+        Returns: Array<{
+          product_id: string
+          product_name: string
+          product_slug: string
+          current_price: number
+          old_price: number
+          retailer_name: string
+          image_url: string | null
+        }>
+      }
     }
     Enums: {
       [_ in never]: never

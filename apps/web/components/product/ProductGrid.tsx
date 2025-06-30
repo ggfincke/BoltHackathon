@@ -8,6 +8,7 @@ type Product = {
   brand?: { name: string } | null;
   listings?: {
     id: string;
+    retailer_id: string;
     price: number | null;
     currency: string | null;
     in_stock: boolean | null;

@@ -27,19 +27,24 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
   const [recentBaskets, setRecentBaskets] = useState<RecentBasket[]>([]);
   const [loadingBaskets, setLoadingBaskets] = useState(false);
   const [basketUpdateTrigger, setBasketUpdateTrigger] = useState(0);
+  const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const categories = [
-    { name: 'Fresh & Perishable', slug: 'fresh-perishable' },
+  const defaultCategories = [
+    { name: 'Dairy', slug: 'dairy' },
+    { name: 'Meat & Seafood', slug: 'meat-seafood' },
+    { name: 'Produce', slug: 'produce' },
+    { name: 'Pantry Staples', slug: 'pantry-staples' },
     { name: 'Frozen Foods', slug: 'frozen-foods' },
     { name: 'Bakery & Bread', slug: 'bakery-bread' },
     { name: 'Beverages', slug: 'beverages' },
-    { name: 'Pantry Staples', slug: 'pantry-staples' },
-    { name: 'Cooking & Baking Supplies', slug: 'cooking-baking-supplies' },
     { name: 'Breakfast & Cereal', slug: 'breakfast-cereal' },
     { name: 'Snacks', slug: 'snacks' },
   ];
 
   useEffect(() => {
+    fetchCategories();
+    
     if (user?.id) {
       fetchRecentBaskets();
     } else {
@@ -60,6 +65,20 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
       window.removeEventListener('basketUpdated', handleBasketUpdate);
     };
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      
+      // Use default categories instead of fetching from database
+      setCategories(defaultCategories);
+    } catch (error) {
+      console.error('Error setting categories:', error);
+      setCategories(defaultCategories);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const fetchRecentBaskets = async () => {
     if (!user?.id) return;
@@ -180,8 +199,9 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
       }`}
     >
       <div className="flex flex-col h-full">
-        {/* Collapse Toggle
-        <div className="p-2 sidebar-section">
+        {/* Collapse Toggle */}
+        {/* <div className="p-2 sidebar-section">
+
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="w-full flex items-center justify-center p-1 rounded-md hover-primary-bg transition-colors"
@@ -197,7 +217,7 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
             </svg>
           </button>
-        </div> */}
+        </div>*/}
 
         <div className="flex-1 overflow-y-auto">
           {/* Home Section */}
@@ -206,9 +226,21 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
               href="/"
               className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                 isActiveLink('/') 
-                  ? 'bg-primary text-buttonText' 
-                  : 'hover-primary-bg'
+                  ? '' 
+                  : ''
               }`}
+              style={isActiveLink('/') ? {
+                background: 'var(--primary)',
+                color: 'var(--dark-text)'
+              } : {}}
+              onMouseEnter={!isActiveLink('/') ? (e) => {
+                e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                e.currentTarget.style.color = 'var(--highlighted-text)';
+              } : undefined}
+              onMouseLeave={!isActiveLink('/') ? (e) => {
+                e.currentTarget.style.background = '';
+                e.currentTarget.style.color = '';
+              } : undefined}
             >
               <HomeIcon className="w-5 h-5 flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Home</span>}
@@ -222,24 +254,48 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                 href="/categories"
                 className={`flex items-center gap-3 p-2 rounded-md transition-colors ${
                   isActiveLink('/categories') 
-                    ? 'bg-primary text-buttonText' 
-                    : 'hover-primary-bg'
+                    ? '' 
+                    : ''
                 }`}
+                style={isActiveLink('/categories') ? {
+                  background: 'var(--primary)',
+                  color: 'var(--dark-text)'
+                } : {}}
+                onMouseEnter={!isActiveLink('/categories') ? (e) => {
+                  e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                  e.currentTarget.style.color = 'var(--highlighted-text)';
+                } : undefined}
+                onMouseLeave={!isActiveLink('/categories') ? (e) => {
+                  e.currentTarget.style.background = '';
+                  e.currentTarget.style.color = '';
+                } : undefined}
               >
                 <CategoriesIcon className="w-5 h-5 flex-shrink-0" />
                 {!isCollapsed && <span className="font-medium">Categories</span>}
               </Link>
             </div>
 
-            {!isCollapsed && (
+            {!isCollapsed && !loadingCategories && (
               <div className="ml-3 space-y-1">
                 <Link
                   href="/best-deals"
                   className={`block p-1.5 text-sm rounded-md transition-colors font-medium ${
                     isActiveLink('/best-deals') 
-                      ? 'bg-primary text-buttonText' 
-                      : 'text-primary hover-primary-bg'
+                      ? '' 
+                      : 'text-primary'
                   }`}
+                  style={isActiveLink('/best-deals') ? {
+                    background: 'var(--primary)',
+                    color: 'var(--dark-text)'
+                  } : {}}
+                  onMouseEnter={!isActiveLink('/best-deals') ? (e) => {
+                    e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                    e.currentTarget.style.color = 'var(--highlighted-text)';
+                  } : undefined}
+                  onMouseLeave={!isActiveLink('/best-deals') ? (e) => {
+                    e.currentTarget.style.background = '';
+                    e.currentTarget.style.color = '';
+                  } : undefined}
                 >
                   Best Deals
                 </Link>
@@ -249,16 +305,36 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                     href={`/categories/${category.slug}`}
                     className={`block p-1.5 text-sm rounded-md transition-colors ${
                       pathname === `/categories/${category.slug}`
-                        ? 'bg-primary text-buttonText font-medium'
-                        : 'hover-primary-bg'
+                        ? 'font-medium'
+                        : ''
                     }`}
+                    style={pathname === `/categories/${category.slug}` ? {
+                      background: 'var(--primary)',
+                      color: 'var(--dark-text)'
+                    } : {}}
+                    onMouseEnter={pathname !== `/categories/${category.slug}` ? (e) => {
+                      e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                      e.currentTarget.style.color = 'var(--highlighted-text)';
+                    } : undefined}
+                    onMouseLeave={pathname !== `/categories/${category.slug}` ? (e) => {
+                      e.currentTarget.style.background = '';
+                      e.currentTarget.style.color = '';
+                    } : undefined}
                   >
                     {category.name}
                   </Link>
                 ))}
                 <Link
                   href="/categories"
-                  className="block p-1.5 text-sm text-primary hover-primary-bg rounded-md transition-colors"
+                  className="block p-1.5 text-sm text-primary rounded-md transition-colors"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                    e.currentTarget.style.color = 'var(--highlighted-text)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '';
+                    e.currentTarget.style.color = '';
+                  }}
                 >
                   View All Categories →
                 </Link>
@@ -293,13 +369,29 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                   <>
                     <Link
                       href="/create-basket"
-                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
+                      className="flex items-center gap-2 p-1.5 text-sm rounded-md transition-colors"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                        e.currentTarget.style.color = 'var(--highlighted-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '';
+                        e.currentTarget.style.color = '';
+                      }}
                     >
                       Create New Basket
                     </Link>
                     <Link
                       href="/baskets"
-                      className="flex items-center gap-2 p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
+                      className="flex items-center gap-2 p-1.5 text-sm rounded-md transition-colors"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                        e.currentTarget.style.color = 'var(--highlighted-text)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '';
+                        e.currentTarget.style.color = '';
+                      }}
                     >
                       Manage Baskets
                     </Link>
@@ -319,7 +411,15 @@ export default function Sidebar({ variant = 'home' }: SidebarProps) {
                             <Link
                               key={basket.id}
                               href={`/basket/${basket.id}`}
-                              className="block p-1.5 text-sm rounded-md hover-primary-bg transition-colors"
+                              className="block p-1.5 text-sm rounded-md transition-colors"
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(133, 209, 231, 0.1)';
+                                e.currentTarget.style.color = 'var(--highlighted-text)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '';
+                                e.currentTarget.style.color = '';
+                              }}
                             >
                               <div className="font-medium">{basket.name}</div>
                               <div className="text-xs text-gray-500">
