@@ -7,6 +7,7 @@ import { ThemeProvider } from '~/components/ui/ThemeProvider';
 import { AuthProvider } from '~/lib/auth';
 import { AuthModalProvider } from '~/components/shared/AuthModalProvider';
 import ConditionalBoltBadge from '~/components/shared/ConditionalBoltBadge';
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -40,6 +41,7 @@ export default function RootLayout({
           </AuthProvider>
           <ConditionalBoltBadge />
         </ThemeProvider>
+        <Analytics /> 
       </body>
     </html>
   );
